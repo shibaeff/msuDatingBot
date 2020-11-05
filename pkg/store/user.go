@@ -9,15 +9,15 @@ const (
 )
 
 type UserModel struct {
-	User  *bot.User
-	Seen  map[int64]bool
-	Liked map[int64]bool
+	bot.User
+	// Seen  map[int64]bool
+	// Liked map[int64]bool
 }
 
 func NewUserModel(user *bot.User) *UserModel {
 	return &UserModel{
-		User:  user,
-		Seen:  make(map[int64]bool),
-		Liked: make(map[int64]bool),
+		User: *user,
+		// Seen:  make(map[int64]bool),
+		// Liked: make(map[int64]bool),
 	}
 }
