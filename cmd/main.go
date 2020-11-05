@@ -1,13 +1,34 @@
 package main
 
 import (
+	"context"
 	"log"
 
-	"echoBot/pkg/bot"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"echoBot/pkg/bot"
+)
+
+const (
+	usersCollectionName = "users"
+)
+
+var (
+	client, _ = mongo.NewClient(options.Client().ApplyURI("mongodb://127.0.0.1:27017"))
 )
 
 func main() {
+	err := client.Connect(context.TODO())
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = client.Ping(context.TODO(), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_ = client.Database("test").Collection(usersCollectionName)
 	api, err := tgbotapi.NewBotAPI("1327834524:AAFSH9KVrRiowoqo8uCGdm5EfBIk9Hdxurs")
 	if err != nil {
 		log.Panic(err)
