@@ -24,25 +24,25 @@ type Trainer struct {
 }
 
 func Test_store_Put(t *testing.T) {
-	collection, _ := prepareCollection()
+	collection, _ := prepareCollection(usersCollectionName)
 	ash := bot.User{
-		Name: "Pavel",
+		Name: "Peter",
 	}
-	insertResult, err := collection.InsertOne(context.TODO(), ash)
-	log.Printf("%d\n", insertResult.InsertedID)
+	store := NewStore(collection, nil, nil)
+	err := store.Put(&ash)
 	assert.NoError(t, err)
 
 	var result Trainer
-	filter := bson.D{{"name", "Pavel"}}
+	filter := bson.D{{"name", "Peter"}}
 	err = collection.FindOne(context.TODO(), filter).Decode(&result)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	log.Printf("Found a single document: %+v\n", result)
+	assert.NoError(t, err)
+	assert.Equal(t, ash.Name, result.Name)
 }
 
-func prepareCollection() (col *mongo.Collection, conn *mongo.Client) {
+func prepareCollection(name string) (col *mongo.Collection, conn *mongo.Client) {
 	client, _ := mongo.NewClient(options.Client().ApplyURI("mongodb://127.0.0.1:27017"))
 	err := client.Connect(context.TODO())
 	if err != nil {
@@ -52,6 +52,6 @@ func prepareCollection() (col *mongo.Collection, conn *mongo.Client) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	col = client.Database("another").Collection(usersCollectionName)
+	col = client.Database("another").Collection(name)
 	return
 }
