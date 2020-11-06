@@ -36,7 +36,7 @@ func registerFlow(message *tgbotapi.Message) (reply *tgbotapi.MessageConfig) {
 	user, ok := UserQueue[message.Chat.ID]
 	if !ok {
 		user = &User{
-			id: message.Chat.ID,
+			Id: message.Chat.ID,
 		}
 		UserQueue[message.Chat.ID] = user
 	}
@@ -45,36 +45,36 @@ func registerFlow(message *tgbotapi.Message) (reply *tgbotapi.MessageConfig) {
 		RegisterStatus[message.Chat.ID] = regName
 		return registerStep(askName)
 	case regName:
-		user.name = message.Text
-		log.Printf("Recorded username %s", user.name)
+		user.Name = message.Text
+		log.Printf("Recorded username %s", user.Name)
 		RegisterStatus[message.Chat.ID] = regGender
 		reply = registerStep(askGender)
 		return
 	case regGender:
 		RegisterStatus[message.Chat.ID] = regWantGender
-		user.gender = message.Text
-		log.Printf("Recorded gender %s", user.gender)
+		user.Gender = message.Text
+		log.Printf("Recorded Gender %s", user.Gender)
 		reply = registerStep(askWantGender)
 	case regWantGender:
-		user.wantGender = message.Text
+		user.WantGender = message.Text
 		RegisterStatus[message.Chat.ID] = regFaculty
-		log.Printf("Recorded want gender %s", user.wantGender)
+		log.Printf("Recorded want Gender %s", user.WantGender)
 		reply = registerStep(askFaculty)
 	case regFaculty:
-		user.faculty = message.Text
+		user.Faculty = message.Text
 		RegisterStatus[message.Chat.ID] = regAbout
-		log.Printf("Recorded faculty %s", user.faculty)
+		log.Printf("Recorded Faculty %s", user.Faculty)
 		reply = registerStep(askAbout)
 	case regAbout:
-		user.about = message.Text
+		user.About = message.Text
 		RegisterStatus[message.Chat.ID] = regPhoto
-		log.Printf("Recorded about %s", user.about)
+		log.Printf("Recorded about %s", user.About)
 		reply = registerStep("Загрузите свое фото")
 	case regPhoto:
 		photos := *message.Photo
 		photo := photos[0]
-		user.photoLink = photo.FileID
-		log.Printf("Recorded photo id %s", user.photoLink)
+		user.PhotoLink = photo.FileID
+		log.Printf("Recorded photo id %s", user.PhotoLink)
 		RegisterStatus[message.Chat.ID] = regOver
 		reply = registerStep("Регистрация окончена")
 	}

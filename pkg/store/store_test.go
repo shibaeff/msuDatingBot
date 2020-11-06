@@ -17,22 +17,29 @@ const (
 	usersCollectionName = "another"
 )
 
+type Trainer struct {
+	Name string
+	Age  int
+	City string
+}
+
 func Test_store_Put(t *testing.T) {
 	collection, _ := prepareCollection()
-	store := NewStore(collection)
-	//defer func() {
-	//	client.Disconnect(context.TODO())
-	//}()
-	user := bot.NewUser("pavel", "vmk", "m",
-		"f", "nohing", 123, "link")
-	userModel := NewUserModel(user)
-	err := store.Put(userModel)
+	ash := bot.User{
+		Name: "Pavel",
+	}
+	insertResult, err := collection.InsertOne(context.TODO(), ash)
+	log.Printf("%d\n", insertResult.InsertedID)
 	assert.NoError(t, err)
-	filter := bson.D{{"name", "pavel"}}
-	var another UserModel
-	err = collection.FindOne(context.TODO(), filter).Decode(&another)
-	assert.NoError(t, err)
-	assert.Equal(t, userModel.User.GetId(), another.User.GetId())
+
+	var result Trainer
+	filter := bson.D{{"name", "Pavel"}}
+	err = collection.FindOne(context.TODO(), filter).Decode(&result)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("Found a single document: %+v\n", result)
 }
 
 func prepareCollection() (col *mongo.Collection, conn *mongo.Client) {
