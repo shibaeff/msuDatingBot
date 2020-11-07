@@ -3,7 +3,6 @@ package store
 import (
 	"context"
 	"log"
-
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -35,7 +34,7 @@ func Test_store_Put(t *testing.T) {
 		Name: "Peter",
 	}
 	store := NewStore(collection, nil, nil)
-	err := store.Put(&ash)
+	err := store.PutUser(&ash)
 	assert.NoError(t, err)
 
 	var result Trainer
@@ -46,6 +45,23 @@ func Test_store_Put(t *testing.T) {
 	}
 	assert.NoError(t, err)
 	assert.Equal(t, ash.Name, result.Name)
+}
+
+func Test_store_GetUser(t *testing.T) {
+	collection, _ := prepareCollection(usersCollectionName)
+	ash := bot.User{
+		Name: "Peter",
+		Id:   whoID,
+	}
+	store := NewStore(collection, nil, nil)
+	err := store.PutUser(&ash)
+	assert.NoError(t, err)
+	var result *bot.User
+	result, err = store.GetUser(whoID)
+	assert.NoError(t, err)
+	assert.Equal(t, ash.Id, result.Id)
+	filter := bson.D{{"id", whoID}}
+	collection.DeleteOne(context.TODO(), filter)
 }
 
 func Test_store_PutLike(t *testing.T) {
