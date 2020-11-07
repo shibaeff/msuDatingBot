@@ -2,6 +2,8 @@ package bot
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+
+	"echoBot/pkg/store"
 )
 
 const (
@@ -35,6 +37,7 @@ type Bot interface {
 }
 
 type bot struct {
+	store store.Store
 }
 
 func replyWithText(text string) (ret *tgbotapi.MessageConfig) {
@@ -90,7 +93,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply *tgbotapi.MessageConfig) {
 	return
 }
 
-func NewBot() (b Bot) {
-	b = &bot{}
+func NewBot(store store.Store) (b Bot) {
+	b = &bot{store: store}
 	return b
 }
