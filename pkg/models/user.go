@@ -1,4 +1,4 @@
-package bot
+package models
 
 type User struct {
 	Name       string

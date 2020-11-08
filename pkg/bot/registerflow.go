@@ -4,6 +4,8 @@ import (
 	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+
+	"echoBot/pkg/models"
 )
 
 const (
@@ -30,12 +32,12 @@ func registerStep(text string) (reply *tgbotapi.MessageConfig) {
 	return
 }
 
-var UserQueue = make(map[int64]*User)
+var UserQueue = make(map[int64]*models.User)
 
 func registerFlow(message *tgbotapi.Message) (reply *tgbotapi.MessageConfig) {
 	user, ok := UserQueue[message.Chat.ID]
 	if !ok {
-		user = &User{
+		user = &models.User{
 			Id: message.Chat.ID,
 		}
 		UserQueue[message.Chat.ID] = user

@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"echoBot/pkg/bot"
+	"echoBot/pkg/models"
 )
 
 const (
@@ -30,7 +30,7 @@ type Trainer struct {
 
 func Test_store_Put(t *testing.T) {
 	collection, _ := prepareCollection(usersCollectionName)
-	ash := bot.User{
+	ash := models.User{
 		Name: "Peter",
 	}
 	store := NewStore(collection, nil, nil)
@@ -49,14 +49,14 @@ func Test_store_Put(t *testing.T) {
 
 func Test_store_GetUser(t *testing.T) {
 	collection, _ := prepareCollection(usersCollectionName)
-	ash := bot.User{
+	ash := models.User{
 		Name: "Peter",
 		Id:   whoID,
 	}
 	store := NewStore(collection, nil, nil)
 	err := store.PutUser(&ash)
 	assert.NoError(t, err)
-	var result *bot.User
+	var result *models.User
 	result, err = store.GetUser(whoID)
 	assert.NoError(t, err)
 	assert.Equal(t, ash.Id, result.Id)
@@ -102,6 +102,14 @@ func Test_store_PutLike(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, int64(1), deleteRes.DeletedCount)
 	})
+}
+
+func Test_store_GetAny(t *testing.T) {
+	usersCollection, conn := prepareCollection(usersCollectionName)
+	defer func() {
+		conn.Disconnect(context.TODO())
+	}()
+	_ = NewStore(usersCollection, nil, nil)
 }
 
 func prepareCollection(name string) (col *mongo.Collection, conn *mongo.Client) {

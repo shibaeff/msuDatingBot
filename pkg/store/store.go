@@ -6,22 +6,22 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"echoBot/pkg/bot"
+	"echoBot/pkg/models"
 )
 
 var (
-	justOne = []bson.D{bson.D{{"$sample", bson.D{{"size", 10}}}}}
+	justOne = []bson.D{bson.D{{"$sample", bson.D{{"size", 1}}}}}
 )
 
 type Store interface {
-	PutUser(model *bot.User) error
-	GetUser(id int64) (*bot.User, error)
+	PutUser(model *models.User) error
+	GetUser(id int64) (*models.User, error)
 	// CheckExists() bool
 	PutLike(who int64, whome int64) error
 	GetLikes(whose int64) (*Entry, error)
 	PutSeen(who int64, whome int64) error
 	GetSeen(whose int64) (*Entry, error)
-	GetAny(for_id int64) (*bot.User, error)
+	GetAny(for_id int64) (*models.User, error)
 	GetBunch() (ret []int64, err error)
 }
 
@@ -31,14 +31,14 @@ type store struct {
 	seenRegistry    Registry
 }
 
-func (s *store) PutUser(model *bot.User) error {
+func (s *store) PutUser(model *models.User) error {
 	_, err := s.usersCollection.InsertOne(context.TODO(), *model)
 	return err
 }
 
-func (s *store) GetUser(id int64) (user *bot.User, err error) {
+func (s *store) GetUser(id int64) (user *models.User, err error) {
 	filter := bson.D{{"id", id}}
-	user = new(bot.User)
+	user = new(models.User)
 	err = s.usersCollection.FindOne(context.TODO(), filter).Decode(user)
 	return
 }
@@ -63,18 +63,13 @@ func (s *store) GetSeen(whose int64) (seen *Entry, err error) {
 	return
 }
 
-func (s *store) GetAny(for_id int64) (user *bot.User, err error) {
-	curs, err := s.usersCollection.Find(context.TODO(), justOne)
+func (s *store) GetAny(for_id int64) (user *models.User, err error) {
+	user = new(models.User)
+	err = s.usersCollection.FindOne(context.TODO(), justOne).Decode(user)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		curs.Close(context.TODO())
-	}()
-	user = new(bot.User)
-	for curs.Next(context.TODO()) {
-
-	}
+	return
 }
 
 func (s *store) GetBunch() (ret []int64, err error) {
