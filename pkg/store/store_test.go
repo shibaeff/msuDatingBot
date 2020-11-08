@@ -20,13 +20,22 @@ const (
 
 	putNewLike = "put new like success"
 	updLike    = "update like success"
+
+	noUsersGetAny   = "successful get any test when there are no users"
+	oneUserGetAny   = "successful test with only one user"
+	manyUsersGetAny = "successful test with two and more users"
 )
 
-type Trainer struct {
-	Name string
-	Age  int
-	City string
-}
+var (
+	pasha = models.User{
+		Id:   whoID,
+		Name: "pasha",
+	}
+	ksyusha = models.User{
+		Id:   whomeID,
+		Name: "ksyusha",
+	}
+)
 
 func Test_store_Put(t *testing.T) {
 	collection, _ := prepareCollection(usersCollectionName)
@@ -37,7 +46,7 @@ func Test_store_Put(t *testing.T) {
 	err := store.PutUser(&ash)
 	assert.NoError(t, err)
 
-	var result Trainer
+	var result models.User
 	filter := bson.D{{"name", "Peter"}}
 	err = collection.FindOne(context.TODO(), filter).Decode(&result)
 	if err != nil {
@@ -105,11 +114,25 @@ func Test_store_PutLike(t *testing.T) {
 }
 
 func Test_store_GetAny(t *testing.T) {
-	usersCollection, conn := prepareCollection(usersCollectionName)
-	defer func() {
-		conn.Disconnect(context.TODO())
-	}()
-	_ = NewStore(usersCollection, nil, nil)
+	usersCollection, _ := prepareCollection(usersCollectionName)
+	store := NewStore(usersCollection, nil, nil)
+
+	t.Run(noUsersGetAny, func(t *testing.T) {
+		_, err := store.GetUser(whoID)
+		assert.Error(t, err)
+	})
+
+	t.Run(oneUserGetAny, func(t *testing.T) {
+		err := store.PutUser(&pasha)
+		assert.NoError(t, err)
+		user, err := store.GetUser(pasha.Id)
+		assert.NoError(t, err)
+		assert.Equal(t, pasha.Id, user.Id)
+		_, err = store.GetUser(whomeID)
+		assert.Error(t, err)
+		err = store.DeleteUser(pasha.Id)
+		assert.NoError(t, err)
+	})
 }
 
 func prepareCollection(name string) (col *mongo.Collection, conn *mongo.Client) {

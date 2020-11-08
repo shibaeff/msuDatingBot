@@ -16,6 +16,7 @@ var (
 type Store interface {
 	PutUser(model *models.User) error
 	GetUser(id int64) (*models.User, error)
+	DeleteUser(id int64) error
 	// CheckExists() bool
 	PutLike(who int64, whome int64) error
 	GetLikes(whose int64) (*Entry, error)
@@ -41,6 +42,12 @@ func (s *store) GetUser(id int64) (user *models.User, err error) {
 	user = new(models.User)
 	err = s.usersCollection.FindOne(context.TODO(), filter).Decode(user)
 	return
+}
+
+func (s *store) DeleteUser(id int64) (err error) {
+	filter := bson.D{{"id", id}}
+	_, err = s.usersCollection.DeleteOne(context.TODO(), filter)
+	return err
 }
 
 func (s *store) PutLike(who, whome int64) (err error) {
