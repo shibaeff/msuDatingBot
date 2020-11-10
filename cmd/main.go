@@ -42,6 +42,8 @@ func main() {
 	likes := PrepareCollection(client, likes)
 	seen := PrepareCollection(client, seen)
 
+	store := store.NewStore(users, likes, seen)
+
 	api, err := tgbotapi.NewBotAPI("1327834524:AAFSH9KVrRiowoqo8uCGdm5EfBIk9Hdxurs")
 	if err != nil {
 		log.Panic(err)
@@ -55,7 +57,7 @@ func main() {
 	u.Timeout = 60
 
 	updates, err := api.GetUpdatesChan(u)
-	Bot := bot.NewBot(store.NewStore(users, likes, seen))
+	Bot := bot.NewBot(store)
 	for update := range updates {
 		if update.Message == nil { // ignore any non-Message Updates
 			continue

@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	waiting         = -1
 	registerCommand = "/register"
 	nextCommand     = "/next"
 	usersCommand    = "/users"
@@ -48,22 +49,33 @@ func replyWithText(text string) (ret *tgbotapi.MessageConfig) {
 	return
 }
 
-var Users = make(map[int64]bool)
+// var Users = make(map[int64]bool)
 var RegisterStatus = make(map[int64]int64)
 var Photos = make(map[int64]string)
 
 func (b *bot) Reply(message *tgbotapi.Message) (reply *tgbotapi.MessageConfig) {
-	_, ok := Users[message.Chat.ID]
-	if !ok {
-		reply = replyWithText(greetMsg)
-		Users[message.Chat.ID] = true
-		return
-	}
-	_, ok = RegisterStatus[message.Chat.ID]
-	if ok && RegisterStatus[message.Chat.ID] < regOver {
-		reply = registerFlow(message)
-		return
-	}
+	// TODO transfer to db
+	//_, err := b.store.GetUser(message.Chat.ID)
+	//if err != nil {
+	//	reply = replyWithText(greetMsg)
+	//	b.store.PutUser(&models.User{
+	//		Name:       "",
+	//		Faculty:    "",
+	//		Gender:     "",
+	//		WantGender: "",
+	//		About:      "",
+	//		Id:         message,
+	//		PhotoLink:  "",
+	//		RegiStep:   0,
+	//		UserName:   "",
+	//	})
+	//	return
+	//}
+	//_, ok = RegisterStatus[message.Chat.ID]
+	//if ok && RegisterStatus[message.Chat.ID] < regOver {
+	//	reply = registerFlow(message)
+	//	return
+	//}
 	if message.IsCommand() {
 		switch message.Text {
 		case helpCommand:

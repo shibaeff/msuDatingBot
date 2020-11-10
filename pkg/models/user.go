@@ -8,4 +8,6 @@ type User struct {
 	About      string
 	Id         int64
 	PhotoLink  string
+	RegiStep   int64
+	UserName   string
 }
