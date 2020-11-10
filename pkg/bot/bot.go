@@ -56,7 +56,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply *tgbotapi.MessageConfig, e
 	_, err = b.store.GetUser(message.Chat.ID)
 	if err != nil {
 		reply = replyWithText(greetMsg)
-		b.store.PutUser(&models.User{
+		err = b.store.PutUser(&models.User{
 			Name:       message.Chat.FirstName,
 			Faculty:    "",
 			Gender:     "",
@@ -70,8 +70,11 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply *tgbotapi.MessageConfig, e
 		return
 	}
 	user, err := b.store.GetUser(message.Chat.ID)
+	if err != nil {
+		return nil, err
+	}
 	if user.RegiStep < regOver {
-		reply = registerFlow(message)
+		reply = b.registerFlow(user, message)
 		return
 	}
 	if message.IsCommand() {
@@ -80,20 +83,20 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply *tgbotapi.MessageConfig, e
 			reply = replyWithText(helpMsg)
 			return
 		case registerCommand:
-			if RegisterStatus[message.Chat.ID] >= regOver {
+			if user.RegiStep >= regOver {
 				reply = replyWithText(alreadyRegistered)
 				return
 			}
-			reply = registerFlow(message)
+			reply = b.registerFlow(user, message)
 			// RegisterStatus[message.Chat.ID] = 1
 			return
 		case nextCommand:
-			if RegisterStatus[message.Chat.ID] < regOver {
+			if user.RegiStep < regOver {
 				reply = replyWithText(notRegistered)
 				return
 			}
 		case usersCommand:
-			if RegisterStatus[message.Chat.ID] < regOver {
+			if user.RegiStep < regOver {
 				reply = replyWithText(notRegistered)
 				return
 			}

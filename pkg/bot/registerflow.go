@@ -32,44 +32,54 @@ func registerStep(text string) (reply *tgbotapi.MessageConfig) {
 	return
 }
 
-var UserQueue = make(map[int64]*models.User)
+func (b *bot) updateRegStatus(id, status int64) error {
+	return b.store.UpdUserField(id, "id", status)
+}
 
-func registerFlow(message *tgbotapi.Message) (reply *tgbotapi.MessageConfig) {
-	user, ok := UserQueue[message.Chat.ID]
-	if !ok {
-		user = &models.User{
-			Id: message.Chat.ID,
-		}
-		UserQueue[message.Chat.ID] = user
-	}
-	switch RegisterStatus[message.Chat.ID] {
+func (b *bot) registerFlow(user *models.User, message *tgbotapi.Message) (reply *tgbotapi.MessageConfig) {
+	switch user.RegiStep {
 	case regBegin:
-		RegisterStatus[message.Chat.ID] = regName
+		// RegisterStatus[message.Chat.ID] = regName
+		if err := b.updateRegStatus(user.Id, regName); err != nil {
+			log.Fatal(err)
+		}
 		return registerStep(askName)
 	case regName:
 		user.Name = message.Text
 		log.Printf("Recorded username %s", user.Name)
-		RegisterStatus[message.Chat.ID] = regGender
+		// RegisterStatus[message.Chat.ID] = regGender
+		if err := b.updateRegStatus(user.Id, regGender); err != nil {
+			log.Fatal(err)
+		}
 		reply = registerStep(askGender)
 		return
 	case regGender:
-		RegisterStatus[message.Chat.ID] = regWantGender
+		// RegisterStatus[message.Chat.ID] = regWantGender
+		if err := b.updateRegStatus(user.Id, regWantGender); err != nil {
+			log.Fatal(err)
+		}
 		user.Gender = message.Text
 		log.Printf("Recorded Gender %s", user.Gender)
 		reply = registerStep(askWantGender)
 	case regWantGender:
 		user.WantGender = message.Text
-		RegisterStatus[message.Chat.ID] = regFaculty
+		// RegisterStatus[message.Chat.ID] = regFaculty
+		if err := b.updateRegStatus(user.Id, regFaculty); err != nil {
+			log.Fatal(err)
+		}
 		log.Printf("Recorded want Gender %s", user.WantGender)
 		reply = registerStep(askFaculty)
 	case regFaculty:
 		user.Faculty = message.Text
-		RegisterStatus[message.Chat.ID] = regAbout
+		// RegisterStatus[message.Chat.ID] = regAbout
 		log.Printf("Recorded Faculty %s", user.Faculty)
 		reply = registerStep(askAbout)
 	case regAbout:
 		user.About = message.Text
-		RegisterStatus[message.Chat.ID] = regPhoto
+		// RegisterStatus[message.Chat.ID] = regPhoto
+		if err := b.updateRegStatus(user.Id, regPhoto); err != nil {
+			log.Fatal(err)
+		}
 		log.Printf("Recorded about %s", user.About)
 		reply = registerStep("Загрузите свое фото")
 	case regPhoto:
@@ -77,7 +87,10 @@ func registerFlow(message *tgbotapi.Message) (reply *tgbotapi.MessageConfig) {
 		photo := photos[0]
 		user.PhotoLink = photo.FileID
 		log.Printf("Recorded photo id %s", user.PhotoLink)
-		RegisterStatus[message.Chat.ID] = regOver
+		// RegisterStatus[message.Chat.ID] = regOver
+		if err := b.updateRegStatus(user.Id, regOver); err != nil {
+			log.Fatal(err)
+		}
 		reply = registerStep("Регистрация окончена")
 	}
 

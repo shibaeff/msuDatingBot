@@ -72,6 +72,9 @@ func main() {
 		//msg.ReplyToMessageID = update.Message.MessageID
 		//msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(buttons)
 		reply.ChatID = update.Message.Chat.ID
-		api.Send(reply)
+		_, err = api.Send(reply)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
