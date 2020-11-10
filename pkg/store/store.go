@@ -24,6 +24,7 @@ type Store interface {
 	GetSeen(whose int64) (*Entry, error)
 	GetAny(for_id int64) (*models.User, error)
 	GetBunch() (ret []int64, err error)
+	UpdUserField(id int64, field string, value interface{}) (err error)
 }
 
 type store struct {

@@ -73,6 +73,27 @@ func Test_store_GetUser(t *testing.T) {
 	collection.DeleteOne(context.TODO(), filter)
 }
 
+func Test_store_UpdUserField(t *testing.T) {
+	collection, _ := prepareCollection(usersCollectionName)
+	ash := models.User{
+		Name: "Peter",
+		Id:   whoID,
+	}
+	store := NewStore(collection, nil, nil)
+	err := store.PutUser(&ash)
+	assert.NoError(t, err)
+	var result *models.User
+	result, err = store.GetUser(whoID)
+	assert.NoError(t, err)
+	assert.Equal(t, ash.Id, result.Id)
+
+	ash.Name = "Pasha"
+	err = store.UpdUserField(ash.Id, "name", ash.Name)
+	assert.NoError(t, err)
+	err = store.DeleteUser(ash.Id)
+	assert.NoError(t, err)
+}
+
 func Test_store_PutLike(t *testing.T) {
 	collection, _ := prepareCollection(likesCollectionName)
 	st := NewStore(nil, collection, nil)
