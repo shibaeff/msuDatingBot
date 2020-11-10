@@ -62,7 +62,10 @@ func main() {
 		if update.Message == nil { // ignore any non-Message Updates
 			continue
 		}
-		reply := Bot.Reply(update.Message)
+		reply, err := Bot.Reply(update.Message)
+		if err != nil {
+			log.Fatal(err)
+		}
 		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 		//buttons := []tgbotapi.KeyboardButton{tgbotapi.KeyboardButton{Text: "Hello",},}
 		//msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
