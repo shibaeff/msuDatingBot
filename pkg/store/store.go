@@ -44,6 +44,15 @@ func (s *store) GetUser(id int64) (user *models.User, err error) {
 	return
 }
 
+func (s *store) UpdUserField(id int64, field string, value interface{}) (err error) {
+	filter := bson.D{{"id", id}}
+	pipeline := bson.D{
+		{"$set", bson.D{{field, value}}},
+	}
+	_, err = s.usersCollection.UpdateOne(context.TODO(), filter, pipeline)
+	return
+}
+
 func (s *store) DeleteUser(id int64) (err error) {
 	filter := bson.D{{"id", id}}
 	_, err = s.usersCollection.DeleteOne(context.TODO(), filter)
