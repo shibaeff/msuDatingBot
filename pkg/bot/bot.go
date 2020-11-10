@@ -51,28 +51,26 @@ func replyWithText(text string) (ret *tgbotapi.MessageConfig) {
 }
 
 // var Users = make(map[int64]bool)
-var RegisterStatus = make(map[int64]int64)
-var Photos = make(map[int64]string)
 
 func (b *bot) Reply(message *tgbotapi.Message) (reply *tgbotapi.MessageConfig) {
 	_, err := b.store.GetUser(message.Chat.ID)
 	if err != nil {
 		reply = replyWithText(greetMsg)
 		b.store.PutUser(&models.User{
-			Name:       "",
+			Name:       message.Chat.FirstName,
 			Faculty:    "",
 			Gender:     "",
 			WantGender: "",
 			About:      "",
 			Id:         message.Chat.ID,
 			PhotoLink:  "",
-			RegiStep:   0,
+			RegiStep:   waiting,
 			UserName:   message.Chat.UserName,
 		})
 		return
 	}
-	_, ok = RegisterStatus[message.Chat.ID]
-	if ok && RegisterStatus[message.Chat.ID] < regOver {
+	user, err := b.store.GetUser(message.Chat.ID)
+	if user.RegiStep < regOver {
 		reply = registerFlow(message)
 		return
 	}
