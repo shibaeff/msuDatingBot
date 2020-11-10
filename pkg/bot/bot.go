@@ -3,6 +3,7 @@ package bot
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
+	"echoBot/pkg/models"
 	"echoBot/pkg/store"
 )
 
@@ -54,28 +55,27 @@ var RegisterStatus = make(map[int64]int64)
 var Photos = make(map[int64]string)
 
 func (b *bot) Reply(message *tgbotapi.Message) (reply *tgbotapi.MessageConfig) {
-	// TODO transfer to db
-	//_, err := b.store.GetUser(message.Chat.ID)
-	//if err != nil {
-	//	reply = replyWithText(greetMsg)
-	//	b.store.PutUser(&models.User{
-	//		Name:       "",
-	//		Faculty:    "",
-	//		Gender:     "",
-	//		WantGender: "",
-	//		About:      "",
-	//		Id:         message,
-	//		PhotoLink:  "",
-	//		RegiStep:   0,
-	//		UserName:   "",
-	//	})
-	//	return
-	//}
-	//_, ok = RegisterStatus[message.Chat.ID]
-	//if ok && RegisterStatus[message.Chat.ID] < regOver {
-	//	reply = registerFlow(message)
-	//	return
-	//}
+	_, err := b.store.GetUser(message.Chat.ID)
+	if err != nil {
+		reply = replyWithText(greetMsg)
+		b.store.PutUser(&models.User{
+			Name:       "",
+			Faculty:    "",
+			Gender:     "",
+			WantGender: "",
+			About:      "",
+			Id:         message.Chat.ID,
+			PhotoLink:  "",
+			RegiStep:   0,
+			UserName:   message.Chat.UserName,
+		})
+		return
+	}
+	_, ok = RegisterStatus[message.Chat.ID]
+	if ok && RegisterStatus[message.Chat.ID] < regOver {
+		reply = registerFlow(message)
+		return
+	}
 	if message.IsCommand() {
 		switch message.Text {
 		case helpCommand:
