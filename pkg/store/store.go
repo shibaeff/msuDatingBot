@@ -12,6 +12,7 @@ import (
 
 var (
 	justOne = []bson.D{bson.D{{"$sample", bson.D{{"size", 1}}}}}
+	many    = []bson.D{bson.D{{"$sample", bson.D{{"size", 5}}}}}
 )
 
 type Store interface {
@@ -24,7 +25,7 @@ type Store interface {
 	PutSeen(who int64, whome int64) error
 	GetSeen(whose int64) (*Entry, error)
 	GetAny(for_id int64) (*models.User, error)
-	GetBunch() (ret []int64, err error)
+	GetBunch() (ret []*models.User, err error)
 	UpdUserField(id int64, field string, value interface{}) (err error)
 }
 
@@ -93,8 +94,19 @@ func (s *store) GetAny(for_id int64) (user *models.User, err error) {
 	return
 }
 
-func (s *store) GetBunch() (ret []int64, err error) {
-	panic("nothing")
+func (s *store) GetBunch() (ret []*models.User, err error) {
+	cur, err := s.usersCollection.Find(context.TODO(), many)
+	if err != nil {
+		return
+	}
+	for cur.Next(context.TODO()) {
+		user := new(models.User)
+		if err = cur.Decode(user); err != nil {
+			return nil, err
+		}
+		ret = append(ret, user)
+	}
+	return
 }
 
 func NewStore(users *mongo.Collection, likes *mongo.Collection, seen *mongo.Collection) Store {

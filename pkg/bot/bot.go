@@ -42,14 +42,6 @@ type bot struct {
 	store store.Store
 }
 
-func replyWithText(text string) (ret *tgbotapi.MessageConfig) {
-	ret = &tgbotapi.MessageConfig{
-		Text: text,
-	}
-	ret.ReplyMarkup = menuKeyboard
-	return
-}
-
 // var Users = make(map[int64]bool)
 
 func (b *bot) Reply(message *tgbotapi.Message) (reply *tgbotapi.MessageConfig, err error) {
@@ -96,9 +88,22 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply *tgbotapi.MessageConfig, e
 				reply = replyWithText(notRegistered)
 				return
 			}
+			// reply = b.listUsers()
 		}
 	}
 	reply = replyWithText(notUnderstood)
+	return
+}
+
+//func (b *bot) listUsers() {
+//	users := b.store.GetBunch()
+//}
+
+func replyWithText(text string) (ret *tgbotapi.MessageConfig) {
+	ret = &tgbotapi.MessageConfig{
+		Text: text,
+	}
+	ret.ReplyMarkup = menuKeyboard
 	return
 }
 
