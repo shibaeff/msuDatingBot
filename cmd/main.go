@@ -76,5 +76,6 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		client.Ping(context.TODO(), nil)
 	}
 }

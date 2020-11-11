@@ -33,11 +33,16 @@ func registerStep(text string) (reply *tgbotapi.MessageConfig) {
 }
 
 func (b *bot) updateRegStatus(id, status int64) error {
-	return b.store.UpdUserField(id, "id", status)
+	return b.store.UpdUserField(id, "registep", status)
 }
 
 func (b *bot) registerFlow(user *models.User, message *tgbotapi.Message) (reply *tgbotapi.MessageConfig) {
 	switch user.RegiStep {
+	case waiting:
+		if err := b.updateRegStatus(user.Id, regName); err != nil {
+			log.Fatal(err)
+		}
+		return registerStep(askName)
 	case regBegin:
 		// RegisterStatus[message.Chat.ID] = regName
 		if err := b.updateRegStatus(user.Id, regName); err != nil {
@@ -72,6 +77,9 @@ func (b *bot) registerFlow(user *models.User, message *tgbotapi.Message) (reply 
 	case regFaculty:
 		user.Faculty = message.Text
 		// RegisterStatus[message.Chat.ID] = regAbout
+		if err := b.updateRegStatus(user.Id, regAbout); err != nil {
+			log.Fatal(err)
+		}
 		log.Printf("Recorded Faculty %s", user.Faculty)
 		reply = registerStep(askAbout)
 	case regAbout:

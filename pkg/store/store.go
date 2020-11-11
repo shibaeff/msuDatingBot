@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -50,7 +51,10 @@ func (s *store) UpdUserField(id int64, field string, value interface{}) (err err
 	pipeline := bson.D{
 		{"$set", bson.D{{field, value}}},
 	}
-	_, err = s.usersCollection.UpdateOne(context.TODO(), filter, pipeline)
+	res, err := s.usersCollection.UpdateOne(context.TODO(), filter, pipeline)
+	if err == nil {
+		log.Printf("modified %d documents\n", res.ModifiedCount)
+	}
 	return
 }
 

@@ -53,7 +53,7 @@ func replyWithText(text string) (ret *tgbotapi.MessageConfig) {
 // var Users = make(map[int64]bool)
 
 func (b *bot) Reply(message *tgbotapi.Message) (reply *tgbotapi.MessageConfig, err error) {
-	_, err = b.store.GetUser(message.Chat.ID)
+	user, err := b.store.GetUser(message.Chat.ID)
 	if err != nil {
 		reply = replyWithText(greetMsg)
 		err = b.store.PutUser(&models.User{
@@ -69,11 +69,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply *tgbotapi.MessageConfig, e
 		})
 		return
 	}
-	user, err := b.store.GetUser(message.Chat.ID)
-	if err != nil {
-		return nil, err
-	}
-	if user.RegiStep < regOver {
+	if user.RegiStep != waiting && user.RegiStep < regOver {
 		reply = b.registerFlow(user, message)
 		return
 	}
