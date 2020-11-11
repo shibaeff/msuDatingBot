@@ -51,6 +51,9 @@ func (b *bot) registerFlow(user *models.User, message *tgbotapi.Message) (reply 
 		return registerStep(askName)
 	case regName:
 		user.Name = message.Text
+		if err := b.store.UpdUserField(user.Id, "name", user.Name); err != nil {
+			log.Fatal(err)
+		}
 		log.Printf("Recorded username %s", user.Name)
 		// RegisterStatus[message.Chat.ID] = regGender
 		if err := b.updateRegStatus(user.Id, regGender); err != nil {
@@ -64,12 +67,19 @@ func (b *bot) registerFlow(user *models.User, message *tgbotapi.Message) (reply 
 			log.Fatal(err)
 		}
 		user.Gender = message.Text
+		if err := b.store.UpdUserField(user.Id, "gender", user.Gender); err != nil {
+			log.Fatal(err)
+		}
 		log.Printf("Recorded Gender %s", user.Gender)
+
 		reply = registerStep(askWantGender)
 	case regWantGender:
 		user.WantGender = message.Text
 		// RegisterStatus[message.Chat.ID] = regFaculty
 		if err := b.updateRegStatus(user.Id, regFaculty); err != nil {
+			log.Fatal(err)
+		}
+		if err := b.store.UpdUserField(user.Id, "wantgender", user.WantGender); err != nil {
 			log.Fatal(err)
 		}
 		log.Printf("Recorded want Gender %s", user.WantGender)
@@ -80,6 +90,9 @@ func (b *bot) registerFlow(user *models.User, message *tgbotapi.Message) (reply 
 		if err := b.updateRegStatus(user.Id, regAbout); err != nil {
 			log.Fatal(err)
 		}
+		if err := b.store.UpdUserField(user.Id, "faculty", user.Faculty); err != nil {
+			log.Fatal(err)
+		}
 		log.Printf("Recorded Faculty %s", user.Faculty)
 		reply = registerStep(askAbout)
 	case regAbout:
@@ -88,18 +101,28 @@ func (b *bot) registerFlow(user *models.User, message *tgbotapi.Message) (reply 
 		if err := b.updateRegStatus(user.Id, regPhoto); err != nil {
 			log.Fatal(err)
 		}
+		if err := b.store.UpdUserField(user.Id, "about", user.About); err != nil {
+			log.Fatal(err)
+		}
 		log.Printf("Recorded about %s", user.About)
 		reply = registerStep("Загрузите свое фото")
 	case regPhoto:
+		if message.Photo == nil {
+			reply = replyWithText("Загрузите фото!")
+			return
+		}
 		photos := *message.Photo
 		photo := photos[0]
 		user.PhotoLink = photo.FileID
+		if err := b.store.UpdUserField(user.Id, "name", user.Name); err != nil {
+			log.Fatal(err)
+		}
 		log.Printf("Recorded photo id %s", user.PhotoLink)
 		// RegisterStatus[message.Chat.ID] = regOver
 		if err := b.updateRegStatus(user.Id, regOver); err != nil {
 			log.Fatal(err)
 		}
-		reply = registerStep("Регистрация окончена")
+		reply = registerStep("Регистрация окончена\n" + user.String())
 	}
 
 	return
