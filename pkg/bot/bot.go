@@ -113,12 +113,12 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 				return
 			}
 			reply = replyWithText("Успешный лайк!")
-			likee_entry, e := b.store.GetMatchesRegistry().GetList(likee)
+			likee_entry, e := b.store.GetLikes(likee)
 			if e == nil {
 				likee_likes := likee_entry.Whome
 				_, ok1 := find(likee_likes, user.Id)
 				if ok1 {
-					user_entry, e := b.store.GetMatchesRegistry().GetList(user.Id)
+					user_entry, e := b.store.GetLikes(user.Id)
 					if e != nil {
 						return
 					}
@@ -129,6 +129,8 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 							reply = replyWithText("Такого пользователя уже нет")
 						}
 						reply = replyWithText(fmt.Sprintf(matchMsg, likee_user.UserName))
+						e = b.store.GetMatchesRegistry().AddToList(user.Id, likee_user.Id)
+						e = b.store.GetMatchesRegistry().AddToList(likee_user.Id, user.Id)
 						return
 					} else {
 						return

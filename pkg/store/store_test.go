@@ -42,7 +42,7 @@ func Test_store_Put(t *testing.T) {
 	ash := models.User{
 		Name: "Peter",
 	}
-	store := NewStore(collection, nil, nil)
+	store := NewStore(collection, []*mongo.Collection{nil, nil, nil})
 	err := store.PutUser(&ash)
 	assert.NoError(t, err)
 
@@ -62,7 +62,7 @@ func Test_store_GetUser(t *testing.T) {
 		Name: "Peter",
 		Id:   whoID,
 	}
-	store := NewStore(collection, nil, nil)
+	store := NewStore(collection, []*mongo.Collection{nil, nil, nil})
 	err := store.PutUser(&ash)
 	assert.NoError(t, err)
 	var result *models.User
@@ -79,7 +79,7 @@ func Test_store_UpdUserField(t *testing.T) {
 		Name: "Peter",
 		Id:   whoID,
 	}
-	store := NewStore(collection, nil, nil)
+	store := NewStore(collection, []*mongo.Collection{nil, nil, nil})
 	err := store.PutUser(&ash)
 	assert.NoError(t, err)
 	var result *models.User
@@ -96,7 +96,7 @@ func Test_store_UpdUserField(t *testing.T) {
 
 func Test_store_PutLike(t *testing.T) {
 	collection, _ := prepareCollection(likesCollectionName)
-	st := NewStore(nil, collection, nil)
+	st := NewStore(nil, []*mongo.Collection{collection, nil, nil})
 	t.Run(putNewLike, func(t *testing.T) {
 		err := st.PutLike(whoID, whomeID)
 		assert.NoError(t, err)
@@ -136,7 +136,7 @@ func Test_store_PutLike(t *testing.T) {
 
 func Test_store_GetAny(t *testing.T) {
 	usersCollection, _ := prepareCollection(usersCollectionName)
-	store := NewStore(usersCollection, nil, nil)
+	store := NewStore(usersCollection, []*mongo.Collection{nil, nil})
 
 	t.Run(noUsersGetAny, func(t *testing.T) {
 		_, err := store.GetUser(whoID)
