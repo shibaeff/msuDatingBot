@@ -1,6 +1,8 @@
 package bot
 
 import (
+	"errors"
+	"fmt"
 	"log"
 	"strings"
 
@@ -17,6 +19,7 @@ const (
 	nextCommand      = "/next"
 	usersCommand     = "/users"
 	helpCommand      = "/help"
+	likeCommand      = "/like"
 
 	greetMsg          = "Добро пожаловать в бота знакомств. Начните с /register."
 	notUnderstood     = "Пожалуйста, выберите действие из меню"
@@ -30,7 +33,7 @@ var (
 	registerButton = tgbotapi.KeyboardButton{Text: registerCommand}
 	helpButton     = tgbotapi.KeyboardButton{Text: helpCommand}
 	nextButton     = tgbotapi.KeyboardButton{Text: nextCommand}
-	usersButton    = tgbotapi.KeyboardButton{Text: usersCommand}
+	usersButton    = tgbotapi.KeyboardButton{Text: likeCommand}
 	menuButtons    = []tgbotapi.KeyboardButton{registerButton, helpButton, nextButton, usersButton}
 	menuKeyboard   = tgbotapi.NewReplyKeyboard(menuButtons)
 )
@@ -86,9 +89,29 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			}
 			newuser, e := b.store.GetAny(user.Id)
 			if e != nil {
+				reply = replyWithText("Не можем подобрать вариант")
+				return
+			}
+			e = b.store.PutSeen(user.Id, newuser.Id)
+			if e != nil {
+				reply = replyWithText("Не можем подобрать вариант")
 				return
 			}
 			reply = replyWithPhoto(newuser, message.Chat.ID)
+			return
+		case likeCommand:
+			entry, e := b.store.GetSeen(user.Id)
+			if e != nil {
+				reply = replyWithText("failed to put your like")
+				return
+			}
+			likee := entry.Whome[len(entry.Whome)-1]
+			e = b.store.PutLike(user.Id, likee)
+			if e != nil {
+				reply = replyWithText("failed to put your like")
+				return
+			}
+			reply = replyWithText("Успешный лайк!")
 			return
 		case usersCommand:
 			if user.RegiStep < regOver {
@@ -125,6 +148,18 @@ func replyWithText(text string) (ret *tgbotapi.MessageConfig) {
 		Text: text,
 	}
 	ret.ReplyMarkup = menuKeyboard
+	return
+}
+
+func (b *bot) parseLikee(message *tgbotapi.Message) (id int64, err error) {
+	if message.ReplyToMessage == nil {
+		return -1, errors.New("nothing to reply to")
+	}
+	text := message.ReplyToMessage.Text
+	_, err = fmt.Scanf(text, &id)
+	if err != nil {
+		return -1, err
+	}
 	return
 }
 

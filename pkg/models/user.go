@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	stringify = "Имя %s\nФакультет %s\nПол %s\nПол собеседника %s\nО себе %s\nUsername %s"
+	stringify = "Имя %s\nФакультет %s\nПол %s\nПол собеседника %s\nО себе %s\nUsername %s\nID %d"
 )
 
 type User struct {
@@ -21,5 +21,5 @@ type User struct {
 }
 
 func (u *User) String() string {
-	return fmt.Sprintf(stringify, u.Name, u.Faculty, u.Gender, u.WantGender, u.About, u.UserName)
+	return fmt.Sprintf(stringify, u.Name, u.Faculty, u.Gender, u.WantGender, u.About, u.UserName, u.Id)
 }
