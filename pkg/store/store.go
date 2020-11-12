@@ -26,6 +26,7 @@ type Store interface {
 	GetSeen(whose int64) (*Entry, error)
 	GetAny(for_id int64) (*models.User, error)
 	GetBunch(n int) (ret []*models.User, err error)
+	GetMatchesRegistry() Registry
 	UpdUserField(id int64, field string, value interface{}) (err error)
 }
 
@@ -109,6 +110,10 @@ func (s *store) GetBunch(n int) (ret []*models.User, err error) {
 		ret = append(ret, user)
 	}
 	return
+}
+
+func (s *store) GetMatchesRegistry() Registry {
+	return s.matchesRegistry
 }
 
 func NewStore(users *mongo.Collection, registries []*mongo.Collection) Store {

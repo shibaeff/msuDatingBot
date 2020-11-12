@@ -47,3 +47,12 @@ func replyWithPhoto(u *models.User, to int64) (ret *tgbotapi.PhotoConfig) {
 	}
 	return
 }
+
+func find(slice []int64, val int64) (int, bool) {
+	for i, item := range slice {
+		if item == val {
+			return i, true
+		}
+	}
+	return -1, false
+}
