@@ -7,6 +7,7 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
+	"echoBot/pkg/bot/controllers"
 	"echoBot/pkg/models"
 	"echoBot/pkg/store"
 )
@@ -44,8 +45,10 @@ type Bot interface {
 }
 
 type bot struct {
-	store store.Store
-	api   *tgbotapi.BotAPI
+	store            store.Store
+	api              *tgbotapi.BotAPI
+	genderController controllers.Controller
+	photoController  controllers.Controller
 }
 
 // var Users = make(map[int64]bool)
@@ -172,6 +175,11 @@ func (b *bot) listUsers() (str string, err error) {
 }
 
 func NewBot(store store.Store, api *tgbotapi.BotAPI) (b Bot) {
-	b = &bot{store: store, api: api}
+	b = &bot{
+		store:            store,
+		api:              api,
+		genderController: &controllers.GenderController{},
+		photoController:  &controllers.PhotoController{},
+	}
 	return b
 }

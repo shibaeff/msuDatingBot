@@ -63,6 +63,11 @@ func (b *bot) registerFlow(user *models.User, message *tgbotapi.Message) (reply 
 		return
 	case regGender:
 		// RegisterStatus[message.Chat.ID] = regWantGender
+		resp, err := b.photoController.Verify(message.Text)
+		if err != nil {
+			reply = replyWithText(resp)
+			return
+		}
 		if err := b.updateRegStatus(user.Id, regWantGender); err != nil {
 			log.Fatal(err)
 		}
@@ -74,6 +79,11 @@ func (b *bot) registerFlow(user *models.User, message *tgbotapi.Message) (reply 
 
 		reply = registerStep(askWantGender)
 	case regWantGender:
+		resp, err := b.photoController.Verify(message.Text)
+		if err != nil {
+			reply = replyWithText(resp)
+			return
+		}
 		user.WantGender = message.Text
 		// RegisterStatus[message.Chat.ID] = regFaculty
 		if err := b.updateRegStatus(user.Id, regFaculty); err != nil {
@@ -107,8 +117,9 @@ func (b *bot) registerFlow(user *models.User, message *tgbotapi.Message) (reply 
 		log.Printf("Recorded about %s", user.About)
 		reply = registerStep("Загрузите свое фото")
 	case regPhoto:
-		if message.Photo == nil {
-			reply = replyWithText("Загрузите фото!")
+		resp, err := b.photoController.Verify(message.Photo)
+		if err != nil {
+			reply = replyWithText(resp)
 			return
 		}
 		photos := *message.Photo
