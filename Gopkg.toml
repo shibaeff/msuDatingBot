@@ -30,17 +30,17 @@
   unused-packages = true
 
 [[constraint]]
-  Name = "github.com/go-telegram-bot-api/telegram-bot-api"
+  name = "github.com/go-telegram-bot-api/telegram-bot-api"
   version = "5.0.1"
 
 [[constraint]]
-  Name = "go.mongodb.org/mongo-driver"
+  name = "go.mongodb.org/mongo-driver"
   version = "~1.0.0"
 
 [[constraint]]
-  Name = "github.com/mongodb/mongo-go-driver"
+  name = "github.com/mongodb/mongo-go-driver"
   version = "0.3.0"
 
 [[constraint]]
-  Name = "github.com/stretchr/testify"
+  name = "github.com/stretchr/testify"
   version = "1.6.1"
