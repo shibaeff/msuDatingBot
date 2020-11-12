@@ -17,6 +17,7 @@ const (
 	usersCollectionName = "users"
 	likes               = "likes"
 	seen                = "seen"
+	matches             = "matches"
 )
 
 var (
@@ -41,8 +42,8 @@ func main() {
 	users := PrepareCollection(client, usersCollectionName)
 	likes := PrepareCollection(client, likes)
 	seen := PrepareCollection(client, seen)
-
-	store := store.NewStore(users, likes, seen)
+	matches := PrepareCollection(client, matches)
+	store := store.NewStore(users, []*mongo.Collection{likes, seen, matches})
 
 	api, err := tgbotapi.NewBotAPI("1327834524:AAFSH9KVrRiowoqo8uCGdm5EfBIk9Hdxurs")
 	if err != nil {

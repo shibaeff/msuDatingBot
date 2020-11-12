@@ -9,14 +9,6 @@ import (
 	"echoBot/pkg/models"
 )
 
-func replyWithText(text string) (ret *tgbotapi.MessageConfig) {
-	ret = &tgbotapi.MessageConfig{
-		Text: text,
-	}
-	ret.ReplyMarkup = menuKeyboard
-	return
-}
-
 func (b *bot) parseLikee(message *tgbotapi.Message) (id int64, err error) {
 	if message.ReplyToMessage == nil {
 		return -1, errors.New("nothing to reply to")
@@ -26,6 +18,19 @@ func (b *bot) parseLikee(message *tgbotapi.Message) (id int64, err error) {
 	if err != nil {
 		return -1, err
 	}
+	return
+}
+
+// TODO
+//func (b *bot) prepareMatches(userId int64) (err error) {
+//
+//}
+
+func replyWithText(text string) (ret *tgbotapi.MessageConfig) {
+	ret = &tgbotapi.MessageConfig{
+		Text: text,
+	}
+	ret.ReplyMarkup = menuKeyboard
 	return
 }
 

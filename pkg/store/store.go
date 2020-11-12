@@ -33,6 +33,7 @@ type store struct {
 	usersCollection *mongo.Collection
 	likesRegistry   Registry
 	seenRegistry    Registry
+	matchesRegistry Registry
 }
 
 func (s *store) PutUser(model *models.User) error {
@@ -110,10 +111,11 @@ func (s *store) GetBunch(n int) (ret []*models.User, err error) {
 	return
 }
 
-func NewStore(users *mongo.Collection, likes *mongo.Collection, seen *mongo.Collection) Store {
+func NewStore(users *mongo.Collection, registries []*mongo.Collection) Store {
 	return &store{
 		usersCollection: users,
-		likesRegistry:   NewRegistry(likes),
-		seenRegistry:    NewRegistry(seen),
+		likesRegistry:   NewRegistry(registries[0]),
+		seenRegistry:    NewRegistry(registries[1]),
+		matchesRegistry: NewRegistry(registries[2]),
 	}
 }

@@ -18,6 +18,7 @@ const (
 	usersCommand     = "/users"
 	helpCommand      = "/help"
 	likeCommand      = "/like"
+	matchesCommand   = "/matches"
 
 	greetMsg          = "Добро пожаловать в бота знакомств. Начните с /register."
 	notUnderstood     = "Пожалуйста, выберите действие из меню"
