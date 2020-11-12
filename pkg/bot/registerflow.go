@@ -114,7 +114,7 @@ func (b *bot) registerFlow(user *models.User, message *tgbotapi.Message) (reply 
 		photos := *message.Photo
 		photo := photos[0]
 		user.PhotoLink = photo.FileID
-		if err := b.store.UpdUserField(user.Id, "name", user.Name); err != nil {
+		if err := b.store.UpdUserField(user.Id, "photolink", user.PhotoLink); err != nil {
 			log.Fatal(err)
 		}
 		log.Printf("Recorded photo id %s", user.PhotoLink)

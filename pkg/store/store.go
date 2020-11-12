@@ -12,7 +12,7 @@ import (
 
 var (
 	justOne = []bson.D{bson.D{{"$sample", bson.D{{"size", 1}}}}}
-	many    = []bson.D{bson.D{{"$sample", bson.D{{"size", 5}}}}}
+	many    = []bson.D{bson.D{{"$sample", bson.D{{"size", 10}}}}}
 )
 
 type Store interface {
@@ -25,7 +25,7 @@ type Store interface {
 	PutSeen(who int64, whome int64) error
 	GetSeen(whose int64) (*Entry, error)
 	GetAny(for_id int64) (*models.User, error)
-	GetBunch() (ret []*models.User, err error)
+	GetBunch(n int) (ret []*models.User, err error)
 	UpdUserField(id int64, field string, value interface{}) (err error)
 }
 
@@ -86,16 +86,17 @@ func (s *store) GetSeen(whose int64) (seen *Entry, err error) {
 }
 
 func (s *store) GetAny(for_id int64) (user *models.User, err error) {
-	user = new(models.User)
-	err = s.usersCollection.FindOne(context.TODO(), justOne).Decode(user)
+	users, err := s.GetBunch(1)
 	if err != nil {
-		return nil, err
+		return
 	}
+	user = users[0]
 	return
 }
 
-func (s *store) GetBunch() (ret []*models.User, err error) {
-	cur, err := s.usersCollection.Find(context.TODO(), many)
+func (s *store) GetBunch(n int) (ret []*models.User, err error) {
+	many = []bson.D{bson.D{{"$sample", bson.D{{"size", n}}}}}
+	cur, err := s.usersCollection.Aggregate(context.TODO(), many)
 	if err != nil {
 		return
 	}

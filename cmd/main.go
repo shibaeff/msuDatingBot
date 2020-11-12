@@ -57,7 +57,7 @@ func main() {
 	u.Timeout = 60
 
 	updates, err := api.GetUpdatesChan(u)
-	Bot := bot.NewBot(store)
+	Bot := bot.NewBot(store, api)
 	for update := range updates {
 		if update.Message == nil { // ignore any non-Message Updates
 			continue
@@ -66,15 +66,23 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
-		//buttons := []tgbotapi.KeyboardButton{tgbotapi.KeyboardButton{Text: "Hello",},}
-		//msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-		//msg.ReplyToMessageID = update.Message.MessageID
-		//msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(buttons)
-		reply.ChatID = update.Message.Chat.ID
-		_, err = api.Send(reply)
-		if err != nil {
-			log.Fatal(err)
+		switch v := reply.(type) {
+		case *tgbotapi.MessageConfig:
+			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+			//buttons := []tgbotapi.KeyboardButton{tgbotapi.KeyboardButton{Text: "Hello",},}
+			//msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+			//msg.ReplyToMessageID = update.Message.MessageID
+			//msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(buttons)
+			v.ChatID = update.Message.Chat.ID
+			_, err = api.Send(v)
+			if err != nil {
+				log.Fatal(err)
+			}
+		case *tgbotapi.PhotoConfig:
+			_, err = api.Send(v)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 		client.Ping(context.TODO(), nil)
 	}
