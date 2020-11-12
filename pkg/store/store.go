@@ -28,6 +28,7 @@ type Store interface {
 	GetBunch(n int) (ret []*models.User, err error)
 	GetMatchesRegistry() Registry
 	UpdUserField(id int64, field string, value interface{}) (err error)
+	DeleteFromRegistires(id int64) error
 }
 
 type store struct {
@@ -114,6 +115,13 @@ func (s *store) GetBunch(n int) (ret []*models.User, err error) {
 
 func (s *store) GetMatchesRegistry() Registry {
 	return s.matchesRegistry
+}
+
+func (s *store) DeleteFromRegistires(id int64) (err error) {
+	s.matchesRegistry.DeleteItem(id)
+	s.likesRegistry.DeleteItem(id)
+	s.seenRegistry.DeleteItem(id)
+	return nil
 }
 
 func NewStore(users *mongo.Collection, registries []*mongo.Collection) Store {

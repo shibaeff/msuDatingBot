@@ -21,6 +21,7 @@ const (
 	helpCommand      = "/help"
 	likeCommand      = "/like"
 	matchesCommand   = "/matches"
+	resetCommand     = "/reset"
 
 	greetMsg          = "Добро пожаловать в бота знакомств. Начните с /register."
 	notUnderstood     = "Пожалуйста, выберите действие из меню"
@@ -156,6 +157,9 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			matches, _ := b.prepareMatches(user.Id)
 			reply = replyWithText(matches)
 			return
+		case resetCommand:
+			b.store.DeleteFromRegistires(user.Id)
+			reply = replyWithText("Ваши оценки сброшены!")
 		}
 	}
 	reply = replyWithText(notUnderstood)
