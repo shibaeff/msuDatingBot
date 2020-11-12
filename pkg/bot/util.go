@@ -3,10 +3,15 @@ package bot
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
 	"echoBot/pkg/models"
+)
+
+const (
+	numOfMatches = 5
 )
 
 func (b *bot) parseLikee(message *tgbotapi.Message) (id int64, err error) {
@@ -21,10 +26,26 @@ func (b *bot) parseLikee(message *tgbotapi.Message) (id int64, err error) {
 	return
 }
 
-// TODO
-//func (b *bot) prepareMatches(userId int64) (err error) {
-//
-//}
+func (b *bot) prepareMatches(userId int64) (resp string, err error) {
+	entry, err := b.store.GetMatchesRegistry().GetList(userId)
+	if err != nil {
+		return "Матчей нет", nil
+	}
+	matches := entry.Whome
+	if len(matches) == 0 {
+		return "Матчей нет", nil
+	}
+	raw := []string{}
+	for _, match := range matches {
+		user, err := b.store.GetUser(match)
+		if err != nil {
+			continue
+		}
+		raw = append(raw, fmt.Sprintf("@%s\n", user.UserName))
+	}
+	resp = matchesList + strings.Join(raw, "")
+	return
+}
 
 func replyWithText(text string) (ret *tgbotapi.MessageConfig) {
 	ret = &tgbotapi.MessageConfig{

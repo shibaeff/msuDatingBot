@@ -1,6 +1,8 @@
 package controllers
 
-import "strings"
+import (
+	"strings"
+)
 
 type GenderController struct {
 }
@@ -23,7 +25,7 @@ type PhotoController struct {
 }
 
 func (p *PhotoController) Verify(data interface{}) (string, error) {
-	if data == nil {
+	if data.(bool) {
 		return PhotoErrorResp, PhotoError
 	}
 	return "", nil
