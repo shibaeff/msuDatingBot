@@ -11,6 +11,7 @@ import (
 type Registry interface {
 	AddToList(who, whome int64) error
 	GetList(whose int64) (*Entry, error)
+	DeleteItem(int642 int64) error
 }
 
 type registry struct {
@@ -52,6 +53,12 @@ func (r *registry) GetList(whose int64) (item *Entry, err error) {
 		return nil, err
 	}
 	return
+}
+
+func (r *registry) DeleteItem(whose int64) (err error) {
+	filter := bson.D{{"who", whose}}
+	_, err = r.collection.DeleteOne(context.TODO(), filter)
+	return err
 }
 
 func NewRegistry(collection *mongo.Collection) Registry {

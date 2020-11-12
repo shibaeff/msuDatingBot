@@ -14,7 +14,8 @@ const (
 	whomeID        = 2
 	anotherWhome   = 3
 
-	simpleTest = "simple test success"
+	simpleTest       = "simple test success"
+	simpleDeleteTest = "simple delete test"
 )
 
 func Test_registry_AddToList(t *testing.T) {
@@ -54,5 +55,23 @@ func Test_registry_AddToList(t *testing.T) {
 		deleteRes, err := st.(*registry).collection.DeleteOne(context.TODO(), filter)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(1), deleteRes.DeletedCount)
+	})
+}
+
+func TestRegistry_DeleteItem(t *testing.T) {
+	collection, _ := prepareCollection(collectionName)
+	reg := NewRegistry(collection)
+	t.Run(simpleDeleteTest, func(t *testing.T) {
+		err := reg.AddToList(1, 2)
+		assert.NoError(t, err)
+		entry, err := reg.GetList(1)
+		assert.NoError(t, err)
+		assert.Equal(t, 1, int(entry.Who))
+		assert.Equal(t, 2, int(entry.Whome[0]))
+		err = reg.DeleteItem(1)
+		assert.NoError(t, err)
+		entry, err = reg.GetList(1)
+		assert.Error(t, err)
+		assert.Nil(t, entry)
 	})
 }
