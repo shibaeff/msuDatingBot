@@ -23,10 +23,7 @@ const (
 	alreadyRegistered = "Вы уже зарегистрированы!"
 	notRegistered     = "Вы не зарегистрированы!"
 
-	helpMsg = "Бот знакомств поможет Вам найти интересных людей. \n " +
-		"/register - регистрация\n" +
-		"/next - получить следующее предложение\n" +
-		"/users - вывести список активных пользователей \n"
+	helpMsg = "🔍 Поиск:\n• /next — просмотреть следующую анкету\n• /matches — взаимные лайки\n• /info — посмотреть информацию\n\n📋 Профиль:\n• /profile — посмотреть как выглядит ваш профиль\n• /register — пройти регистрацию заново \n• /photo — обновить фото \n• /faculty — обновить факультет\n• /about — обновить описание \n• /settings — прочие настройки профиля\n\n⚙️ Прочие команды:\n• /start — общее описание бота\n• /help — вызов этого сообщения\n• /cancel — отмена текущей операции\n• /reset — сбросить все свои оценки (аккуратно!)"
 )
 
 var (
@@ -81,18 +78,17 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 				return
 			}
 			reply = b.registerFlow(user, message)
-			// RegisterStatus[message.Chat.ID] = 1
 			return
 		case nextCommand:
 			if user.RegiStep < regOver {
 				reply = replyWithText(notRegistered)
 				return
 			}
-			user, err = b.store.GetAny(user.Id)
-			if err != nil {
+			newuser, e := b.store.GetAny(user.Id)
+			if e != nil {
 				return
 			}
-			reply = replyWithPhoto(user)
+			reply = replyWithPhoto(newuser, message.Chat.ID)
 			return
 		case usersCommand:
 			if user.RegiStep < regOver {
@@ -132,12 +128,17 @@ func replyWithText(text string) (ret *tgbotapi.MessageConfig) {
 	return
 }
 
-func replyWithPhoto(u *models.User) (ret *tgbotapi.PhotoConfig) {
-	//ret = &tgbotapi.PhotoConfig{
-	//
-	//	},
-	//	Caption: u.String(),
-	//}
+func replyWithPhoto(u *models.User, to int64) (ret *tgbotapi.PhotoConfig) {
+	ret = &tgbotapi.PhotoConfig{
+		BaseFile: tgbotapi.BaseFile{
+			BaseChat: tgbotapi.BaseChat{
+				ChatID: to,
+			},
+			UseExisting: true,
+			FileID:      u.PhotoLink,
+		},
+		Caption: u.String(),
+	}
 	return
 }
 

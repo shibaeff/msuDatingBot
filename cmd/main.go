@@ -80,6 +80,7 @@ func main() {
 			}
 		case *tgbotapi.PhotoConfig:
 			_, err = api.Send(v)
+
 			if err != nil {
 				log.Fatal(err)
 			}
