@@ -27,6 +27,8 @@ const (
 	profileCommand  = "/profile"
 	photoCommand    = "/photo"
 	startCommand    = "/start"
+	cancelCommand   = "/cancel"
+	facultyCommand  = "/faculty"
 
 	greetMsg          = "Добро пожаловать в бота знакомств. Начните с /register."
 	notUnderstood     = "Пожалуйста, выберите действие из меню"
@@ -74,11 +76,31 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 		return
 	}
 	if user.RegiStep != waiting && user.RegiStep < regOver {
+		if message.Text == cancelCommand {
+			if user.RegiStep != regPhoto {
+				b.store.DeleteUser(user.Id)
+				reply = replyWithText("Откат регистрации")
+				return
+			} else {
+				b.store.UpdUserField(user.Id, "registep", regOver)
+				reply = replyWithText("Откатываемся к старой информации")
+				return
+			}
+		}
 		reply = b.registerFlow(user, message)
 		return
 	}
-	if message.IsCommand() {
-		switch message.Text {
+	if message.Text[0] == '/' {
+		switch strings.Split(message.Text, " ")[0] {
+		case facultyCommand:
+			faculty := strings.Split(message.Text, " ")[1]
+			err = b.store.UpdUserField(user.Id, "faculty", faculty)
+			if err != nil {
+				reply = replyWithText("Ошибка обновления!")
+				return
+			}
+			reply = replyWithText(fmt.Sprintf("Обновили факультет на %s", faculty))
+			return
 		case startCommand:
 			reply = replyWithText(greetMsg)
 			return
