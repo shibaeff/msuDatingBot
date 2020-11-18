@@ -33,6 +33,7 @@ const (
 	facultyCommand  = "/faculty"
 	aboutCommand    = "/about"
 	dumpCommand     = "/dump"
+	notifyAll       = "/notifyAll"
 
 	greetMsg          = "Добро пожаловать в бота знакомств. Начните с /register."
 	notUnderstood     = "Пожалуйста, выберите действие из меню"
@@ -98,6 +99,8 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 	if message.Text[0] == '/' {
 		split := strings.Split(message.Text, " ")
 		switch split[0] {
+		case notifyAll:
+
 		case dumpCommand:
 			offset, e := strconv.Atoi(split[1])
 			if e != nil {

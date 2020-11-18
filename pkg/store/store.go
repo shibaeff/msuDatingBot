@@ -29,6 +29,7 @@ type Store interface {
 	GetMatchesRegistry() Registry
 	UpdUserField(id int64, field string, value interface{}) (err error)
 	DeleteFromRegistires(id int64) error
+	GetAllUsers() (ret []*models.User, err error)
 }
 
 type store struct {
@@ -94,6 +95,22 @@ func (s *store) GetAny(for_id int64) (user *models.User, err error) {
 		return
 	}
 	user = users[0]
+	return
+}
+
+func (s *store) GetAllUsers() (ret []*models.User, err error) {
+	empty := bson.D{}
+	cur, err := s.usersCollection.Find(context.TODO(), empty)
+	if err != nil {
+		return
+	}
+	for cur.Next(context.TODO()) {
+		user := new(models.User)
+		if err = cur.Decode(user); err != nil {
+			return nil, err
+		}
+		ret = append(ret, user)
+	}
 	return
 }
 

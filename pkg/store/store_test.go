@@ -24,6 +24,7 @@ const (
 	noUsersGetAny   = "successful get any test when there are no users"
 	oneUserGetAny   = "successful test with only one user"
 	manyUsersGetAny = "successful test with two and more users"
+	getAllUsersTest = "successful get all the users"
 )
 
 var (
@@ -153,6 +154,23 @@ func Test_store_GetAny(t *testing.T) {
 		assert.Error(t, err)
 		err = store.DeleteUser(pasha.Id)
 		assert.NoError(t, err)
+	})
+}
+
+func Test_store_GetAll(t *testing.T) {
+	usersCollection, _ := prepareCollection(usersCollectionName)
+	store := NewStore(usersCollection, []*mongo.Collection{nil, nil, nil})
+
+	t.Run(getAllUsersTest, func(t *testing.T) {
+		err := store.PutUser(&pasha)
+		assert.NoError(t, err)
+		err = store.PutUser(&ksyusha)
+		assert.NoError(t, err)
+		users, err := store.GetAllUsers()
+		assert.NoError(t, err)
+		assert.Equal(t, 2, len(users))
+		store.DeleteUser(pasha.Id)
+		store.DeleteUser(ksyusha.Id)
 	})
 }
 
