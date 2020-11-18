@@ -26,6 +26,7 @@ const (
 	resetCommand    = "/reset"
 	profileCommand  = "/profile"
 	photoCommand    = "/photo"
+	startCommand    = "/start"
 
 	greetMsg          = "Добро пожаловать в бота знакомств. Начните с /register."
 	notUnderstood     = "Пожалуйста, выберите действие из меню"
@@ -78,6 +79,9 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 	}
 	if message.IsCommand() {
 		switch message.Text {
+		case startCommand:
+			reply = replyWithText(greetMsg)
+			return
 		case helpCommand:
 			reply = replyWithText(helpMsg)
 			return
