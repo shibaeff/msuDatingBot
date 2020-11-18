@@ -15,13 +15,17 @@ import (
 const (
 	waiting          = -1
 	defaultBunchSize = 5
-	registerCommand  = "/register"
-	nextCommand      = "/next"
-	usersCommand     = "/users"
-	helpCommand      = "/help"
-	likeCommand      = "/like"
-	matchesCommand   = "/matches"
-	resetCommand     = "/reset"
+	noPhoto          = "none"
+
+	registerCommand = "/register"
+	nextCommand     = "/next"
+	usersCommand    = "/users"
+	helpCommand     = "/help"
+	likeCommand     = "/like"
+	matchesCommand  = "/matches"
+	resetCommand    = "/reset"
+	profileCommand  = "/profile"
+	photoCommand    = "/photo"
 
 	greetMsg          = "Добро пожаловать в бота знакомств. Начните с /register."
 	notUnderstood     = "Пожалуйста, выберите действие из меню"
@@ -160,6 +164,23 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 		case resetCommand:
 			b.store.DeleteFromRegistires(user.Id)
 			reply = replyWithText("Ваши оценки сброшены!")
+			return
+		case profileCommand:
+			reply = replyWithText(user.String())
+			return
+		case photoCommand:
+			err = b.store.UpdUserField(user.Id, "photolink", noPhoto)
+			if err != nil {
+				reply = replyWithText("Ошибка обновления фото")
+				return
+			}
+			err = b.store.UpdUserField(user.Id, "registep", regPhoto)
+			if err != nil {
+				reply = replyWithText("Ошибка обновления фото")
+				return
+			}
+			reply = replyWithText("Ждем ваше фото!")
+			return
 		}
 	}
 	reply = replyWithText(notUnderstood)
