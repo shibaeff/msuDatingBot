@@ -1,8 +1,11 @@
 package bot
 
 import (
+	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -10,6 +13,32 @@ import (
 	"echoBot/pkg/models"
 )
 
+func (b *bot) grabLogs(offset int) (str string, err error) {
+	var (
+		part   []byte
+		prefix bool
+	)
+	var txtlines []string
+	reader := bufio.NewReader(b.logFile)
+	buffer := bytes.NewBuffer(make([]byte, 1024))
+	for {
+		if part, prefix, err = reader.ReadLine(); err != nil {
+			break
+		}
+		buffer.Write(part)
+		if !prefix {
+			txtlines = append(txtlines, buffer.String())
+			buffer.Reset()
+		}
+	}
+	b.logFile.Seek(0, os.SEEK_SET)
+	if len(txtlines) < offset {
+		return "", errors.New("Неправильный оффсет")
+	}
+	err = nil
+	str = strings.Join(txtlines[len(txtlines)-offset:], "")
+	return
+}
 func (b *bot) parseLikee(message *tgbotapi.Message) (id int64, err error) {
 	if message.ReplyToMessage == nil {
 		return -1, errors.New("nothing to reply to")

@@ -65,6 +65,8 @@ func main() {
 	}
 
 	logFile, err := os.OpenFile("log.txt", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+	readFile, err := os.OpenFile("log.txt", os.O_RDONLY, 0666)
+	defer readFile.Close()
 	if err != nil {
 		panic(err)
 	}
@@ -79,7 +81,8 @@ func main() {
 	u.Timeout = 60
 
 	updates, err := api.GetUpdatesChan(u)
-	Bot := bot.NewBot(store, api)
+	Bot := bot.NewBot(store, api, readFile)
+	defer logFile.Close()
 	for update := range updates {
 		if update.Message == nil { // ignore any non-Message Updates
 			continue
