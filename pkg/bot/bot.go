@@ -64,8 +64,6 @@ type bot struct {
 	adminsList       []string
 }
 
-// var Users = make(map[int64]bool)
-
 func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 	user, err := b.store.GetUser(message.Chat.ID)
 	if err != nil {
@@ -113,13 +111,15 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 				reply = replyWithText(notAdmin)
 				return
 			}
-			offset, e := strconv.Atoi(split[1])
-			if e != nil {
+			offset, err := strconv.Atoi(split[1])
+			if err != nil {
+				err = nil
 				reply = replyWithText("Неправильный оффсет")
 				return
 			}
-			logs, e := b.grabLogs(offset)
-			if e != nil {
+			logs, err := b.grabLogs(offset)
+			if err != nil {
+				err = nil
 				reply = replyWithText("Неправильный оффсет")
 				return
 			}
@@ -161,13 +161,13 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 				reply = replyWithText(notRegistered)
 				return
 			}
-			newuser, e := b.store.GetAny(user.Id)
-			if e != nil {
+			newuser, err := b.store.GetAny(user.Id)
+			if err != nil {
 				reply = replyWithText("Не можем подобрать вариант")
 				return
 			}
-			e = b.store.PutSeen(user.Id, newuser.Id)
-			if e != nil {
+			err = b.store.PutSeen(user.Id, newuser.Id)
+			if err != nil {
 				reply = replyWithText("Не можем подобрать вариант")
 				return
 			}
@@ -186,19 +186,19 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 				return
 			}
 			reply = replyWithText("Успешный лайк!")
-			likee_entry, e := b.store.GetLikes(likee)
-			if e == nil {
+			likee_entry, err := b.store.GetLikes(likee)
+			if err == nil {
 				likee_likes := likee_entry.Whome
 				_, ok1 := find(likee_likes, user.Id)
 				if ok1 {
-					user_entry, e := b.store.GetLikes(user.Id)
-					if e != nil {
+					user_entry, err := b.store.GetLikes(user.Id)
+					if err != nil {
 						return
 					}
 					_, ok1 = find(user_entry.Whome, likee)
 					if ok1 {
-						likee_user, e := b.store.GetUser(likee)
-						if e != nil {
+						likee_user, err := b.store.GetUser(likee)
+						if err != nil {
 							reply = replyWithText("Такого пользователя уже нет")
 						}
 						reply = replyWithText(fmt.Sprintf(matchMsg, likee_user.UserName))
