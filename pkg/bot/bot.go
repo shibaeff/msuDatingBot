@@ -12,12 +12,15 @@ import (
 	"echoBot/pkg/bot/controllers"
 	"echoBot/pkg/models"
 	"echoBot/pkg/store"
+	"echoBot/pkg/timelogger"
 )
 
 const (
 	waiting          = -1
 	defaultBunchSize = 5
 	noPhoto          = "none"
+
+	timeLoggingFileName = "time.csv"
 
 	registerCommand = "/register"
 	nextCommand     = "/next"
@@ -61,6 +64,7 @@ type bot struct {
 	genderController controllers.Controller
 	photoController  controllers.Controller
 	logFile          *os.File
+	timeloggers      map[string]timelogger.TimeLogger
 	adminsList       []string
 }
 
@@ -144,7 +148,9 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			reply = replyWithText(fmt.Sprintf("Обновили факультет на %s", faculty))
 			return
 		case startCommand:
+			b.timeloggers[startCommand].Start()
 			reply = replyWithText(greetMsg)
+			b.timeloggers[startCommand].End()
 			return
 		case helpCommand:
 			reply = replyWithText(helpMsg)
@@ -268,6 +274,11 @@ func (b *bot) listUsers() (str string, err error) {
 	return strings.Join(raw, "\n"), nil
 }
 
+func (b *bot) setTimeLoggers() {
+	b.timeloggers = make(map[string]timelogger.TimeLogger)
+	b.timeloggers[startCommand] = timelogger.NewTimeLogger(startCommand, timeLoggingFileName)
+}
+
 func NewBot(store store.Store, api *tgbotapi.BotAPI, logFile *os.File, admins []string) (b Bot) {
 	b = &bot{
 		store:            store,
@@ -277,5 +288,6 @@ func NewBot(store store.Store, api *tgbotapi.BotAPI, logFile *os.File, admins []
 		logFile:          logFile,
 		adminsList:       admins,
 	}
+	b.(*bot).setTimeLoggers()
 	return b
 }
