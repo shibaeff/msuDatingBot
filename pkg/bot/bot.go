@@ -29,6 +29,7 @@ const (
 	startCommand    = "/start"
 	cancelCommand   = "/cancel"
 	facultyCommand  = "/faculty"
+	aboutCommand    = "/about"
 
 	greetMsg          = "Добро пожаловать в бота знакомств. Начните с /register."
 	notUnderstood     = "Пожалуйста, выберите действие из меню"
@@ -92,6 +93,15 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 	}
 	if message.Text[0] == '/' {
 		switch strings.Split(message.Text, " ")[0] {
+		case aboutCommand:
+			about := strings.Split(message.Text, " ")[1]
+			err = b.store.UpdUserField(user.Id, "about", about)
+			if err != nil {
+				reply = replyWithText("Ошибка обновления!")
+				return
+			}
+			reply = replyWithText(fmt.Sprintf("Обновили информацию на %s", about))
+			return
 		case facultyCommand:
 			faculty := strings.Split(message.Text, " ")[1]
 			err = b.store.UpdUserField(user.Id, "faculty", faculty)
