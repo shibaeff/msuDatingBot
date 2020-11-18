@@ -13,6 +13,27 @@ import (
 	"echoBot/pkg/models"
 )
 
+func (b *bot) notifyUsers(message string) (list []*tgbotapi.MessageConfig, err error) {
+	users, err := b.store.GetAllUsers()
+	if err != nil {
+		return
+	}
+	for _, user := range users {
+		res := replyWithText(message)
+		res.ChatID = user.Id
+		list = append(list, res)
+	}
+	return
+}
+
+func (b *bot) ensureAdmin(userName string) bool {
+	for _, item := range b.adminsList {
+		if item == userName {
+			return true
+		}
+	}
+	return false
+}
 func (b *bot) grabLogs(offset int) (str string, err error) {
 	var (
 		part   []byte
@@ -39,6 +60,7 @@ func (b *bot) grabLogs(offset int) (str string, err error) {
 	str = strings.Join(txtlines[len(txtlines)-offset:], "")
 	return
 }
+
 func (b *bot) parseLikee(message *tgbotapi.Message) (id int64, err error) {
 	if message.ReplyToMessage == nil {
 		return -1, errors.New("nothing to reply to")

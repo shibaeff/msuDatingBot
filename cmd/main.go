@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/joho/godotenv"
@@ -81,7 +82,12 @@ func main() {
 	u.Timeout = 60
 
 	updates, err := api.GetUpdatesChan(u)
-	Bot := bot.NewBot(store, api, readFile)
+	admins, ok := os.LookupEnv("ADMINS")
+	if !ok {
+		log.Fatal("cannot load admins")
+	}
+	admins_list := strings.Split(admins, " ")
+	Bot := bot.NewBot(store, api, readFile, admins_list)
 	defer logFile.Close()
 	for update := range updates {
 		if update.Message == nil { // ignore any non-Message Updates
@@ -108,6 +114,14 @@ func main() {
 
 			if err != nil {
 				log.Fatal(err)
+			}
+		case []*tgbotapi.MessageConfig:
+			for _, item := range v {
+				// item.ChatID = update.Message.Chat.ID
+				_, err = api.Send(item)
+				if err != nil {
+					log.Fatal(err)
+				}
 			}
 		}
 		client.Ping(context.TODO(), nil)

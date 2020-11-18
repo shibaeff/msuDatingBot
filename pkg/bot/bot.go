@@ -33,12 +33,13 @@ const (
 	facultyCommand  = "/faculty"
 	aboutCommand    = "/about"
 	dumpCommand     = "/dump"
-	notifyAll       = "/notifyAll"
+	notifyAll       = "/notify"
 
 	greetMsg          = "Добро пожаловать в бота знакомств. Начните с /register."
 	notUnderstood     = "Пожалуйста, выберите действие из меню"
 	alreadyRegistered = "Вы уже зарегистрированы!"
 	notRegistered     = "Вы не зарегистрированы!"
+	notAdmin          = "Вы не админ"
 )
 
 var (
@@ -60,6 +61,7 @@ type bot struct {
 	genderController controllers.Controller
 	photoController  controllers.Controller
 	logFile          *os.File
+	adminsList       []string
 }
 
 // var Users = make(map[int64]bool)
@@ -100,8 +102,17 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 		split := strings.Split(message.Text, " ")
 		switch split[0] {
 		case notifyAll:
-
+			if !b.ensureAdmin(user.UserName) {
+				reply = replyWithText(notAdmin)
+				return
+			}
+			reply, _ = b.notifyUsers(split[1])
+			return
 		case dumpCommand:
+			if !b.ensureAdmin(user.UserName) {
+				reply = replyWithText(notAdmin)
+				return
+			}
 			offset, e := strconv.Atoi(split[1])
 			if e != nil {
 				reply = replyWithText("Неправильный оффсет")
@@ -257,13 +268,14 @@ func (b *bot) listUsers() (str string, err error) {
 	return strings.Join(raw, "\n"), nil
 }
 
-func NewBot(store store.Store, api *tgbotapi.BotAPI, logFile *os.File) (b Bot) {
+func NewBot(store store.Store, api *tgbotapi.BotAPI, logFile *os.File, admins []string) (b Bot) {
 	b = &bot{
 		store:            store,
 		api:              api,
 		genderController: &controllers.GenderController{},
 		photoController:  &controllers.PhotoController{},
 		logFile:          logFile,
+		adminsList:       admins,
 	}
 	return b
 }
