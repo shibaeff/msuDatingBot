@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
@@ -27,6 +28,13 @@ var (
 func PrepareCollection(client *mongo.Client, name string) (conn *mongo.Collection) {
 	conn = client.Database(dbName).Collection(name)
 	return
+}
+
+func init() {
+	// loads values from .env into the system
+	if err := godotenv.Load(); err != nil {
+		log.Print("No .env file found")
+	}
 }
 
 func main() {

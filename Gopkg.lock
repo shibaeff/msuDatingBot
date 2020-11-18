@@ -34,6 +34,14 @@
   revision = "674baa8c7fc30da5df3074a459494a7e6b427dff"
 
 [[projects]]
+  digest = "1:ecd9aa82687cf31d1585d4ac61d0ba180e42e8a6182b85bd785fcca8dfeefc1b"
+  name = "github.com/joho/godotenv"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "23d116af351c84513e1946b527c88823e476be13"
+  version = "v1.3.0"
+
+[[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
@@ -156,6 +164,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/go-telegram-bot-api/telegram-bot-api",
+    "github.com/joho/godotenv",
     "github.com/stretchr/testify/assert",
     "go.mongodb.org/mongo-driver/bson",
     "go.mongodb.org/mongo-driver/mongo",
