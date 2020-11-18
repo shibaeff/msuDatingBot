@@ -111,20 +111,20 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 				reply = replyWithText(notAdmin)
 				return
 			}
-			offset, err := strconv.Atoi(split[1])
+			var offset, err = strconv.Atoi(split[1])
 			if err != nil {
 				err = nil
 				reply = replyWithText("Неправильный оффсет")
-				return
+				return reply, nil
 			}
 			logs, err := b.grabLogs(offset)
 			if err != nil {
 				err = nil
 				reply = replyWithText("Неправильный оффсет")
-				return
+				return reply, nil
 			}
 			reply = replyWithText(logs)
-			return
+			return reply, nil
 		case aboutCommand:
 			about := strings.Split(message.Text, " ")[1]
 			err = b.store.UpdUserField(user.Id, "about", about)
@@ -164,15 +164,15 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			newuser, err := b.store.GetAny(user.Id)
 			if err != nil {
 				reply = replyWithText("Не можем подобрать вариант")
-				return
+				return reply, nil
 			}
 			err = b.store.PutSeen(user.Id, newuser.Id)
 			if err != nil {
 				reply = replyWithText("Не можем подобрать вариант")
-				return
+				return reply, nil
 			}
 			reply = replyWithPhoto(newuser, message.Chat.ID)
-			return
+			return reply, nil
 		case likeCommand:
 			entry, e := b.store.GetSeen(user.Id)
 			if e != nil {
@@ -193,7 +193,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 				if ok1 {
 					user_entry, err := b.store.GetLikes(user.Id)
 					if err != nil {
-						return
+						return reply, nil
 					}
 					_, ok1 = find(user_entry.Whome, likee)
 					if ok1 {
@@ -204,16 +204,16 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 						reply = replyWithText(fmt.Sprintf(matchMsg, likee_user.UserName))
 						e = b.store.GetMatchesRegistry().AddToList(user.Id, likee_user.Id)
 						e = b.store.GetMatchesRegistry().AddToList(likee_user.Id, user.Id)
-						return
+						return reply, nil
 					} else {
-						return
+						return reply, nil
 					}
 				} else {
-					return
+					return reply, nil
 				}
 
 			}
-			return
+			return reply, nil
 		case usersCommand:
 			if user.RegiStep < regOver {
 				reply = replyWithText(notRegistered)
