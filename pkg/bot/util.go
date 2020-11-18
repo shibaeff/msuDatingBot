@@ -10,10 +10,6 @@ import (
 	"echoBot/pkg/models"
 )
 
-const (
-	numOfMatches = 5
-)
-
 func (b *bot) parseLikee(message *tgbotapi.Message) (id int64, err error) {
 	if message.ReplyToMessage == nil {
 		return -1, errors.New("nothing to reply to")
