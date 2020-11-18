@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/joho/godotenv"
@@ -53,7 +54,11 @@ func main() {
 	matches := PrepareCollection(client, matches)
 	store := store.NewStore(users, []*mongo.Collection{likes, seen, matches})
 
-	api, err := tgbotapi.NewBotAPI("1327834524:AAFSH9KVrRiowoqo8uCGdm5EfBIk9Hdxurs")
+	token, exists := os.LookupEnv("TELEGRAM_TOKEN")
+	if !exists {
+		log.Panic("Not telegram key specified!")
+	}
+	api, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		log.Panic(err)
 	}
