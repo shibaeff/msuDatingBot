@@ -107,20 +107,20 @@ func main() {
 			v.ChatID = update.Message.Chat.ID
 			_, err = api.Send(v)
 			if err != nil {
-				log.Fatal(err)
+				log.Println(err)
 			}
 		case *tgbotapi.PhotoConfig:
 			_, err = api.Send(v)
 
 			if err != nil {
-				log.Fatal(err)
+				log.Println(err)
 			}
 		case []*tgbotapi.MessageConfig:
 			for _, item := range v {
 				// item.ChatID = update.Message.Chat.ID
 				_, err = api.Send(item)
 				if err != nil {
-					log.Fatal(err)
+					log.Println(err)
 				}
 			}
 		}

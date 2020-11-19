@@ -279,6 +279,7 @@ func (b *bot) setTimeLoggers() {
 	b.timeloggers[startCommand] = timelogger.NewTimeLogger(startCommand, timeLoggingFileName)
 }
 
+// TODO handle
 func NewBot(store store.Store, api *tgbotapi.BotAPI, logFile *os.File, admins []string) (b Bot) {
 	b = &bot{
 		store:            store,

@@ -57,7 +57,7 @@ func (b *bot) grabLogs(offset int) (str string, err error) {
 		return "", errors.New("Неправильный оффсет")
 	}
 	err = nil
-	str = strings.Join(txtlines[len(txtlines)-offset:], "")
+	str = strings.Join(txtlines[len(txtlines)-offset:], "\n")
 	return
 }
 
