@@ -31,6 +31,7 @@ type Store interface {
 	UpdUserField(id int64, field string, value interface{}) (err error)
 	DeleteFromRegistires(id int64) error
 	GetAllUsers() (ret []*models.User, err error)
+	GetSeenRegistry() Registry
 }
 
 type store struct {
@@ -150,6 +151,9 @@ func (s *store) DeleteFromRegistires(id int64) (err error) {
 	return nil
 }
 
+func (s *store) GetSeenRegistry() Registry {
+	return s.seenRegistry
+}
 func remove(s []*models.User, i int) []*models.User {
 	s[i] = s[len(s)-1]
 	// We do not need to put s[i] at the end, as it will be discarded anyway

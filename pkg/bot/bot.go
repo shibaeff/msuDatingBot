@@ -43,6 +43,7 @@ const (
 	alreadyRegistered = "Вы уже зарегистрированы!"
 	notRegistered     = "Вы не зарегистрированы!"
 	notAdmin          = "Вы не админ"
+	pleaseSendAgain   = "Пожалуйста, сделайте запрос еще раз"
 )
 
 var (
@@ -171,58 +172,62 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 				reply = replyWithText(notRegistered)
 				return
 			}
-			newuser, err := b.store.GetAny(user.Id)
+			users, err := b.store.GetAllUsers()
 			if err != nil {
-				reply = replyWithText("Не можем подобрать вариант")
-				return reply, nil
-			}
-			err = b.store.PutSeen(user.Id, newuser.Id)
-			if err != nil {
-				reply = replyWithText("Не можем подобрать вариант")
-				return reply, nil
-			}
-			reply = replyWithPhoto(newuser, message.Chat.ID)
-			return reply, nil
-		case likeCommand:
-			entry, e := b.store.GetSeen(user.Id)
-			if e != nil {
-				reply = replyWithText("failed to put your like")
+				reply = replyWithText(pleaseSendAgain)
+				err = nil
 				return
 			}
-			likee := entry.Whome[len(entry.Whome)-1]
-			e = b.store.PutLike(user.Id, likee)
-			if e != nil {
-				reply = replyWithText("failed to put your like")
-				return
-			}
-			reply = replyWithText("Успешный лайк!")
-			likee_entry, err := b.store.GetLikes(likee)
-			if err == nil {
-				likee_likes := likee_entry.Whome
-				_, ok1 := find(likee_likes, user.Id)
-				if ok1 {
-					user_entry, err := b.store.GetLikes(user.Id)
-					if err != nil {
-						return reply, nil
-					}
-					_, ok1 = find(user_entry.Whome, likee)
-					if ok1 {
-						likee_user, err := b.store.GetUser(likee)
-						if err != nil {
-							reply = replyWithText("Такого пользователя уже нет")
-						}
-						reply = replyWithText(fmt.Sprintf(matchMsg, likee_user.UserName))
-						e = b.store.GetMatchesRegistry().AddToList(user.Id, likee_user.Id)
-						e = b.store.GetMatchesRegistry().AddToList(likee_user.Id, user.Id)
-						return reply, nil
-					} else {
-						return reply, nil
-					}
-				} else {
-					return reply, nil
+			for _, cur_user := range users {
+				if !b.store.GetSeenRegistry().IsPresent(user.Id, cur_user.Id) && cur_user.Gender == user.WantGender &&
+					cur_user.WantGender == user.Gender {
+					b.store.PutSeen(user.Id, cur_user.Id)
+					b.store.PutSeen(cur_user.Id, user.Id)
+					reply = replyWithPhoto(cur_user, user.Id)
+					return
 				}
-
 			}
+			reply = replyWithText("Вы просмотрели всех пользователей на данный момент")
+		case likeCommand:
+			// entry, e := b.store.GetSeen(user.Id)
+			//if e != nil {
+			//	reply = replyWithText("failed to put your like")
+			//	return
+			//}
+			//likee := entry.Whome[len(entry.Whome)-1]
+			//e = b.store.PutLike(user.Id, likee)
+			//if e != nil {
+			//	reply = replyWithText("failed to put your like")
+			//	return
+			//}
+			//reply = replyWithText("Успешный лайк!")
+			//likee_entry, err := b.store.GetLikes(likee)
+			//if err == nil {
+			//	likee_likes := likee_entry.Whome
+			//	_, ok1 := find(likee_likes, user.Id)
+			//	if ok1 {
+			//		user_entry, err := b.store.GetLikes(user.Id)
+			//		if err != nil {
+			//			return reply, nil
+			//		}
+			//		_, ok1 = find(user_entry.Whome, likee)
+			//		if ok1 {
+			//			likee_user, err := b.store.GetUser(likee)
+			//			if err != nil {
+			//				reply = replyWithText("Такого пользователя уже нет")
+			//			}
+			//			reply = replyWithText(fmt.Sprintf(matchMsg, likee_user.UserName))
+			//			e = b.store.GetMatchesRegistry().AddToList(user.Id, likee_user.Id)
+			//			e = b.store.GetMatchesRegistry().AddToList(likee_user.Id, user.Id)
+			//			return reply, nil
+			//		} else {
+			//			return reply, nil
+			//		}
+			//	} else {
+			//		return reply, nil
+			//	}
+			//
+			//}
 			return reply, nil
 		case usersCommand:
 			if user.RegiStep < regOver {

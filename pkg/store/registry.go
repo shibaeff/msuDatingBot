@@ -11,6 +11,7 @@ type Registry interface {
 	AddToList(who, whome int64) error
 	GetList(whose int64) ([]Entry, error)
 	DeleteItems(int642 int64) error
+	IsPresent(who int64, whome int64) bool
 }
 
 type registry struct {
@@ -43,6 +44,15 @@ func (r *registry) GetList(whose int64) (items []Entry, err error) {
 		items = append(items, *item)
 	}
 	return
+}
+
+func (r *registry) IsPresent(who int64, whome int64) bool {
+	filter := bson.D{{"who", who}, {"whome", whome}}
+	cur := r.collection.FindOne(context.TODO(), filter)
+	if cur == nil {
+		return false
+	}
+	return true
 }
 
 func (r *registry) DeleteItems(whose int64) (err error) {
