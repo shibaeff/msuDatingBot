@@ -97,6 +97,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+
 		switch v := reply.(type) {
 		case *tgbotapi.MessageConfig:
 			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
@@ -106,6 +107,7 @@ func main() {
 			//msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(buttons)
 			v.ChatID = update.Message.Chat.ID
 			_, err = api.Send(v)
+			v.ParseMode = "markdown"
 			if err != nil {
 				log.Println(err)
 			}

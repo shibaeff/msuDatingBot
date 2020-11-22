@@ -240,7 +240,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			reply = replyWithText("Ваши оценки сброшены!")
 			return
 		case profileCommand:
-			reply = replyWithText(user.String())
+			reply = replyWithPhoto(user, message.Chat.ID)
 			return
 		case photoCommand:
 			err = b.store.UpdUserField(user.Id, "photolink", noPhoto)
