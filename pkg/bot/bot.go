@@ -153,6 +153,10 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			b.timeloggers[startCommand].End()
 			return
 		case helpCommand:
+			if b.ensureAdmin(user.UserName) {
+				reply = replyWithText(helpMsg + adminHelp)
+				return
+			}
 			reply = replyWithText(helpMsg)
 			return
 		case registerCommand:
