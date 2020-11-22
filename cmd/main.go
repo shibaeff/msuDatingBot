@@ -107,13 +107,12 @@ func main() {
 			//msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(buttons)
 			v.ChatID = update.Message.Chat.ID
 			_, err = api.Send(v)
-			v.ParseMode = "markdown"
 			if err != nil {
 				log.Println(err)
 			}
 		case *tgbotapi.PhotoConfig:
+			v.ParseMode = "html"
 			_, err = api.Send(v)
-
 			if err != nil {
 				log.Println(err)
 			}

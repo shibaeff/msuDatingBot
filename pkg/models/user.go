@@ -5,7 +5,13 @@ import (
 )
 
 const (
-	stringify = "*Имя:* %s\n**Факультет:** %s\n**Пол:** %s\n**Пол собеседника:** %s\n**О себе:** %s\nUsername: %s\nID: %d"
+	stringify = "<strong>Имя:</strong> %s\n" +
+		"<strong>Факультет:</strong> %s\n" +
+		"<strong>Пол:</strong> %s\n" +
+		"<strong>Пол собеседника:</strong> %s\n" +
+		"<strong>О себе:</strong> %s\n" +
+		"<strong>Username:</strong> %s\n" +
+		"<strong>ID:</strong> %d"
 )
 
 type User struct {
