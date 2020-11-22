@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"log"
+	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -120,10 +121,15 @@ func Test_store_PutLike(t *testing.T) {
 		err = st.PutLike(whoID, anotherWhome)
 		assert.NoError(t, err)
 		likes, err := st.GetLikes(whoID)
-		assert.NoError(t, err)
-		assert.Equal(t, int64(whoID), likes[0].Who)
-		assert.Equal(t, int64(whomeID), likes[0].Whome)
-		assert.Equal(t, int64(anotherWhome), likes[1].Whome)
+		var ids []int
+		for _, item := range likes {
+			ids = append(ids, int(item.Whome))
+		}
+		sort.Ints(ids)
+		i1 := sort.SearchInts(ids, whomeID)
+		assert.Equal(t, whomeID, ids[i1])
+		i2 := sort.SearchInts(ids, anotherWhome)
+		assert.Equal(t, anotherWhome, ids[i2])
 		filter := bson.D{
 			{
 				"who", whoID,
@@ -137,7 +143,7 @@ func Test_store_PutLike(t *testing.T) {
 
 func Test_store_GetAny(t *testing.T) {
 	usersCollection, _ := prepareCollection(usersCollectionName)
-	store := NewStore(usersCollection, []*mongo.Collection{nil, nil})
+	store := NewStore(usersCollection, []*mongo.Collection{nil, nil, nil})
 
 	t.Run(noUsersGetAny, func(t *testing.T) {
 		_, err := store.GetUser(whoID)
