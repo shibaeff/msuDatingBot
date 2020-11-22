@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"errors"
 	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -90,12 +91,20 @@ func (s *store) GetSeen(whose int64) (seen *Entry, err error) {
 }
 
 func (s *store) GetAny(for_id int64) (user *models.User, err error) {
-	users, err := s.GetBunch(1)
+	users, err := s.GetBunch(5)
+	for i, user := range users {
+		if user.Id == for_id {
+			users = remove(users, i)
+		}
+	}
 	if err != nil {
 		return
 	}
-	user = users[0]
-	return
+	if len(users) > 0 {
+		user = users[0]
+		return
+	}
+	return nil, errors.New("no users")
 }
 
 func (s *store) GetAllUsers() (ret []*models.User, err error) {
@@ -139,6 +148,12 @@ func (s *store) DeleteFromRegistires(id int64) (err error) {
 	s.likesRegistry.DeleteItem(id)
 	s.seenRegistry.DeleteItem(id)
 	return nil
+}
+
+func remove(s []*models.User, i int) []*models.User {
+	s[i] = s[len(s)-1]
+	// We do not need to put s[i] at the end, as it will be discarded anyway
+	return s[:len(s)-1]
 }
 
 func NewStore(users *mongo.Collection, registries []*mongo.Collection) Store {
