@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	stringify = "*Имя* %s\n**Факультет** %s\n**Пол** %s\n**Пол собеседника** %s\n**О себе** %s\nUsername %s\nID %d"
+	stringify = "*Имя:* %s\n**Факультет:** %s\n**Пол:** %s\n**Пол собеседника:** %s\n**О себе:** %s\nUsername: %s\nID: %d"
 )
 
 type User struct {
