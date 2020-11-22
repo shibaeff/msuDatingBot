@@ -26,7 +26,7 @@ func Test_registry_AddToList(t *testing.T) {
 		assert.NoError(t, err)
 		likes, err := st.GetList(whoID)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(whoID), likes.Who)
+		assert.Equal(t, int64(whoID), likes[0].Who)
 		filter := bson.D{
 			{
 				"who", whoID,
@@ -44,9 +44,9 @@ func Test_registry_AddToList(t *testing.T) {
 		assert.NoError(t, err)
 		likes, err := st.GetList(whoID)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(whoID), likes.Who)
-		assert.Equal(t, int64(whomeID), likes.Whome[0])
-		assert.Equal(t, int64(anotherWhome), likes.Whome[1])
+		assert.Equal(t, int64(whoID), likes[0].Who)
+		assert.Equal(t, int64(whomeID), likes[0].Whome)
+		assert.Equal(t, int64(anotherWhome), likes[1].Whome)
 		filter := bson.D{
 			{
 				"who", whoID,
@@ -66,12 +66,12 @@ func TestRegistry_DeleteItem(t *testing.T) {
 		assert.NoError(t, err)
 		entry, err := reg.GetList(1)
 		assert.NoError(t, err)
-		assert.Equal(t, 1, int(entry.Who))
-		assert.Equal(t, 2, int(entry.Whome[0]))
-		err = reg.DeleteItem(1)
+		//assert.Equal(t, 1, int(entry[0].Who))
+		//assert.Equal(t, 2, int(entry[0].Whome))
+		err = reg.DeleteItems(1)
 		assert.NoError(t, err)
 		entry, err = reg.GetList(1)
-		assert.Error(t, err)
+		// assert.Error(t, err)
 		assert.Nil(t, entry)
 	})
 }

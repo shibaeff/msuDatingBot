@@ -103,7 +103,7 @@ func Test_store_PutLike(t *testing.T) {
 		assert.NoError(t, err)
 		likes, err := st.GetLikes(whoID)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(whoID), likes.Who)
+		assert.Equal(t, int64(whoID), likes[0].Who)
 		filter := bson.D{
 			{
 				"who", whoID,
@@ -121,9 +121,9 @@ func Test_store_PutLike(t *testing.T) {
 		assert.NoError(t, err)
 		likes, err := st.GetLikes(whoID)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(whoID), likes.Who)
-		assert.Equal(t, int64(whomeID), likes.Whome[0])
-		assert.Equal(t, int64(anotherWhome), likes.Whome[1])
+		assert.Equal(t, int64(whoID), likes[0].Who)
+		assert.Equal(t, int64(whomeID), likes[0].Whome)
+		assert.Equal(t, int64(anotherWhome), likes[1].Whome)
 		filter := bson.D{
 			{
 				"who", whoID,

@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -10,8 +9,8 @@ import (
 
 type Registry interface {
 	AddToList(who, whome int64) error
-	GetList(whose int64) (*Entry, error)
-	DeleteItem(int642 int64) error
+	GetList(whose int64) ([]Entry, error)
+	DeleteItems(int642 int64) error
 }
 
 type registry struct {
@@ -20,44 +19,35 @@ type registry struct {
 
 type Entry struct {
 	Who   int64
-	Whome []int64
+	Whome int64
 }
 
 func (r *registry) AddToList(who, whome int64) (err error) {
-	filter := bson.D{{"who", who}}
-	change := bson.D{
-		{
-			"$push", bson.D{
-				{"whome", whome},
-			},
-		},
-	}
-	upd, err := r.collection.UpdateOne(context.TODO(), filter, change)
-	log.Printf("Update result %d", upd.ModifiedCount)
-	if err != nil || upd.MatchedCount == 0 {
-		_, err = r.collection.InsertOne(context.TODO(), Entry{
-			Who:   who,
-			Whome: []int64{whome},
-		})
-		return err
-	}
+	entry := Entry{who, whome}
+	_, err = r.collection.InsertOne(context.TODO(), entry)
 	return
 }
 
-func (r *registry) GetList(whose int64) (item *Entry, err error) {
+func (r *registry) GetList(whose int64) (items []Entry, err error) {
 	filter := bson.D{{"who", whose}}
-	res := r.collection.FindOne(context.TODO(), filter)
-	item = new(Entry)
-	err = res.Decode(item)
+	cur, err := r.collection.Find(context.TODO(), filter)
 	if err != nil {
-		return nil, err
+		return
+	}
+	for cur.Next(context.TODO()) {
+		item := new(Entry)
+		err = cur.Decode(item)
+		if err != nil {
+			return nil, err
+		}
+		items = append(items, *item)
 	}
 	return
 }
 
-func (r *registry) DeleteItem(whose int64) (err error) {
+func (r *registry) DeleteItems(whose int64) (err error) {
 	filter := bson.D{{"who", whose}}
-	_, err = r.collection.DeleteOne(context.TODO(), filter)
+	_, err = r.collection.DeleteMany(context.TODO(), filter)
 	return err
 }
 

@@ -22,9 +22,9 @@ type Store interface {
 	DeleteUser(id int64) error
 	// CheckExists() bool
 	PutLike(who int64, whome int64) error
-	GetLikes(whose int64) (*Entry, error)
+	GetLikes(whose int64) ([]Entry, error)
 	PutSeen(who int64, whome int64) error
-	GetSeen(whose int64) (*Entry, error)
+	GetSeen(whose int64) ([]Entry, error)
 	GetAny(for_id int64) (*models.User, error)
 	GetBunch(n int) (ret []*models.User, err error)
 	GetMatchesRegistry() Registry
@@ -75,7 +75,7 @@ func (s *store) PutLike(who, whome int64) (err error) {
 	return
 }
 
-func (s *store) GetLikes(whose int64) (likes *Entry, err error) {
+func (s *store) GetLikes(whose int64) (likes []Entry, err error) {
 	likes, err = s.likesRegistry.GetList(whose)
 	return
 }
@@ -85,7 +85,7 @@ func (s *store) PutSeen(who, whome int64) (err error) {
 	return
 }
 
-func (s *store) GetSeen(whose int64) (seen *Entry, err error) {
+func (s *store) GetSeen(whose int64) (seen []Entry, err error) {
 	seen, err = s.seenRegistry.GetList(whose)
 	return
 }
@@ -144,9 +144,9 @@ func (s *store) GetMatchesRegistry() Registry {
 }
 
 func (s *store) DeleteFromRegistires(id int64) (err error) {
-	s.matchesRegistry.DeleteItem(id)
-	s.likesRegistry.DeleteItem(id)
-	s.seenRegistry.DeleteItem(id)
+	s.matchesRegistry.DeleteItems(id)
+	s.likesRegistry.DeleteItems(id)
+	s.seenRegistry.DeleteItems(id)
 	return nil
 }
 
