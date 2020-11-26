@@ -134,6 +134,7 @@ func (b *bot) registerFlow(user *models.User, message *tgbotapi.Message) (reply 
 		if err := b.updateRegStatus(user.Id, regOver); err != nil {
 			log.Fatal(err)
 		}
+		user.RegiStep = regOver
 		reply = registerStep("Регистрация окончена\n" + user.String())
 	}
 

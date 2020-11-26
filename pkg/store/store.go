@@ -23,21 +23,21 @@ type Store interface {
 	// CheckExists() bool
 	PutLike(who int64, whome int64) error
 	GetLikes(whose int64) ([]Entry, error)
-	PutSeen(who int64, whome int64) error
-	GetSeen(whose int64) ([]Entry, error)
+	PutUnseen(who int64, whome int64) error
+	GetUnseen(whose int64) ([]Entry, error)
 	GetAny(for_id int64) (*models.User, error)
 	GetBunch(n int) (ret []*models.User, err error)
 	GetMatchesRegistry() Registry
 	UpdUserField(id int64, field string, value interface{}) (err error)
 	DeleteFromRegistires(id int64) error
 	GetAllUsers() (ret []*models.User, err error)
-	GetSeenRegistry() Registry
+	GetUnseenRegistry() Registry
 }
 
 type store struct {
 	usersCollection *mongo.Collection
 	likesRegistry   Registry
-	seenRegistry    Registry
+	unseenRegistry  Registry
 	matchesRegistry Registry
 }
 
@@ -81,13 +81,13 @@ func (s *store) GetLikes(whose int64) (likes []Entry, err error) {
 	return
 }
 
-func (s *store) PutSeen(who, whome int64) (err error) {
-	err = s.seenRegistry.AddToList(who, whome)
+func (s *store) PutUnseen(who, whome int64) (err error) {
+	err = s.unseenRegistry.AddToList(who, whome)
 	return
 }
 
-func (s *store) GetSeen(whose int64) (seen []Entry, err error) {
-	seen, err = s.seenRegistry.GetList(whose)
+func (s *store) GetUnseen(whose int64) (seen []Entry, err error) {
+	seen, err = s.unseenRegistry.GetList(whose)
 	return
 }
 
@@ -147,12 +147,12 @@ func (s *store) GetMatchesRegistry() Registry {
 func (s *store) DeleteFromRegistires(id int64) (err error) {
 	s.matchesRegistry.DeleteItems(id)
 	s.likesRegistry.DeleteItems(id)
-	s.seenRegistry.DeleteItems(id)
+	s.unseenRegistry.DeleteItems(id)
 	return nil
 }
 
-func (s *store) GetSeenRegistry() Registry {
-	return s.seenRegistry
+func (s *store) GetUnseenRegistry() Registry {
+	return s.unseenRegistry
 }
 func remove(s []*models.User, i int) []*models.User {
 	s[i] = s[len(s)-1]
@@ -164,7 +164,7 @@ func NewStore(users *mongo.Collection, registries []*mongo.Collection) Store {
 	return &store{
 		usersCollection: users,
 		likesRegistry:   NewRegistry(registries[0]),
-		seenRegistry:    NewRegistry(registries[1]),
+		unseenRegistry:  NewRegistry(registries[1]),
 		matchesRegistry: NewRegistry(registries[2]),
 	}
 }

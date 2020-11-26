@@ -20,7 +20,7 @@ const (
 	dbName              = "main"
 	usersCollectionName = "users"
 	likes               = "likes"
-	seen                = "seen"
+	unseen              = "unseen"
 	matches             = "matches"
 )
 
@@ -52,7 +52,7 @@ func main() {
 
 	users := PrepareCollection(client, usersCollectionName)
 	likes := PrepareCollection(client, likes)
-	seen := PrepareCollection(client, seen)
+	seen := PrepareCollection(client, unseen)
 	matches := PrepareCollection(client, matches)
 	store := store.NewStore(users, []*mongo.Collection{likes, seen, matches})
 

@@ -100,6 +100,15 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			}
 		}
 		reply = b.registerFlow(user, message)
+		if user.RegiStep == regOver {
+			users, _ := b.store.GetAllUsers()
+			for _, cur_user := range users {
+				if b.ensureGender(user, cur_user) {
+					b.store.PutUnseen(user.Id, cur_user.Id)
+					b.store.PutUnseen(cur_user.Id, user.Id)
+				}
+			}
+		}
 		return
 	}
 	if message.Text[0] == '/' {
@@ -172,27 +181,28 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			}
 			reply = b.registerFlow(user, message)
 			return
+		case "/unseen":
+			unseen, _ := b.store.GetUnseen(user.Id)
+			ret := []string{}
+			for _, item := range unseen {
+				ret = append(ret, strconv.Itoa(int(item.Whome)))
+			}
+			reply = replyWithText(strings.Join(ret, " "))
+			return
 		case nextCommand:
 			if user.RegiStep < regOver {
 				reply = replyWithText(notRegistered)
 				return
 			}
-			users, err := b.store.GetAllUsers()
-			if err != nil {
-				reply = replyWithText(pleaseSendAgain)
-				err = nil
+			unseen, e := b.store.GetUnseen(user.Id)
+			if len(unseen) == 0 || e != nil {
+				reply = replyWithText("Вы просмотрели всех пользователей на данный момент")
 				return reply, nil
 			}
-			for _, cur_user := range users {
-				if !b.store.GetSeenRegistry().IsPresent(user.Id, cur_user.Id) {
-					b.store.PutSeen(user.Id, cur_user.Id)
-					b.store.PutSeen(cur_user.Id, user.Id)
-					reply = replyWithPhoto(cur_user, user.Id)
-					return reply, nil
-				}
-			}
-			reply = replyWithText("Вы просмотрели всех пользователей на данный момент")
-			return reply, nil
+			unseen_user, _ := b.store.GetUser(unseen[0].Whome)
+			b.store.GetUnseenRegistry().DeleteItem(user.Id, unseen_user.Id)
+			reply = replyWithCard(unseen_user, user.Id)
+			return
 		case likeCommand:
 			// entry, e := b.store.GetSeen(user.Id)
 			//if e != nil {

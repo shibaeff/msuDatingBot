@@ -10,7 +10,8 @@ import (
 type Registry interface {
 	AddToList(who, whome int64) error
 	GetList(whose int64) ([]Entry, error)
-	DeleteItems(int642 int64) error
+	DeleteItems(int64) error
+	DeleteItem(int64, int64) error
 	IsPresent(who int64, whome int64) bool
 }
 
@@ -57,6 +58,12 @@ func (r *registry) IsPresent(who int64, whome int64) bool {
 
 func (r *registry) DeleteItems(whose int64) (err error) {
 	filter := bson.D{{"who", whose}}
+	_, err = r.collection.DeleteMany(context.TODO(), filter)
+	return err
+}
+
+func (r *registry) DeleteItem(who, whome int64) (err error) {
+	filter := bson.D{{"who", who}, {"whome", whome}}
 	_, err = r.collection.DeleteMany(context.TODO(), filter)
 	return err
 }

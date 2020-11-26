@@ -26,6 +26,10 @@ func (b *bot) notifyUsers(message string) (list []*tgbotapi.MessageConfig, err e
 	return
 }
 
+func (b *bot) ensureGender(u1, u2 *models.User) bool {
+	return u1.Id != u2.Id && u1.Gender == u2.WantGender && u1.WantGender == u2.Gender
+}
+
 func (b *bot) ensureAdmin(userName string) bool {
 	for _, item := range b.adminsList {
 		if item == userName {
