@@ -111,7 +111,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 		}
 		return
 	}
-	if message.Text[0] == '/' {
+	if message.Text[0] == '/' || message.Text == likeEmoji || message.Text == nextEmoji {
 		split := strings.Split(message.Text, " ")
 		switch split[0] {
 		case reregisterCommand:
