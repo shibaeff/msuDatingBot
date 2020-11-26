@@ -10,8 +10,8 @@ const (
 		"<strong>Пол:</strong> %s\n" +
 		"<strong>Пол собеседника:</strong> %s\n" +
 		"<strong>О себе:</strong> %s\n" +
-		"<strong>Username:</strong> %s\n" +
-		"<strong>ID:</strong> %d"
+		"<strong>Username:</strong> %s\n"
+	//"<strong>ID:</strong> %d"
 )
 
 type User struct {
