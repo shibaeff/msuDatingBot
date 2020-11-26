@@ -38,6 +38,7 @@ const (
 	dumpCommand       = "/dump"
 	notifyAll         = "/notify"
 	reregisterCommand = "/reregister"
+	feedbackCommand   = "/feedback"
 
 	greetMsg          = "Добро пожаловать в бота знакомств. Начните с /register."
 	notUnderstood     = "Пожалуйста, выберите действие из меню"
@@ -58,6 +59,7 @@ var (
 
 type Bot interface {
 	Reply(message *tgbotapi.Message) (interface{}, error)
+	GetStore() store.Store
 }
 
 type bot struct {
@@ -68,6 +70,10 @@ type bot struct {
 	logFile          *os.File
 	timeloggers      map[string]timelogger.TimeLogger
 	adminsList       []string
+}
+
+func (b *bot) GetStore() store.Store {
+	return b.store
 }
 
 func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
@@ -125,6 +131,13 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			}
 			reply, _ = b.notifyUsers(split[1])
 			return
+		case feedbackCommand:
+			repl := replyWithText(message.Text)
+			adminmsg := &MessageToAdmin{
+				repl,
+				b.adminsList,
+			}
+			return adminmsg, nil
 		case dumpCommand:
 			if !b.ensureAdmin(user.UserName) {
 				reply = replyWithText(notAdmin)
@@ -244,6 +257,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 
 			}
 			return reply, nil
+
 		case usersCommand:
 			if user.RegiStep < regOver {
 				reply = replyWithText(notRegistered)

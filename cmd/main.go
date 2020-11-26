@@ -126,6 +126,18 @@ func main() {
 					log.Println(err)
 				}
 			}
+		case *bot.MessageToAdmin:
+			config := v.MessageConfig
+			for _, admin := range v.AdminsList {
+				user, err := Bot.GetStore().GetAdmin(admin)
+				if err == nil {
+					config.ChatID = user.Id
+					_, err = api.Send(config)
+					if err != nil {
+						log.Println(err)
+					}
+				}
+			}
 		}
 		client.Ping(context.TODO(), nil)
 	}

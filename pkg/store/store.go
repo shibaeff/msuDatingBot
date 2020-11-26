@@ -34,6 +34,7 @@ type Store interface {
 	GetAllUsers() (ret []*models.User, err error)
 	GetUnseenRegistry() Registry
 	GetSeenRegistry() Registry
+	GetAdmin(username string) (user *models.User, err error)
 }
 
 type store struct {
@@ -51,6 +52,13 @@ func (s *store) PutUser(model *models.User) error {
 
 func (s *store) GetUser(id int64) (user *models.User, err error) {
 	filter := bson.D{{"id", id}}
+	user = new(models.User)
+	err = s.usersCollection.FindOne(context.TODO(), filter).Decode(user)
+	return
+}
+
+func (s *store) GetAdmin(username string) (user *models.User, err error) {
+	filter := bson.D{{"username", username}}
 	user = new(models.User)
 	err = s.usersCollection.FindOne(context.TODO(), filter).Decode(user)
 	return
