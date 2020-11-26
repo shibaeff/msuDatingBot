@@ -52,9 +52,10 @@ func main() {
 
 	users := PrepareCollection(client, usersCollectionName)
 	likes := PrepareCollection(client, likes)
-	seen := PrepareCollection(client, unseen)
+	unseen := PrepareCollection(client, unseen)
 	matches := PrepareCollection(client, matches)
-	store := store.NewStore(users, []*mongo.Collection{likes, seen, matches})
+	seen := PrepareCollection(client, "seen")
+	store := store.NewStore(users, []*mongo.Collection{likes, unseen, matches, seen})
 
 	token, exists := os.LookupEnv("TELEGRAM_TOKEN")
 	if !exists {

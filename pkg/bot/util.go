@@ -11,6 +11,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
 	"echoBot/pkg/models"
+	"echoBot/pkg/store"
 )
 
 func (b *bot) notifyUsers(message string) (list []*tgbotapi.MessageConfig, err error) {
@@ -119,9 +120,9 @@ func replyWithPhoto(u *models.User, to int64) (ret *tgbotapi.PhotoConfig) {
 	return
 }
 
-func find(slice []int64, val int64) (int, bool) {
+func find(slice []store.Entry, val int64) (int, bool) {
 	for i, item := range slice {
-		if item == val {
+		if item.Whome == val {
 			return i, true
 		}
 	}

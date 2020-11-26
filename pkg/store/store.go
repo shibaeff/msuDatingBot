@@ -25,6 +25,7 @@ type Store interface {
 	GetLikes(whose int64) ([]Entry, error)
 	PutUnseen(who int64, whome int64) error
 	GetUnseen(whose int64) ([]Entry, error)
+	GetSeen(whose int64) ([]Entry, error)
 	GetAny(for_id int64) (*models.User, error)
 	GetBunch(n int) (ret []*models.User, err error)
 	GetMatchesRegistry() Registry
@@ -32,6 +33,7 @@ type Store interface {
 	DeleteFromRegistires(id int64) error
 	GetAllUsers() (ret []*models.User, err error)
 	GetUnseenRegistry() Registry
+	GetSeenRegistry() Registry
 }
 
 type store struct {
@@ -39,6 +41,7 @@ type store struct {
 	likesRegistry   Registry
 	unseenRegistry  Registry
 	matchesRegistry Registry
+	seenRegistry    Registry
 }
 
 func (s *store) PutUser(model *models.User) error {
@@ -87,6 +90,11 @@ func (s *store) PutUnseen(who, whome int64) (err error) {
 }
 
 func (s *store) GetUnseen(whose int64) (seen []Entry, err error) {
+	seen, err = s.unseenRegistry.GetList(whose)
+	return
+}
+
+func (s *store) GetSeen(whose int64) (seen []Entry, err error) {
 	seen, err = s.unseenRegistry.GetList(whose)
 	return
 }
@@ -154,6 +162,11 @@ func (s *store) DeleteFromRegistires(id int64) (err error) {
 func (s *store) GetUnseenRegistry() Registry {
 	return s.unseenRegistry
 }
+
+func (s *store) GetSeenRegistry() Registry {
+	return s.unseenRegistry
+}
+
 func remove(s []*models.User, i int) []*models.User {
 	s[i] = s[len(s)-1]
 	// We do not need to put s[i] at the end, as it will be discarded anyway
@@ -166,5 +179,6 @@ func NewStore(users *mongo.Collection, registries []*mongo.Collection) Store {
 		likesRegistry:   NewRegistry(registries[0]),
 		unseenRegistry:  NewRegistry(registries[1]),
 		matchesRegistry: NewRegistry(registries[2]),
+		seenRegistry:    NewRegistry(registries[1]),
 	}
 }
