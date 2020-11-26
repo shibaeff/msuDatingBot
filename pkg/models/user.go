@@ -27,5 +27,5 @@ type User struct {
 }
 
 func (u *User) String() string {
-	return fmt.Sprintf(stringify, u.Name, u.Faculty, u.Gender, u.WantGender, u.About, u.UserName, u.Id)
+	return fmt.Sprintf(stringify, u.Name, u.Faculty, u.Gender, u.WantGender, u.About, u.UserName)
 }
