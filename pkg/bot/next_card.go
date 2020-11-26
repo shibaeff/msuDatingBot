@@ -14,7 +14,7 @@ const (
 var (
 	nextEmojiButton = tgbotapi.InlineKeyboardButton{Text: nextEmoji}
 	likeEmojiButton = tgbotapi.InlineKeyboardButton{Text: likeEmoji}
-	nextKeyBoard    = tgbotapi.NewInlineKeyboardMarkup([]tgbotapi.KeyboardButton{nextEmojiButton, likeEmojiButton})
+	nextKeyBoard    = tgbotapi.NewInlineKeyboardMarkup([]tgbotapi.InlineKeyboardButton{nextEmojiButton, likeEmojiButton})
 )
 
 func replyWithCard(u *models.User, to int64) (ret *tgbotapi.PhotoConfig) {
