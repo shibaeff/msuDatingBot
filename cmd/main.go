@@ -91,12 +91,26 @@ func main() {
 	Bot := bot.NewBot(store, api, readFile, admins_list)
 	defer logFile.Close()
 	for update := range updates {
-		if update.Message == nil { // ignore any non-Message Updates
-			continue
-		}
-		reply, err := Bot.Reply(update.Message)
-		if err != nil {
-			log.Fatal(err)
+		//if update.Message == nil { // ignore any non-Message Updates
+		//	continue
+		//}
+
+		var reply interface{}
+		if update.Message != nil {
+			reply, err = Bot.Reply(update.Message)
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			log.Println(update.CallbackQuery.Data)
+			update.Message = &tgbotapi.Message{}
+			update.Message.Text = update.CallbackQuery.Data
+			update.Message.Chat = &tgbotapi.Chat{
+				ID: int64(update.CallbackQuery.From.ID),
+			}
+			update.Message.From = &tgbotapi.User{}
+			update.Message.From.UserName = update.CallbackQuery.From.UserName
+			reply, err = Bot.Reply(update.Message)
 		}
 
 		switch v := reply.(type) {

@@ -12,8 +12,10 @@ const (
 )
 
 var (
-	nextEmojiButton = tgbotapi.InlineKeyboardButton{Text: nextEmoji}
-	likeEmojiButton = tgbotapi.InlineKeyboardButton{Text: likeEmoji}
+	nextData        = nextEmoji
+	likeData        = likeEmoji
+	nextEmojiButton = tgbotapi.InlineKeyboardButton{Text: nextEmoji, CallbackData: &nextData}
+	likeEmojiButton = tgbotapi.InlineKeyboardButton{Text: likeEmoji, CallbackData: &likeData}
 	nextKeyBoard    = tgbotapi.NewInlineKeyboardMarkup([]tgbotapi.InlineKeyboardButton{nextEmojiButton, likeEmojiButton})
 )
 
