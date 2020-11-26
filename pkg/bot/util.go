@@ -94,7 +94,7 @@ func (b *bot) prepareMatches(userId int64) (resp string, err error) {
 		}
 		raw = append(raw, fmt.Sprintf("@%s\n", user.UserName))
 	}
-	resp = matchesList + strings.Join(raw, "")
+	resp = matchesList + strings.Join(raw, "\n")
 	return
 }
 
