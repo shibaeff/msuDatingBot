@@ -50,9 +50,9 @@ const (
 var (
 	registerButton = tgbotapi.KeyboardButton{Text: registerCommand}
 	helpButton     = tgbotapi.KeyboardButton{Text: helpCommand}
+	matchesButton  = tgbotapi.KeyboardButton{Text: matchesCommand}
 	nextButton     = tgbotapi.KeyboardButton{Text: nextCommand}
-	usersButton    = tgbotapi.KeyboardButton{Text: likeCommand}
-	menuButtons    = []tgbotapi.KeyboardButton{registerButton, helpButton, nextButton, usersButton}
+	menuButtons    = []tgbotapi.KeyboardButton{registerButton, helpButton, matchesButton, nextButton}
 	menuKeyboard   = tgbotapi.NewReplyKeyboard(menuButtons)
 )
 
@@ -189,7 +189,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			}
 			reply = replyWithText(strings.Join(ret, " "))
 			return
-		case nextCommand:
+		case nextCommand, nextEmoji:
 			if user.RegiStep < regOver {
 				reply = replyWithText(notRegistered)
 				return
@@ -203,7 +203,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			b.store.GetUnseenRegistry().DeleteItem(user.Id, unseen_user.Id)
 			reply = replyWithCard(unseen_user, user.Id)
 			return
-		case likeCommand:
+		case likeCommand, likeEmoji:
 			// entry, e := b.store.GetSeen(user.Id)
 			//if e != nil {
 			//	reply = replyWithText("failed to put your like")
