@@ -152,6 +152,15 @@ func main() {
 					}
 				}
 			}
+		case *bot.Match:
+			_, err = api.Send(v.Msg1)
+			if err != nil {
+				log.Println(err)
+			}
+			_, err = api.Send(v.Msg2)
+			if err != nil {
+				log.Println(err)
+			}
 		}
 		client.Ping(context.TODO(), nil)
 	}

@@ -244,7 +244,14 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 						if err != nil {
 							reply = replyWithText("Такого пользователя уже нет")
 						}
-						reply = replyWithText(fmt.Sprintf(matchMsg, likee_user.UserName))
+						reply1 := replyWithText(fmt.Sprintf(matchMsg, likee_user.UserName))
+						reply1.ChatID = user.Id
+						reply2 := replyWithText(fmt.Sprintf(matchMsg, user.UserName))
+						reply2.ChatID = likee_user.Id
+						reply = &Match{
+							Msg1: reply1,
+							Msg2: reply2,
+						}
 						e = b.store.GetMatchesRegistry().AddToList(user.Id, likee_user.Id)
 						e = b.store.GetMatchesRegistry().AddToList(likee_user.Id, user.Id)
 						return reply, nil
@@ -317,7 +324,6 @@ func (b *bot) setTimeLoggers() {
 	b.timeloggers[startCommand] = timelogger.NewTimeLogger(startCommand, timeLoggingFileName)
 }
 
-// TODO handle
 func NewBot(store store.Store, api *tgbotapi.BotAPI, logFile *os.File, admins []string) (b Bot) {
 	b = &bot{
 		store:            store,
