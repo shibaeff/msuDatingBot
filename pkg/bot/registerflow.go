@@ -2,6 +2,7 @@ package bot
 
 import (
 	"log"
+	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
@@ -72,7 +73,7 @@ func (b *bot) registerFlow(user *models.User, message *tgbotapi.Message) (reply 
 			log.Fatal(err)
 		}
 		user.Gender = message.Text
-		if err := b.store.UpdUserField(user.Id, "gender", user.Gender); err != nil {
+		if err := b.store.UpdUserField(user.Id, "gender", strings.ToLower(user.Gender)); err != nil {
 			log.Fatal(err)
 		}
 		log.Printf("Recorded Gender %s", user.Gender)
@@ -89,7 +90,7 @@ func (b *bot) registerFlow(user *models.User, message *tgbotapi.Message) (reply 
 		if err := b.updateRegStatus(user.Id, regFaculty); err != nil {
 			log.Fatal(err)
 		}
-		if err := b.store.UpdUserField(user.Id, "wantgender", user.WantGender); err != nil {
+		if err := b.store.UpdUserField(user.Id, "wantgender", strings.ToLower(user.WantGender)); err != nil {
 			log.Fatal(err)
 		}
 		log.Printf("Recorded want Gender %s", user.WantGender)

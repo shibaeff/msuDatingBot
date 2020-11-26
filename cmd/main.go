@@ -106,6 +106,7 @@ func main() {
 			//msg.ReplyToMessageID = update.Message.MessageID
 			//msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(buttons)
 			v.ChatID = update.Message.Chat.ID
+			v.ParseMode = "html"
 			_, err = api.Send(v)
 			if err != nil {
 				log.Println(err)

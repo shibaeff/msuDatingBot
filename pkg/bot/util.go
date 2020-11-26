@@ -78,13 +78,12 @@ func (b *bot) prepareMatches(userId int64) (resp string, err error) {
 	if err != nil {
 		return "Матчей нет", nil
 	}
-	matches := entry.Whome
-	if len(matches) == 0 {
+	if len(entry) == 0 {
 		return "Матчей нет", nil
 	}
 	raw := []string{}
-	for _, match := range matches {
-		user, err := b.store.GetUser(match)
+	for _, match := range entry {
+		user, err := b.store.GetUser(match.Whome)
 		if err != nil {
 			continue
 		}

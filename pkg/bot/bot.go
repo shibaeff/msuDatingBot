@@ -22,21 +22,22 @@ const (
 
 	timeLoggingFileName = "time.csv"
 
-	registerCommand = "/register"
-	nextCommand     = "/next"
-	usersCommand    = "/users"
-	helpCommand     = "/help"
-	likeCommand     = "/like"
-	matchesCommand  = "/matches"
-	resetCommand    = "/reset"
-	profileCommand  = "/profile"
-	photoCommand    = "/photo"
-	startCommand    = "/start"
-	cancelCommand   = "/cancel"
-	facultyCommand  = "/faculty"
-	aboutCommand    = "/about"
-	dumpCommand     = "/dump"
-	notifyAll       = "/notify"
+	registerCommand   = "/register"
+	nextCommand       = "/next"
+	usersCommand      = "/users"
+	helpCommand       = "/help"
+	likeCommand       = "/like"
+	matchesCommand    = "/matches"
+	resetCommand      = "/reset"
+	profileCommand    = "/profile"
+	photoCommand      = "/photo"
+	startCommand      = "/start"
+	cancelCommand     = "/cancel"
+	facultyCommand    = "/faculty"
+	aboutCommand      = "/about"
+	dumpCommand       = "/dump"
+	notifyAll         = "/notify"
+	reregisterCommand = "/reregister"
 
 	greetMsg          = "Добро пожаловать в бота знакомств. Начните с /register."
 	notUnderstood     = "Пожалуйста, выберите действие из меню"
@@ -104,6 +105,10 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 	if message.Text[0] == '/' {
 		split := strings.Split(message.Text, " ")
 		switch split[0] {
+		case reregisterCommand:
+			user.RegiStep = regName
+			b.store.UpdUserField(user.Id, "registep", user.RegiStep)
+			return registerStep("Начинаем новую регистрацию!" + askName), nil
 		case notifyAll:
 			if !b.ensureAdmin(user.UserName) {
 				reply = replyWithText(notAdmin)
@@ -176,18 +181,18 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			if err != nil {
 				reply = replyWithText(pleaseSendAgain)
 				err = nil
-				return
+				return reply, nil
 			}
 			for _, cur_user := range users {
-				if !b.store.GetSeenRegistry().IsPresent(user.Id, cur_user.Id) && cur_user.Gender == user.WantGender &&
-					cur_user.WantGender == user.Gender {
+				if !b.store.GetSeenRegistry().IsPresent(user.Id, cur_user.Id) {
 					b.store.PutSeen(user.Id, cur_user.Id)
 					b.store.PutSeen(cur_user.Id, user.Id)
 					reply = replyWithPhoto(cur_user, user.Id)
-					return
+					return reply, nil
 				}
 			}
 			reply = replyWithText("Вы просмотрели всех пользователей на данный момент")
+			return reply, nil
 		case likeCommand:
 			// entry, e := b.store.GetSeen(user.Id)
 			//if e != nil {
