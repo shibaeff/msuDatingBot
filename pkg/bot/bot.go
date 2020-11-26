@@ -307,7 +307,7 @@ func (b *bot) listUsers() (str string, err error) {
 	}
 	var raw []string
 	for _, user := range users {
-		raw = append(raw, user.String())
+		raw = append(raw, fmt.Sprintf("@%s", user.UserName))
 	}
 	return strings.Join(raw, "\n"), nil
 }
