@@ -217,12 +217,12 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 				return reply, nil
 			}
 			unseen_user, _ := b.store.GetUser(unseen[0].Whome)
-			b.store.GetUnseenRegistry().DeleteItem(user.Id, unseen_user.Id)
-			b.store.GetSeenRegistry().AddToList(user.Id, unseen_user.Id)
 			reply = replyWithCard(unseen_user, user.Id)
 			return
 		case likeCommand, likeEmoji:
-			entry, e := b.store.GetSeen(user.Id)
+			entry, e := b.store.GetUnseen(user.Id)
+			b.store.GetUnseenRegistry().DeleteItem(user.Id, entry[0].Whome)
+			b.store.GetSeenRegistry().AddToList(user.Id, entry[0].Whome)
 			if e != nil {
 				reply = replyWithText("failed to put your like")
 				return
