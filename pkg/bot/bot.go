@@ -109,7 +109,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 		if user.RegiStep == regOver {
 			users, _ := b.store.GetAllUsers()
 			for _, cur_user := range users {
-				if b.ensureGender(user, cur_user) {
+				if b.ensureGender(user, cur_user) && user.Id != cur_user.Id {
 					b.store.PutUnseen(user.Id, cur_user.Id)
 					b.store.PutUnseen(cur_user.Id, user.Id)
 				}
