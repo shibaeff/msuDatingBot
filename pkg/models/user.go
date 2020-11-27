@@ -9,8 +9,8 @@ const (
 		"<strong>Факультет:</strong> %s\n" +
 		"<strong>Пол:</strong> %s\n" +
 		"<strong>Пол собеседника:</strong> %s\n" +
-		"<strong>О себе:</strong> %s\n" +
-		"<strong>Username:</strong> %s\n"
+		"<strong>О себе:</strong> %s\n"
+	//"<strong>Username:</strong> %s\n"
 	//"<strong>ID:</strong> %d"
 )
 
@@ -27,5 +27,5 @@ type User struct {
 }
 
 func (u *User) String() string {
-	return fmt.Sprintf(stringify, u.Name, u.Faculty, u.Gender, u.WantGender, u.About, u.UserName)
+	return fmt.Sprintf(stringify, u.Name, u.Faculty, u.Gender, u.WantGender, u.About)
 }
