@@ -256,8 +256,12 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 							Msg1: reply1,
 							Msg2: reply2,
 						}
-						e = b.store.GetMatchesRegistry().AddToList(user.Id, likee_user.Id)
-						e = b.store.GetMatchesRegistry().AddToList(likee_user.Id, user.Id)
+						if !b.store.GetMatchesRegistry().IsPresent(user.Id, likee_user.Id) {
+							b.store.GetMatchesRegistry().AddToList(user.Id, likee_user.Id)
+						}
+						if !b.store.GetMatchesRegistry().IsPresent(likee_user.Id, user.Id) {
+							b.store.GetMatchesRegistry().AddToList(likee_user.Id, user.Id)
+						}
 						return reply, nil
 					} else {
 						return reply, nil
