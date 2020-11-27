@@ -91,7 +91,7 @@ func main() {
 	Bot := bot.NewBot(store, api, readFile, admins_list)
 	defer logFile.Close()
 	for update := range updates {
-		if update.Message == nil || update.CallbackQuery == nil { // ignore any non-Message Updates
+		if update.Message == nil && update.CallbackQuery == nil { // ignore any non-Message Updates
 			continue
 		}
 
