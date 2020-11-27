@@ -143,6 +143,10 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 				reply = replyWithText(notAdmin)
 				return
 			}
+			if len(split) < 2 {
+				reply = replyWithText("Неправильный оффсет")
+				return reply, nil
+			}
 			var offset, err = strconv.Atoi(split[1])
 			if err != nil {
 				err = nil
