@@ -103,7 +103,7 @@ func (s *store) GetUnseen(whose int64) (seen []Entry, err error) {
 }
 
 func (s *store) GetSeen(whose int64) (seen []Entry, err error) {
-	seen, err = s.unseenRegistry.GetList(whose)
+	seen, err = s.seenRegistry.GetList(whose)
 	return
 }
 
@@ -172,7 +172,7 @@ func (s *store) GetUnseenRegistry() Registry {
 }
 
 func (s *store) GetSeenRegistry() Registry {
-	return s.unseenRegistry
+	return s.seenRegistry
 }
 
 func remove(s []*models.User, i int) []*models.User {
@@ -187,6 +187,6 @@ func NewStore(users *mongo.Collection, registries []*mongo.Collection) Store {
 		likesRegistry:   NewRegistry(registries[0]),
 		unseenRegistry:  NewRegistry(registries[1]),
 		matchesRegistry: NewRegistry(registries[2]),
-		seenRegistry:    NewRegistry(registries[1]),
+		seenRegistry:    NewRegistry(registries[3]),
 	}
 }
