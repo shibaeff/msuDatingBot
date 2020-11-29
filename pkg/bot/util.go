@@ -14,6 +14,10 @@ import (
 	"echoBot/pkg/store"
 )
 
+const (
+	inlineMention = "[%s](tg://user?id=%d)"
+)
+
 func (b *bot) notifyUsers(message string) (list []*tgbotapi.MessageConfig, err error) {
 	users, err := b.store.GetAllUsers()
 	if err != nil {
@@ -95,7 +99,11 @@ func (b *bot) prepareMatches(userId int64) (resp string, err error) {
 		if err != nil {
 			continue
 		}
-		raw = append(raw, fmt.Sprintf("@%s\n", user.UserName))
+		if user.UserName == "" {
+			raw = append(raw, fmt.Sprintf("@%s\n", user.UserName))
+		} else {
+			raw = append(raw, fmt.Sprintf(inlineMention, user.Name, user.Id))
+		}
 	}
 	resp = matchesList + strings.Join(raw, "\n")
 	return

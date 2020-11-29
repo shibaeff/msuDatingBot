@@ -25,7 +25,7 @@ const (
 )
 
 var (
-	client, _ = mongo.NewClient(options.Client().ApplyURI("mongodb://127.0.0.1:27017"))
+	client, _ = mongo.NewClient(options.Client().ApplyURI("mongodb://database:27017"))
 )
 
 func PrepareCollection(client *mongo.Client, name string) (conn *mongo.Collection) {
@@ -41,6 +41,7 @@ func init() {
 }
 
 func main() {
+	log.Println("hello")
 	err := client.Connect(context.TODO())
 	if err != nil {
 		log.Fatal(err)
@@ -128,7 +129,8 @@ func main() {
 			}
 		case *tgbotapi.PhotoConfig:
 			v.ParseMode = "html"
-			_, err = api.Send(v)
+			tgbotapi.NewEditMessageText(1, 1, "")
+			_, err := api.Send(v)
 			if err != nil {
 				log.Println(err)
 			}
