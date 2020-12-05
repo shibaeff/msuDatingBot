@@ -27,7 +27,7 @@ const (
 	usersCommand      = "/users"
 	helpCommand       = "/help"
 	likeCommand       = "/like"
-	matchesCommand    = "/matches"
+	matchesCommand    = "/Matches"
 	resetCommand      = "/reset"
 	profileCommand    = "/profile"
 	photoCommand      = "/photo"
@@ -35,10 +35,12 @@ const (
 	cancelCommand     = "/cancel"
 	facultyCommand    = "/faculty"
 	aboutCommand      = "/about"
+	logCommand        = "/log"
 	dumpCommand       = "/dump"
 	notifyAll         = "/notify"
 	reregisterCommand = "/reregister"
 	feedbackCommand   = "/feedback"
+	numbers           = "/numbers"
 
 	greetMsg          = "Добро пожаловать в бота знакомств. Начните с /register."
 	notUnderstood     = "Пожалуйста, выберите действие из меню"
@@ -70,6 +72,7 @@ type bot struct {
 	logFile          *os.File
 	timeloggers      map[string]timelogger.TimeLogger
 	adminsList       []string
+	actionsLog       *log.Logger
 }
 
 func (b *bot) GetStore() store.Store {
@@ -138,7 +141,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 				b.adminsList,
 			}
 			return adminmsg, nil
-		case dumpCommand:
+		case logCommand:
 			if !b.ensureAdmin(user.UserName) {
 				reply = replyWithText(notAdmin)
 				return
@@ -217,6 +220,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 				return reply, nil
 			}
 			unseen_user, _ := b.store.GetUser(unseen[0].Whome)
+			b.actionsLog.Printf("%d VIEWED %d\n", user.Id, unseen)
 			reply = replyWithCard(unseen_user, user.Id)
 			return
 		case likeCommand, likeEmoji:
@@ -229,6 +233,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			}
 			likee := entry[len(entry)-1].Whome
 			e = b.store.PutLike(user.Id, likee)
+			b.actionsLog.Printf("%d LIKED %d\n", user.Id, likee)
 			if e != nil {
 				reply = replyWithText("failed to put your like")
 				return
@@ -262,6 +267,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 						if !b.store.GetMatchesRegistry().IsPresent(likee_user.Id, user.Id) {
 							b.store.GetMatchesRegistry().AddToList(likee_user.Id, user.Id)
 						}
+						b.actionsLog.Printf("%d MATCH %d\n", user.Id, likee)
 						return reply, nil
 					} else {
 						return reply, nil
@@ -282,7 +288,9 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			if err != nil {
 				return nil, err
 			}
-			reply = replyWithText(usersString)
+			raw := replyWithText(usersString)
+			raw.ParseMode = "markdown"
+			reply = raw
 			return reply, nil
 		case matchesCommand:
 			matches, _ := b.prepareMatches(user.Id)
@@ -308,7 +316,21 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			}
 			reply = replyWithText("Ждем ваше фото!")
 			return
+		case numbers:
+			users, _ := b.store.GetAllUsers()
+			likes, matches := 0, 0
+			for _, user := range users {
+				l, _ := b.store.GetLikes(user.Id)
+				m, _ := b.store.GetLikes(user.Id)
+				likes += len(l)
+				matches += len(m)
+			}
+			return replyWithText(fmt.Sprintf("Likes: %d, Matches: %d", likes, matches)), nil
+		case dumpCommand:
+			b.dumpEntire()
+			return replyWithText("Дамп выполнен"), nil
 		}
+
 	}
 	reply = replyWithText(notUnderstood)
 	return
@@ -322,7 +344,12 @@ func (b *bot) listUsers() (str string, err error) {
 	}
 	var raw []string
 	for _, user := range users {
-		raw = append(raw, fmt.Sprintf("@%s", user.UserName))
+		log.Println(user.UserName)
+		if user.UserName != "" {
+			raw = append(raw, fmt.Sprintf("@%s\n", user.UserName))
+		} else {
+			raw = append(raw, fmt.Sprintf(inlineMention, user.Name, user.Id))
+		}
 	}
 	return strings.Join(raw, "\n"), nil
 }
@@ -330,6 +357,14 @@ func (b *bot) listUsers() (str string, err error) {
 func (b *bot) setTimeLoggers() {
 	b.timeloggers = make(map[string]timelogger.TimeLogger)
 	b.timeloggers[startCommand] = timelogger.NewTimeLogger(startCommand, timeLoggingFileName)
+}
+
+func (b *bot) setActionLoggers() {
+	file, err := os.OpenFile("actions.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		panic("Cannot create or open log file")
+	}
+	b.actionsLog = log.New(file, "Common Logger:\t", log.Ldate|log.Ltime|log.Lshortfile)
 }
 
 func NewBot(store store.Store, api *tgbotapi.BotAPI, logFile *os.File, admins []string) (b Bot) {

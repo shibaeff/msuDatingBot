@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 
@@ -25,7 +26,7 @@ const (
 )
 
 var (
-	client, _ = mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+	client, _ = mongo.NewClient(options.Client().ApplyURI("mongodb://127.0.0.1:27017"))
 )
 
 func PrepareCollection(client *mongo.Client, name string) (conn *mongo.Collection) {
@@ -41,6 +42,12 @@ func init() {
 }
 
 func main() {
+	go func() {
+		err := http.ListenAndServe(":3000", nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 	log.Println("hello")
 	err := client.Connect(context.TODO())
 	if err != nil {
@@ -50,7 +57,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	users := PrepareCollection(client, usersCollectionName)
 	likes := PrepareCollection(client, likes)
 	unseen := PrepareCollection(client, unseen)
@@ -122,7 +128,9 @@ func main() {
 			//msg.ReplyToMessageID = update.Message.MessageID
 			//msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(buttons)
 			v.ChatID = update.Message.Chat.ID
-			v.ParseMode = "html"
+			if v.ParseMode != "markdown" {
+				v.ParseMode = "html"
+			}
 			_, err = api.Send(v)
 			if err != nil {
 				log.Println(err)
