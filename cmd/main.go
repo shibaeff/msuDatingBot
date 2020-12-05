@@ -25,7 +25,7 @@ const (
 )
 
 var (
-	client, _ = mongo.NewClient(options.Client().ApplyURI("mongodb://database:27017"))
+	client, _ = mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
 )
 
 func PrepareCollection(client *mongo.Client, name string) (conn *mongo.Collection) {
