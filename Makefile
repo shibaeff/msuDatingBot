@@ -11,7 +11,7 @@ all: test build
 
 test: $(GOTEST) ./... -v
 
-build: $(GOBUILD) -o $(BINARY_NAME) -v
+build: $(GOBUILD) -o main
 
 lint: $(LINTER) run
 run:
