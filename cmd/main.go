@@ -171,6 +171,11 @@ func main() {
 			if err != nil {
 				log.Println(err)
 			}
+		case tgbotapi.DocumentConfig:
+			_, err = api.Send(v)
+			if err != nil {
+				log.Println(err)
+			}
 		}
 		client.Ping(context.TODO(), nil)
 	}

@@ -336,7 +336,12 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			return replyWithText(fmt.Sprintf("Likes: %d, Matches: %d", likes, matches)), nil
 		case dumpCommand:
 			b.dumpEntire()
-			return replyWithText("Дамп выполнен"), nil
+			file, _ := os.Open("dump.json")
+			defer file.Close()
+			fileUpload := tgbotapi.NewDocumentUpload(user.Id, file)
+			fileUpload.Caption = "Ваш дамп"
+			reply = fileUpload
+			return
 		}
 
 	}
