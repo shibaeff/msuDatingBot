@@ -27,7 +27,7 @@ const (
 	usersCommand      = "/users"
 	helpCommand       = "/help"
 	likeCommand       = "/like"
-	matchesCommand    = "/Matches"
+	matchesCommand    = "/matches"
 	resetCommand      = "/reset"
 	profileCommand    = "/profile"
 	photoCommand      = "/photo"
@@ -52,12 +52,12 @@ const (
 )
 
 var (
-	registerButton = tgbotapi.KeyboardButton{Text: registerCommand}
-	helpButton     = tgbotapi.KeyboardButton{Text: helpCommand}
-	matchesButton  = tgbotapi.KeyboardButton{Text: matchesCommand}
-	nextButton     = tgbotapi.KeyboardButton{Text: nextCommand}
-	menuButtons    = []tgbotapi.KeyboardButton{registerButton, helpButton, matchesButton, nextButton}
-	menuKeyboard   = tgbotapi.NewReplyKeyboard(menuButtons)
+	profileButton = tgbotapi.KeyboardButton{Text: profileCommand}
+	helpButton    = tgbotapi.KeyboardButton{Text: helpCommand}
+	matchesButton = tgbotapi.KeyboardButton{Text: matchesCommand}
+	nextButton    = tgbotapi.KeyboardButton{Text: nextCommand}
+	menuButtons   = []tgbotapi.KeyboardButton{profileButton, helpButton, matchesButton, nextButton}
+	menuKeyboard  = tgbotapi.NewReplyKeyboard(menuButtons)
 )
 
 type Bot interface {
