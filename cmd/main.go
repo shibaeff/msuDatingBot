@@ -110,6 +110,13 @@ func main() {
 			}
 		} else {
 			log.Println(update.CallbackQuery.Data)
+			api.AnswerCallbackQuery(tgbotapi.CallbackConfig{
+				CallbackQueryID: update.CallbackQuery.ID,
+				Text:            "Грузим еще",
+				ShowAlert:       false,
+				URL:             "",
+				CacheTime:       0,
+			})
 			update.Message = &tgbotapi.Message{}
 			update.Message.Text = update.CallbackQuery.Data
 			update.Message.Chat = &tgbotapi.Chat{
