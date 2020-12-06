@@ -253,9 +253,9 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 						if err != nil {
 							reply = replyWithText("Такого пользователя уже нет")
 						}
-						reply1 := replyWithText(fmt.Sprintf(matchMsg, likee_user.UserName))
+						reply1 := replyWithText(fmt.Sprintf(matchMsg, getUserLink(likee_user)))
 						reply1.ChatID = user.Id
-						reply2 := replyWithText(fmt.Sprintf(matchMsg, user.UserName))
+						reply2 := replyWithText(fmt.Sprintf(matchMsg, getUserLink(user)))
 						reply2.ChatID = likee_user.Id
 						reply = &Match{
 							Msg1: reply1,

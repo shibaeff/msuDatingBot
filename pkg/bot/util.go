@@ -85,6 +85,14 @@ func (b *bot) parseLikee(message *tgbotapi.Message) (id int64, err error) {
 	return
 }
 
+func getUserLink(user *models.User) (raw string) {
+	if user.UserName != "" {
+		raw = fmt.Sprintf("@%s\n", user.UserName)
+	} else {
+		raw = fmt.Sprintf(inlineMention, user.Name, user.Id)
+	}
+	return
+}
 func (b *bot) prepareMatches(userId int64) (resp string, err error) {
 	entry, err := b.store.GetMatchesRegistry().GetList(userId)
 	if err != nil {
@@ -99,11 +107,7 @@ func (b *bot) prepareMatches(userId int64) (resp string, err error) {
 		if err != nil {
 			continue
 		}
-		if user.UserName != "" {
-			raw = append(raw, fmt.Sprintf("@%s\n", user.UserName))
-		} else {
-			raw = append(raw, fmt.Sprintf(inlineMention, user.Name, user.Id))
-		}
+		raw = append(raw, getUserLink(user))
 	}
 	resp = matchesList + strings.Join(raw, "\n")
 	return
