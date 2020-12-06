@@ -133,7 +133,8 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 				reply = replyWithText(notAdmin)
 				return
 			}
-			reply, _ = b.notifyUsers(split[1])
+			mes := strings.Join(split[1:], " ")
+			reply, _ = b.notifyUsers(mes)
 			return
 		case feedbackCommand:
 			repl := replyWithText(message.Text)
