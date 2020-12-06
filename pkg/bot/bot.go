@@ -221,7 +221,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 				return reply, nil
 			}
 			unseen_user, _ := b.store.GetUser(unseen[0].Whome)
-			b.actionsLog.Printf("%d VIEWED %d\n", user.Id, unseen)
+			b.actionsLog.Printf("%d VIEWED %d\n", user.Id, unseen_user.Id)
 			reply = replyWithCard(unseen_user, user.Id)
 			return
 		case likeCommand, likeEmoji:
