@@ -160,6 +160,8 @@ func (b *bot) next(user *models.User) (reply interface{}) {
 	}
 	unseen_user, _ := b.store.GetUser(unseen[0].Whome)
 	b.actionsLog.Printf("%d VIEWED %d\n", user.Id, unseen_user.Id)
-	reply = replyWithCard(unseen_user, user.Id)
+	card := replyWithCard(unseen_user, user.Id)
+	card.ParseMode = "html"
+	reply = card
 	return
 }
