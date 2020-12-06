@@ -160,7 +160,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			logs, err := b.grabLogs(offset)
 			if err != nil {
 				err = nil
-				reply = replyWithText("Неправильный оффсет")
+				reply = replyWithText(fmt.Sprintf("%v", err))
 				return reply, nil
 			}
 			reply = replyWithText(logs)
