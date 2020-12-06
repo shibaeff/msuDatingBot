@@ -35,6 +35,7 @@ type Store interface {
 	GetUnseenRegistry() Registry
 	GetSeenRegistry() Registry
 	GetAdmin(username string) (user *models.User, err error)
+	GetLikesRegistry() Registry
 }
 
 type store struct {
@@ -45,6 +46,9 @@ type store struct {
 	seenRegistry    Registry
 }
 
+func (s *store) GetLikesRegistry() Registry {
+	return s.likesRegistry
+}
 func (s *store) PutUser(model *models.User) error {
 	_, err := s.usersCollection.InsertOne(context.TODO(), *model)
 	return err

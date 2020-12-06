@@ -42,7 +42,8 @@ const (
 	reregisterCommand = "/reregister"
 	feedbackCommand   = "/feedback"
 	numbers           = "/numbers"
-	purgeCommand      = "/purge"
+	deleteCommand     = "/delete"
+	pauseCommand      = "/pause"
 
 	greetMsg          = "Привет! ✨\nЭто бот знакомств МГУ. Работает аналогично Тиндеру 😉\n\nДля регистрации вызывай: /register, для отмены: /cancel. Бот запросит имя, фоточку и пару слов о себе.\n\nПредложения и баги пишите в /feedback."
 	notUnderstood     = "Пожалуйста, выберите действие из меню"
@@ -168,6 +169,9 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			}
 			reply = replyWithText(logs)
 			return reply, nil
+		case pauseCommand:
+			b.hide(user)
+			reply = replyWithText("Ваше участие приостановлено.")
 		case aboutCommand:
 			about := strings.Split(message.Text, " ")[1]
 			err = b.store.UpdUserField(user.Id, "about", about)
@@ -292,9 +296,10 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			}
 			return reply, nil
 
-		case purgeCommand:
+		case deleteCommand:
 			b.store.DeleteFromRegistires(user.Id)
 			b.store.DeleteUser(user.Id)
+			b.hide(user)
 			reply = replyWithText("Успешное удаление профиля")
 			return
 		case usersCommand:
