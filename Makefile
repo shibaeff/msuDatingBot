@@ -9,13 +9,10 @@ LINTER=golangci-lint
 
 all: test build
 
-test:
-      $(GOTEST) ./... -v
+test: $(GOTEST) ./... -v
 
-build:
-      $(GOBUILD) -o $(BINARY_NAME) -v
+build: $(GOBUILD) -o $(BINARY_NAME) -v
 
-lint:
-      $(LINTER) run
+lint: $(LINTER) run
 run:
 	$(GORUN) ./cmd/main.go
