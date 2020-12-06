@@ -163,8 +163,12 @@ func (s *store) GetMatchesRegistry() Registry {
 func (s *store) DeleteFromRegistires(id int64) (err error) {
 	s.matchesRegistry.DeleteItems(id)
 	s.likesRegistry.DeleteItems(id)
-	s.unseenRegistry.DeleteItems(id)
-	s.unseenRegistry.DeleteItems(id)
+	//s.unseenRegistry.DeleteItems(id)
+	users, _ := s.GetAllUsers()
+	for _, user := range users {
+		s.unseenRegistry.AddToList(id, user.Id)
+	}
+	s.seenRegistry.DeleteItems(id)
 	return nil
 }
 
