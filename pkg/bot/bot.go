@@ -218,7 +218,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			}
 			unseen, e := b.store.GetUnseen(user.Id)
 			if len(unseen) == 0 || e != nil {
-				reply = replyWithText("Вы просмотрели любой пользователей на данный момент")
+				reply = replyWithText("Вы просмотрели всех пользователей на данный момент")
 				return reply, nil
 			}
 			unseen_user, _ := b.store.GetUser(unseen[0].Whome)

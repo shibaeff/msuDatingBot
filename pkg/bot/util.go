@@ -35,7 +35,9 @@ func (b *bot) ensureGender(u1, u2 *models.User) bool {
 	return u1.Id != u2.Id &&
 		u1.Gender == u2.WantGender &&
 		u1.WantGender == u2.Gender ||
-		u1.WantGender == u1.WantGender && u1.WantGender == "любой"
+		u1.WantGender == "любой" && u2.WantGender == u1.Gender ||
+		u2.WantGender == "любой" && u1.WantGender == u2.Gender ||
+		u1.WantGender == u2.WantGender && u1.WantGender == "любой"
 }
 
 func (b *bot) ensureAdmin(userName string) bool {
