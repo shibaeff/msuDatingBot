@@ -377,5 +377,6 @@ func NewBot(store store.Store, api *tgbotapi.BotAPI, logFile *os.File, admins []
 		adminsList:       admins,
 	}
 	b.(*bot).setTimeLoggers()
+	b.(*bot).setActionLoggers()
 	return b
 }
