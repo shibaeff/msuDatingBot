@@ -285,7 +285,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 						return reply, nil
 					}
 				} else {
-					return reply, nil
+					return upd, nil
 				}
 
 			}
