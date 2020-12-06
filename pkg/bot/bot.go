@@ -336,9 +336,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			return replyWithText(fmt.Sprintf("Likes: %d, Matches: %d", likes, matches)), nil
 		case dumpCommand:
 			b.dumpEntire()
-			file, _ := os.Open("dump.json")
-			defer file.Close()
-			fileUpload := tgbotapi.NewDocumentUpload(user.Id, file)
+			fileUpload := tgbotapi.NewDocumentUpload(user.Id, "dump.json")
 			fileUpload.Caption = "Ваш дамп"
 			reply = fileUpload
 			return
