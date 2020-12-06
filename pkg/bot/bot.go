@@ -229,18 +229,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			reply = replyWithCard(unseen_user, user.Id)
 			return
 		case nextCommand:
-			if user.RegiStep < regOver {
-				reply = replyWithText(notRegistered)
-				return
-			}
-			unseen, e := b.store.GetUnseen(user.Id)
-			if len(unseen) == 0 || e != nil {
-				reply = replyWithText("Вы просмотрели всех пользователей на данный момент")
-				return reply, nil
-			}
-			unseen_user, _ := b.store.GetUser(unseen[0].Whome)
-			b.actionsLog.Printf("%d VIEWED %d\n", user.Id, unseen_user.Id)
-			reply = replyWithCard(unseen_user, user.Id)
+			reply = b.next(user)
 			return
 		case likeCommand, likeEmoji:
 			entry, e := b.store.GetUnseen(user.Id)
@@ -257,7 +246,8 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 				reply = replyWithText("failed to put your like")
 				return
 			}
-			reply = replyWithText("Успешный лайк!")
+			upd := b.next(user)
+			// reply = replyWithText("Успешный лайк!")
 			likee_entries, err := b.store.GetLikes(likee)
 			if err == nil {
 				_, ok1 := find(likee_entries, user.Id)
@@ -279,6 +269,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 						reply2.ParseMode = reply1.ParseMode
 						reply2.ChatID = likee_user.Id
 						reply = &Match{
+							Upd:  upd,
 							Msg1: reply1,
 							Msg2: reply2,
 						}

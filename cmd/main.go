@@ -174,6 +174,12 @@ func main() {
 				}
 			}
 		case *bot.Match:
+			switch v1 := v.Upd.(type) {
+			case *tgbotapi.PhotoConfig:
+				api.Send(v1)
+			case *tgbotapi.MessageConfig:
+				api.Send(v1)
+			}
 			_, err = api.Send(v.Msg1)
 			if err != nil {
 				log.Println(err)

@@ -145,3 +145,21 @@ func find(slice []store.Entry, val int64) (int, bool) {
 	}
 	return -1, false
 }
+
+func (b *bot) next(user *models.User) (reply interface{}) {
+	if user.RegiStep < regOver {
+		raw := replyWithText(notRegistered)
+		raw.ChatID = user.Id
+		reply = raw
+		return
+	}
+	unseen, e := b.store.GetUnseen(user.Id)
+	if len(unseen) == 0 || e != nil {
+		reply = replyWithText("Вы просмотрели всех пользователей на данный момент")
+		return reply
+	}
+	unseen_user, _ := b.store.GetUser(unseen[0].Whome)
+	b.actionsLog.Printf("%d VIEWED %d\n", user.Id, unseen_user.Id)
+	reply = replyWithCard(unseen_user, user.Id)
+	return
+}
