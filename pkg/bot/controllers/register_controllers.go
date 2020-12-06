@@ -11,7 +11,7 @@ func (g *GenderController) Verify(data interface{}) (s string, err error) {
 	switch v := data.(type) {
 	case string:
 		sl := strings.ToLower(v)
-		if sl != "м" && sl != "ж" && sl != "всех" {
+		if sl != "м" && sl != "ж" && sl != "любой" {
 			return GenderErrorResp, GenderError
 		} else {
 			return "", nil
