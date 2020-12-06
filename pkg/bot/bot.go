@@ -255,7 +255,9 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 						}
 						reply1 := replyWithText(fmt.Sprintf(matchMsg, getUserLink(likee_user)))
 						reply1.ChatID = user.Id
+						reply1.ParseMode = "markdown"
 						reply2 := replyWithText(fmt.Sprintf(matchMsg, getUserLink(user)))
+						reply2.ParseMode = reply1.ParseMode
 						reply2.ChatID = likee_user.Id
 						reply = &Match{
 							Msg1: reply1,
