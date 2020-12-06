@@ -41,6 +41,7 @@ const (
 	reregisterCommand = "/reregister"
 	feedbackCommand   = "/feedback"
 	numbers           = "/numbers"
+	purgeCommand      = "/purge"
 
 	greetMsg          = "Добро пожаловать в бота знакомств. Начните с /register."
 	notUnderstood     = "Пожалуйста, выберите действие из меню"
@@ -281,6 +282,11 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			}
 			return reply, nil
 
+		case purgeCommand:
+			b.store.DeleteFromRegistires(user.Id)
+			b.store.DeleteUser(user.Id)
+			reply = replyWithText("Успешное удаление профиля")
+			return
 		case usersCommand:
 			if user.RegiStep < regOver {
 				reply = replyWithText(notRegistered)

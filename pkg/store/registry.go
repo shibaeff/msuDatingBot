@@ -53,7 +53,9 @@ func (r *registry) IsPresent(who int64, whome int64) bool {
 	if cur == nil {
 		return false
 	}
-	return true
+	var item Entry
+	cur.Decode(&item)
+	return item.Who == who && item.Whome == whome
 }
 
 func (r *registry) DeleteItems(whose int64) (err error) {

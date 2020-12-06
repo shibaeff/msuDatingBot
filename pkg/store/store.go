@@ -164,6 +164,7 @@ func (s *store) DeleteFromRegistires(id int64) (err error) {
 	s.matchesRegistry.DeleteItems(id)
 	s.likesRegistry.DeleteItems(id)
 	s.unseenRegistry.DeleteItems(id)
+	s.unseenRegistry.DeleteItems(id)
 	return nil
 }
 
