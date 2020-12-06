@@ -10,6 +10,7 @@ import (
 )
 
 const (
+	regPoll       = -1
 	regBegin      = 0
 	regName       = 1
 	regGender     = 2
@@ -41,6 +42,11 @@ func (b *bot) updateRegStatus(id, status int64) error {
 func (b *bot) registerFlow(user *models.User, message *tgbotapi.Message) (reply *tgbotapi.MessageConfig) {
 	switch user.RegiStep {
 	case waiting:
+		reply = replyWithText(prepareLink(user.Id))
+		return
+	case regPoll:
+		pollRes := pollAuthAPI(user.Id)
+
 		if err := b.updateRegStatus(user.Id, regName); err != nil {
 			log.Fatal(err)
 		}

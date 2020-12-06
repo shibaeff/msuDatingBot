@@ -24,6 +24,7 @@ type User struct {
 	PhotoLink  string
 	RegiStep   int64
 	UserName   string
+	AuthStatus int
 }
 
 func (u *User) String() string {

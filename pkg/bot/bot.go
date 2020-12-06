@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	waiting          = -1
+	waiting          = -2
 	defaultBunchSize = 5
 	noPhoto          = "none"
 
