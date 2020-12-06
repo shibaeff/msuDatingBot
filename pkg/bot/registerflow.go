@@ -37,6 +37,7 @@ func (b *bot) updateRegStatus(id, status int64) error {
 	return b.store.UpdUserField(id, "registep", status)
 }
 
+// TODO VK Verifications
 func (b *bot) registerFlow(user *models.User, message *tgbotapi.Message) (reply *tgbotapi.MessageConfig) {
 	switch user.RegiStep {
 	case waiting:
