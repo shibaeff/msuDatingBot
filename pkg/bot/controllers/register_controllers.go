@@ -30,3 +30,13 @@ func (p *PhotoController) Verify(data interface{}) (string, error) {
 	}
 	return "", nil
 }
+
+type AboutController struct {
+}
+
+func (a *AboutController) Verify(data interface{}) (string, error) {
+	if len(data.(string)) < 120 {
+		return AboutErrorResp, AboutError
+	}
+	return "", nil
+}

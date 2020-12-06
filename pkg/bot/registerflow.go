@@ -108,6 +108,10 @@ func (b *bot) registerFlow(user *models.User, message *tgbotapi.Message) (reply 
 		reply = registerStep(askAbout)
 	case regAbout:
 		user.About = message.Text
+		resp, err := b.aboutController.Verify(user.About)
+		if err != nil {
+			return replyWithText(resp)
+		}
 		// RegisterStatus[message.Chat.ID] = regPhoto
 		if err := b.updateRegStatus(user.Id, regPhoto); err != nil {
 			log.Fatal(err)

@@ -71,6 +71,7 @@ type bot struct {
 	api              *tgbotapi.BotAPI
 	genderController controllers.Controller
 	photoController  controllers.Controller
+	aboutController  controllers.Controller
 	logFile          *os.File
 	timeloggers      map[string]timelogger.TimeLogger
 	adminsList       []string
@@ -393,6 +394,7 @@ func NewBot(store store.Store, api *tgbotapi.BotAPI, logFile *os.File, admins []
 		api:              api,
 		genderController: &controllers.GenderController{},
 		photoController:  &controllers.PhotoController{},
+		aboutController:  &controllers.AboutController{},
 		logFile:          logFile,
 		adminsList:       admins,
 	}
