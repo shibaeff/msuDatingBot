@@ -166,7 +166,9 @@ func (s *store) DeleteFromRegistires(id int64) (err error) {
 	//s.unseenRegistry.DeleteItems(id)
 	users, _ := s.GetAllUsers()
 	for _, user := range users {
-		s.unseenRegistry.AddToList(id, user.Id)
+		if user.Id != id {
+			s.unseenRegistry.AddToList(id, user.Id)
+		}
 	}
 	s.seenRegistry.DeleteItems(id)
 	return nil
