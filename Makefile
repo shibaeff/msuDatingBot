@@ -1,5 +1,5 @@
 GOCMD=go
-GOBUILD=$(GOCMD) build
+GOBUILD=$(GOCMD) build ./cmd/main.go
 GOCLEAN=$(GOCMD) clean
 GORUN=$(GOCMD) run
 GOTEST=$(GOCMD) test
