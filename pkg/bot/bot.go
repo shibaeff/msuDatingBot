@@ -3,6 +3,7 @@ package bot
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
@@ -221,7 +222,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 				reply = replyWithText("Вы просмотрели всех пользователей на данный момент")
 				return reply, nil
 			}
-			unseen_user, _ := b.store.GetUser(unseen[0].Whome)
+			unseen_user, _ := b.store.GetUser(unseen[rand.Int()%len(unseen)].Whome)
 			b.actionsLog.Printf("%d VIEWED %d\n", user.Id, unseen_user.Id)
 			reply = replyWithCard(unseen_user, user.Id)
 			return
