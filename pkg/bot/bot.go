@@ -15,7 +15,9 @@ import (
 )
 
 const (
-	waiting          = -1
+	waiting  = -1
+	regBegin = 0
+
 	defaultBunchSize = 5
 	noPhoto          = "none"
 
@@ -99,6 +101,9 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 		user = &u
 	}
 	text := message.Text
+	if !user.IsReg() {
+		reply = user.RegisterStepMessage(text)
+	}
 	if text[0] == '/' {
 		split := strings.Split(text, " ")
 		// in case of paired commands
@@ -107,6 +112,8 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 			case startCommand:
 				return user.ReplyWithText(greetMsg), nil
 			case registerCommand:
+				user.RegiStep = regBegin
+				b.store.UpdUserField(user.Id, "registep", user.RegiStep)
 				return user.ReplyWithText("Начинаем регистарцию"), nil
 			case helpCommand:
 				return user.ReplyWithText(helpMsg), nil

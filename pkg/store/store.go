@@ -20,6 +20,7 @@ type Store interface {
 	GetUser(id int64) (*models.User, error)
 	DeleteUser(id int64) error
 	GetActions() Registry
+	UpdUserField(id int64, field string, value interface{}) (err error)
 	// CheckExists() bool
 	//PutLike(who int64, whome int64) error
 	//GetLikes(whose int64) ([]Entry, error)
@@ -29,7 +30,6 @@ type Store interface {
 	//GetAny(for_id int64) (*models.User, error)
 	//GetBunch(n int) (ret []*models.User, err error)
 	//GetMatchesRegistry() Registry
-	//UpdUserField(id int64, field string, value interface{}) (err error)
 	//DeleteFromRegistires(id int64) error
 	//GetAllUsers() (ret []*models.User, err error)
 	//GetUnseenRegistry() Registry

@@ -17,6 +17,7 @@ const (
 	matchesCommand = "/matches"
 	profileCommand = "/profile"
 
+	regWaiting    = -1
 	regBegin      = 0
 	regName       = 1
 	regGender     = 2
@@ -63,12 +64,20 @@ func (u *User) ReplyWithText(text string) (ret *tgbotapi.MessageConfig) {
 	return
 }
 
-func RegisterStepMessage(text string) (reply *tgbotapi.MessageConfig) {
-	reply = &tgbotapi.MessageConfig{
-		Text: text,
+func (u *User) RegisterStepMessage(text string) (reply *tgbotapi.MessageConfig) {
+	reply = &tgbotapi.MessageConfig{}
+	reply.ChatID = u.Id
+	switch u.RegiStep {
+	case regWaiting:
+		u.RegiStep = regBegin
+		reply.Text = askName
+		return
 	}
-
 	return
+}
+
+func (u *User) IsReg() bool {
+	return u.RegiStep >= regOver
 }
 
 func RegisterStepInline(q *tgbotapi.CallbackQuery) (reply *tgbotapi.MessageConfig) {
