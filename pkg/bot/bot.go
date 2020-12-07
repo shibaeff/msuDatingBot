@@ -1,11 +1,8 @@
 package bot
 
 import (
-	"fmt"
-	"go.mongodb.org/mongo-driver/x/network/wiremessage"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -85,29 +82,48 @@ func (b *bot) GetStore() store.Store {
 }
 
 func (b *bot) HandleCallbackQuery(query *tgbotapi.CallbackQuery) (reply interface{}, err error) {
-	user, err := b.store.GetUser(int64(query.From.ID))
+	_, err = b.store.GetUser(int64(query.From.ID))
+	return nil, nil
 }
 
 func (b *bot) ReplyMessage(message *tgbotapi.Message) (reply interface{}, err error) {
-
-}
-
-func (b *bot) listUsers() (str string, err error) {
-	users, err := b.store.GetBunch(defaultBunchSize)
+	// check if user is registered
+	// unregistered users are allowed only to do /start, /help, /register
+	_, err = b.store.GetUser(message.Chat.ID)
+	// Putting user in the db
 	if err != nil {
-		log.Fatal(err)
+		u := models.User{
+			Name:       message.Chat.FirstName,
+			Faculty:    "",
+			Gender:     "",
+			WantGender: "",
+			About:      "",
+			Id:         message.Chat.ID,
+			PhotoLink:  "",
+			RegiStep:   waiting,
+			UserName:   message.Chat.UserName,
+		}
+		b.store.PutUser(u)
+	}
+	text := message.Text
+	if text[0] == '/' {
+		split := strings.Split(text, " ")
+		// in case of paired commands
+		if len(split) == 1 {
+			switch text {
+			case startCommand:
+				return replyWithText(greetMsg), nil
+			case helpCommand:
+				return replyWithText("Начинаем регистарцию"), nil
+			}
+		}
+		if len(split) == 2 {
+
+		}
+		reply = replyWithText("Неизвестная команда")
 		return
 	}
-	var raw []string
-	for _, user := range users {
-		log.Println(user.UserName)
-		if user.UserName != "" {
-			raw = append(raw, fmt.Sprintf("@%s\n", user.UserName))
-		} else {
-			raw = append(raw, fmt.Sprintf(inlineMention, user.Name, user.Id))
-		}
-	}
-	return strings.Join(raw, "\n"), nil
+	return replyWithText(notUnderstood), nil
 }
 
 func (b *bot) setTimeLoggers() {

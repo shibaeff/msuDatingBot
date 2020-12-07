@@ -1,12 +1,7 @@
 package bot
 
 import (
-	"log"
-	"strings"
-
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-
-	"echoBot/pkg/models"
 )
 
 const (
@@ -30,23 +25,5 @@ func registerStep(text string) (reply *tgbotapi.MessageConfig) {
 	reply = &tgbotapi.MessageConfig{
 		Text: text,
 	}
-	return
-}
-
-func (b *bot) updateRegStatus(id, status int64) error {
-	return b.store.UpdUserField(id, "registep", status)
-}
-
-func (b *bot) handleGender(user *models.User, query *tgbotapi.CallbackQuery) {
-	b.api.Send(tgbotapi.EditMessageTextConfig{
-
-	})
-}
-
-func (b *bot) registerFlow(user *models.User, text string) (reply *tgbotapi.MessageConfig) {
-	switch user.RegiStep {
-	case waiting:
-
-
 	return
 }

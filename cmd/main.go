@@ -106,89 +106,14 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
-		} else {
-			log.Println(update.CallbackQuery.Data)
-			symbol := update.CallbackQuery.Data
-			api.AnswerCallbackQuery(tgbotapi.CallbackConfig{
-				CallbackQueryID: update.CallbackQuery.ID,
-				Text:            symbol,
-				ShowAlert:       false,
-				URL:             "",
-				CacheTime:       0,
-			})
-			update.Message = &tgbotapi.Message{}
-			update.Message.Text = update.CallbackQuery.Data
-			update.Message.Chat = &tgbotapi.Chat{
-				ID: int64(update.CallbackQuery.From.ID),
-			}
-			update.Message.From = &tgbotapi.User{}
-			update.Message.From.UserName = update.CallbackQuery.From.UserName
-			reply, err = Bot.ReplyMessage(update.Message)
-		}
-
-		switch v := reply.(type) {
-		case *tgbotapi.MessageConfig:
-			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
-			//buttons := []tgbotapi.KeyboardButton{tgbotapi.KeyboardButton{Text: "Hello",},}
-			//msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-			//msg.ReplyToMessageID = update.Message.MessageID
-			//msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(buttons)
-			v.ChatID = update.Message.Chat.ID
-			if v.ParseMode != "markdown" {
-				v.ParseMode = "html"
-			}
-			_, err = api.Send(v)
-			if err != nil {
-				log.Println(err)
-			}
-		case *tgbotapi.PhotoConfig:
-			v.ParseMode = "html"
-			tgbotapi.NewEditMessageText(1, 1, "")
-			_, err := api.Send(v)
-			if err != nil {
-				log.Println(err)
-			}
-		case []*tgbotapi.MessageConfig:
-			for _, item := range v {
-				// item.ChatID = update.Message.Chat.ID
-				_, err = api.Send(item)
-				if err != nil {
+			switch v := reply.(type) {
+			case *tgbotapi.MessageConfig:
+				if _, err := api.Send(v); err != nil {
 					log.Println(err)
 				}
 			}
-		case *bot.MessageToAdmin:
-			config := v.MessageConfig
-			for _, admin := range v.AdminsList {
-				user, err := Bot.GetStore().GetAdmin(admin)
-				if err == nil {
-					config.ChatID = user.Id
-					_, err = api.Send(config)
-					if err != nil {
-						log.Println(err)
-					}
-				}
-			}
-		case *bot.Match:
-			switch v1 := v.Upd.(type) {
-			case *tgbotapi.PhotoConfig:
-				api.Send(v1)
-			case *tgbotapi.MessageConfig:
-				api.Send(v1)
-			}
-			_, err = api.Send(v.Msg1)
-			if err != nil {
-				log.Println(err)
-			}
-			_, err = api.Send(v.Msg2)
-			if err != nil {
-				log.Println(err)
-			}
-		case tgbotapi.DocumentConfig:
-			_, err = api.Send(v)
-			if err != nil {
-				log.Println(err)
-			}
+		} else {
+			Bot.HandleCallbackQuery(update.CallbackQuery)
 		}
-		client.Ping(context.TODO(), nil)
 	}
 }
