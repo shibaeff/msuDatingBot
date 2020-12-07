@@ -7,12 +7,18 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+const (
+	EventLike    = "like"
+	EventMatch   = "match"
+	EventView    = "view"
+	EventDislike = "dislike"
+)
+
+type Options []bson.E
 type Registry interface {
-	AddToList(who, whome int64) error
-	GetList(whose int64) ([]Entry, error)
-	DeleteItems(int64) error
-	DeleteItem(int64, int64) error
-	IsPresent(who int64, whome int64) bool
+	AddEvent(Entry) error
+	GetEvents([]bson.E) ([]Entry, error)
+	DeleteEvents([]bson.E) error
 }
 
 type registry struct {
@@ -22,17 +28,16 @@ type registry struct {
 type Entry struct {
 	Who   int64
 	Whome int64
+	Event string
 }
 
-func (r *registry) AddToList(who, whome int64) (err error) {
-	entry := Entry{who, whome}
-	_, err = r.collection.InsertOne(context.TODO(), entry)
+func (r *registry) AddEvent(e Entry) (err error) {
+	_, err = r.collection.InsertOne(context.TODO(), e)
 	return
 }
 
-func (r *registry) GetList(whose int64) (items []Entry, err error) {
-	filter := bson.D{{"who", whose}}
-	cur, err := r.collection.Find(context.TODO(), filter)
+func (r *registry) GetEvents(options []bson.E) (items []Entry, err error) {
+	cur, err := r.collection.Find(context.TODO(), options)
 	if err != nil {
 		return
 	}
@@ -47,26 +52,18 @@ func (r *registry) GetList(whose int64) (items []Entry, err error) {
 	return
 }
 
-func (r *registry) IsPresent(who int64, whome int64) bool {
-	filter := bson.D{{"who", who}, {"whome", whome}}
-	cur := r.collection.FindOne(context.TODO(), filter)
+func (r *registry) IsPresent(options []bson.E) bool {
+	cur := r.collection.FindOne(context.TODO(), options)
 	if cur == nil {
 		return false
 	}
 	var item Entry
-	cur.Decode(&item)
-	return item.Who == who && item.Whome == whome
+	err := cur.Decode(&item)
+	return err != nil
 }
 
-func (r *registry) DeleteItems(whose int64) (err error) {
-	filter := bson.D{{"who", whose}}
-	_, err = r.collection.DeleteMany(context.TODO(), filter)
-	return err
-}
-
-func (r *registry) DeleteItem(who, whome int64) (err error) {
-	filter := bson.D{{"who", who}, {"whome", whome}}
-	_, err = r.collection.DeleteMany(context.TODO(), filter)
+func (r *registry) DeleteEvents(options []bson.E) (err error) {
+	_, err = r.collection.DeleteMany(context.TODO(), options)
 	return err
 }
 

@@ -26,7 +26,7 @@ func (b *bot) dumpEntire() {
 		var item DumpItem
 		likes, _ := b.store.GetLikes(user.Id)
 		seen, _ := b.store.GetSeen(user.Id)
-		matches, _ := b.store.GetMatchesRegistry().GetList(user.Id)
+		matches, _ := b.store.GetMatchesRegistry().GetEvents(user.Id)
 		for _, like := range likes {
 			item.Likes = append(item.Likes, like)
 		}

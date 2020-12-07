@@ -225,7 +225,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 		case likeCommand, likeEmoji:
 			entry, e := b.store.GetUnseen(user.Id)
 			b.store.GetUnseenRegistry().DeleteItem(user.Id, entry[0].Whome)
-			b.store.GetSeenRegistry().AddToList(user.Id, entry[0].Whome)
+			b.store.GetSeenRegistry().AddEvent(user.Id, entry[0].Whome)
 			if e != nil {
 				reply = replyWithText("failed to put your like")
 				return
@@ -265,10 +265,10 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 							Msg2: reply2,
 						}
 						if !b.store.GetMatchesRegistry().IsPresent(user.Id, likee_user.Id) {
-							b.store.GetMatchesRegistry().AddToList(user.Id, likee_user.Id)
+							b.store.GetMatchesRegistry().AddEvent(user.Id, likee_user.Id)
 						}
 						if !b.store.GetMatchesRegistry().IsPresent(likee_user.Id, user.Id) {
-							b.store.GetMatchesRegistry().AddToList(likee_user.Id, user.Id)
+							b.store.GetMatchesRegistry().AddEvent(likee_user.Id, user.Id)
 						}
 						b.actionsLog.Printf("%d MATCH %d\n", user.Id, likee)
 						return reply, nil

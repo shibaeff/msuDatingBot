@@ -96,7 +96,7 @@ func getUserLink(user *models.User) (raw string) {
 	return
 }
 func (b *bot) prepareMatches(userId int64) (resp string, err error) {
-	entry, err := b.store.GetMatchesRegistry().GetList(userId)
+	entry, err := b.store.GetMatchesRegistry().GetEvents(userId)
 	if err != nil {
 		return "Матчей нет", nil
 	}

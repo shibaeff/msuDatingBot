@@ -87,27 +87,27 @@ func (s *store) DeleteUser(id int64) (err error) {
 }
 
 func (s *store) PutLike(who, whome int64) (err error) {
-	err = s.likesRegistry.AddToList(who, whome)
+	err = s.likesRegistry.AddEvent(who, whome)
 	return
 }
 
 func (s *store) GetLikes(whose int64) (likes []Entry, err error) {
-	likes, err = s.likesRegistry.GetList(whose)
+	likes, err = s.likesRegistry.GetEvents(whose)
 	return
 }
 
 func (s *store) PutUnseen(who, whome int64) (err error) {
-	err = s.unseenRegistry.AddToList(who, whome)
+	err = s.unseenRegistry.AddEvent(who, whome)
 	return
 }
 
 func (s *store) GetUnseen(whose int64) (seen []Entry, err error) {
-	seen, err = s.unseenRegistry.GetList(whose)
+	seen, err = s.unseenRegistry.GetEvents(whose)
 	return
 }
 
 func (s *store) GetSeen(whose int64) (seen []Entry, err error) {
-	seen, err = s.seenRegistry.GetList(whose)
+	seen, err = s.seenRegistry.GetEvents(whose)
 	return
 }
 
@@ -165,16 +165,16 @@ func (s *store) GetMatchesRegistry() Registry {
 }
 
 func (s *store) DeleteFromRegistires(id int64) (err error) {
-	s.matchesRegistry.DeleteItems(id)
-	s.likesRegistry.DeleteItems(id)
-	//s.unseenRegistry.DeleteItems(id)
+	s.matchesRegistry.DeleteEvents(id)
+	s.likesRegistry.DeleteEvents(id)
+	//s.unseenRegistry.DeleteEvents(id)
 	users, _ := s.GetAllUsers()
 	for _, user := range users {
 		if user.Id != id {
-			s.unseenRegistry.AddToList(id, user.Id)
+			s.unseenRegistry.AddEvent(id, user.Id)
 		}
 	}
-	s.seenRegistry.DeleteItems(id)
+	s.seenRegistry.DeleteEvents(id)
 	return nil
 }
 
