@@ -18,11 +18,9 @@ import (
 )
 
 const (
-	dbName              = "main"
-	usersCollectionName = "users"
-	likes               = "likes"
-	unseen              = "unseen"
-	matches             = "matches"
+	dbName                = "main"
+	usersCollectionName   = "users"
+	actionsCollectionName = "actions"
 
 	nextEmoji = "➡"
 	likeEmoji = "👍🏻"
@@ -61,11 +59,8 @@ func main() {
 		log.Fatal(err)
 	}
 	users := PrepareCollection(client, usersCollectionName)
-	likes := PrepareCollection(client, likes)
-	unseen := PrepareCollection(client, unseen)
-	matches := PrepareCollection(client, matches)
-	seen := PrepareCollection(client, "seen")
-	store := store.NewStore(users, []*mongo.Collection{likes, unseen, matches, seen})
+	actions := PrepareCollection(client, actionsCollectionName)
+	store := store.NewStore(users, actions)
 
 	token, exists := os.LookupEnv("TELEGRAM_TOKEN")
 	if !exists {
@@ -107,7 +102,7 @@ func main() {
 
 		var reply interface{}
 		if update.Message != nil {
-			reply, err = Bot.Reply(update.Message)
+			reply, err = Bot.ReplyMessage(update.Message)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -128,7 +123,7 @@ func main() {
 			}
 			update.Message.From = &tgbotapi.User{}
 			update.Message.From.UserName = update.CallbackQuery.From.UserName
-			reply, err = Bot.Reply(update.Message)
+			reply, err = Bot.ReplyMessage(update.Message)
 		}
 
 		switch v := reply.(type) {
