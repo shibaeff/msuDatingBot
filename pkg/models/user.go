@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 const (
@@ -10,8 +11,35 @@ const (
 		"<strong>Пол:</strong> %s\n" +
 		"<strong>Пол собеседника:</strong> %s\n" +
 		"<strong>О себе:</strong> %s\n"
-	//"<strong>Username:</strong> %s\n"
-	//"<strong>ID:</strong> %d"
+
+	nextCommand    = "/next"
+	helpCommand    = "/help"
+	matchesCommand = "/matches"
+	profileCommand = "/profile"
+
+	regBegin      = 0
+	regName       = 1
+	regGender     = 2
+	regWantGender = 3
+	regFaculty    = 4
+	regAbout      = 5
+	regPhoto      = 6
+	regOver       = 7
+
+	askName       = "Пожалуйста, введите свое имя"
+	askGender     = "Пожалуйста, введите Ваш пол м/ж"
+	askWantGender = "Кого ищем: м/ж/любой?"
+	askFaculty    = "С какого Вы факультета?"
+	askAbout      = "Напишите немного о себе"
+)
+
+var (
+	profileButton = tgbotapi.KeyboardButton{Text: profileCommand}
+	helpButton    = tgbotapi.KeyboardButton{Text: helpCommand}
+	matchesButton = tgbotapi.KeyboardButton{Text: matchesCommand}
+	nextButton    = tgbotapi.KeyboardButton{Text: nextCommand}
+	menuButtons   = []tgbotapi.KeyboardButton{profileButton, helpButton, matchesButton, nextButton}
+	menuKeyboard  = tgbotapi.NewReplyKeyboard(menuButtons)
 )
 
 type User struct {
@@ -26,6 +54,26 @@ type User struct {
 	UserName   string
 }
 
+func (u *User) ReplyWithText(text string) (ret *tgbotapi.MessageConfig) {
+	ret = &tgbotapi.MessageConfig{
+		Text: text,
+	}
+	ret.ReplyMarkup = menuKeyboard
+	ret.ChatID = u.Id
+	return
+}
+
+func RegisterStepMessage(text string) (reply *tgbotapi.MessageConfig) {
+	reply = &tgbotapi.MessageConfig{
+		Text: text,
+	}
+
+	return
+}
+
+func RegisterStepInline(q *tgbotapi.CallbackQuery) (reply *tgbotapi.MessageConfig) {
+	return
+}
 func (u *User) String() string {
 	return fmt.Sprintf(stringify, u.Name, u.Faculty, u.Gender, u.WantGender, u.About)
 }

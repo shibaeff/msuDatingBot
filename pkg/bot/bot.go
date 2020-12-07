@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"context"
 	"log"
 	"os"
 	"strings"
@@ -50,18 +51,9 @@ const (
 	pleaseSendAgain   = "Пожалуйста, сделайте запрос еще раз"
 )
 
-var (
-	profileButton = tgbotapi.KeyboardButton{Text: profileCommand}
-	helpButton    = tgbotapi.KeyboardButton{Text: helpCommand}
-	matchesButton = tgbotapi.KeyboardButton{Text: matchesCommand}
-	nextButton    = tgbotapi.KeyboardButton{Text: nextCommand}
-	menuButtons   = []tgbotapi.KeyboardButton{profileButton, helpButton, matchesButton, nextButton}
-	menuKeyboard  = tgbotapi.NewReplyKeyboard(menuButtons)
-)
-
 type Bot interface {
-	ReplyMessage(message *tgbotapi.Message) (interface{}, error)
-	HandleCallbackQuery(query *tgbotapi.CallbackQuery) (interface{}, error)
+	ReplyMessage(ctx context.Context, message *tgbotapi.Message) (interface{}, error)
+	HandleCallbackQuery(ctx context.Context, query *tgbotapi.CallbackQuery) (interface{}, error)
 	GetStore() store.Store
 }
 
@@ -81,15 +73,15 @@ func (b *bot) GetStore() store.Store {
 	return b.store
 }
 
-func (b *bot) HandleCallbackQuery(query *tgbotapi.CallbackQuery) (reply interface{}, err error) {
+func (b *bot) HandleCallbackQuery(context context.Context, query *tgbotapi.CallbackQuery) (reply interface{}, err error) {
 	_, err = b.store.GetUser(int64(query.From.ID))
 	return nil, nil
 }
 
-func (b *bot) ReplyMessage(message *tgbotapi.Message) (reply interface{}, err error) {
+func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (reply interface{}, err error) {
 	// check if user is registered
 	// unregistered users are allowed only to do /start, /help, /register
-	_, err = b.store.GetUser(message.Chat.ID)
+	user, err := b.store.GetUser(message.Chat.ID)
 	// Putting user in the db
 	if err != nil {
 		u := models.User{
@@ -104,6 +96,7 @@ func (b *bot) ReplyMessage(message *tgbotapi.Message) (reply interface{}, err er
 			UserName:   message.Chat.UserName,
 		}
 		b.store.PutUser(u)
+		user = &u
 	}
 	text := message.Text
 	if text[0] == '/' {
@@ -112,18 +105,20 @@ func (b *bot) ReplyMessage(message *tgbotapi.Message) (reply interface{}, err er
 		if len(split) == 1 {
 			switch text {
 			case startCommand:
-				return replyWithText(greetMsg), nil
+				return user.ReplyWithText(greetMsg), nil
+			case registerCommand:
+				return user.ReplyWithText("Начинаем регистарцию"), nil
 			case helpCommand:
-				return replyWithText("Начинаем регистарцию"), nil
+				return user.ReplyWithText(helpMsg), nil
 			}
 		}
 		if len(split) == 2 {
 
 		}
-		reply = replyWithText("Неизвестная команда")
+		reply = user.ReplyWithText("Неизвестная команда")
 		return
 	}
-	return replyWithText(notUnderstood), nil
+	return user.ReplyWithText(notUnderstood), nil
 }
 
 func (b *bot) setTimeLoggers() {

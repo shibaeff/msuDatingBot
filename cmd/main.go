@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/joho/godotenv"
@@ -102,18 +103,24 @@ func main() {
 
 		var reply interface{}
 		if update.Message != nil {
-			reply, err = Bot.ReplyMessage(update.Message)
-			if err != nil {
-				log.Fatal(err)
-			}
-			switch v := reply.(type) {
-			case *tgbotapi.MessageConfig:
-				if _, err := api.Send(v); err != nil {
-					log.Println(err)
+			ctx, _ := context.WithTimeout(context.Background(), time.Second)
+			go func() {
+				reply, err = Bot.ReplyMessage(ctx, update.Message)
+				if err != nil {
+					log.Fatal(err)
 				}
-			}
+				switch v := reply.(type) {
+				case *tgbotapi.MessageConfig:
+					if _, err := api.Send(v); err != nil {
+						log.Println(err)
+					}
+				}
+			}()
 		} else {
-			Bot.HandleCallbackQuery(update.CallbackQuery)
+			ctx, _ := context.WithTimeout(context.Background(), time.Second)
+			go func() {
+				Bot.HandleCallbackQuery(ctx, update.CallbackQuery)
+			}()
 		}
 	}
 }

@@ -18,18 +18,18 @@ const (
 	inlineMention = "[%s](tg://user?id=%d)"
 )
 
-func (b *bot) notifyUsers(message string) (list []*tgbotapi.MessageConfig, err error) {
-	users, err := b.store.GetAllUsers()
-	if err != nil {
-		return
-	}
-	for _, user := range users {
-		res := replyWithText(message)
-		res.ChatID = user.Id
-		list = append(list, res)
-	}
-	return
-}
+//func (b *bot) notifyUsers(message string) (list []*tgbotapi.MessageConfig, err error) {
+//	users, err := b.store.GetAllUsers()
+//	if err != nil {
+//		return
+//	}
+//	for _, user := range users {
+//		res := replyWithText(message)
+//		res.ChatID = user.Id
+//		list = append(list, res)
+//	}
+//	return
+//}
 
 func (b *bot) ensureGender(u1, u2 *models.User) bool {
 	return u1.Id != u2.Id &&
@@ -95,33 +95,26 @@ func getUserLink(user *models.User) (raw string) {
 	}
 	return
 }
-func (b *bot) prepareMatches(userId int64) (resp string, err error) {
-	entry, err := b.store.GetMatchesRegistry().GetEvents(userId)
-	if err != nil {
-		return "Матчей нет", nil
-	}
-	if len(entry) == 0 {
-		return "Матчей нет", nil
-	}
-	raw := []string{}
-	for _, match := range entry {
-		user, err := b.store.GetUser(match.Whome)
-		if err != nil {
-			continue
-		}
-		raw = append(raw, getUserLink(user))
-	}
-	resp = matchesList + strings.Join(raw, "\n")
-	return
-}
 
-func replyWithText(text string) (ret *tgbotapi.MessageConfig) {
-	ret = &tgbotapi.MessageConfig{
-		Text: text,
-	}
-	ret.ReplyMarkup = menuKeyboard
-	return
-}
+//func (b *bot) prepareMatches(userId int64) (resp string, err error) {
+//	entry, err := b.store.GetMatchesRegistry().GetEvents(userId)
+//	if err != nil {
+//		return "Матчей нет", nil
+//	}
+//	if len(entry) == 0 {
+//		return "Матчей нет", nil
+//	}
+//	raw := []string{}
+//	for _, match := range entry {
+//		user, err := b.store.GetUser(match.Whome)
+//		if err != nil {
+//			continue
+//		}
+//		raw = append(raw, getUserLink(user))
+//	}
+//	resp = matchesList + strings.Join(raw, "\n")
+//	return
+//}
 
 func replyWithPhoto(u *models.User, to int64) (ret *tgbotapi.PhotoConfig) {
 	ret = &tgbotapi.PhotoConfig{
@@ -146,14 +139,14 @@ func find(slice []store.Entry, val int64) (int, bool) {
 	return -1, false
 }
 
-func (b *bot) hide(user *models.User) {
-	users, _ := b.store.GetAllUsers()
-	for _, item := range users {
-		if item.Id != user.Id {
-			b.store.GetUnseenRegistry().DeleteItem(item.Id, user.Id)
-			b.store.GetSeenRegistry().DeleteItem(item.Id, user.Id)
-			b.store.GetMatchesRegistry().DeleteItem(item.Id, user.Id)
-			b.store.GetLikesRegistry().DeleteItem(item.Id, user.Id)
-		}
-	}
-}
+//func (b *bot) hide(user *models.User) {
+//	users, _ := b.store.GetAllUsers()
+//	for _, item := range users {
+//		if item.Id != user.Id {
+//			b.store.GetUnseenRegistry().DeleteItem(item.Id, user.Id)
+//			b.store.GetSeenRegistry().DeleteItem(item.Id, user.Id)
+//			b.store.GetMatchesRegistry().DeleteItem(item.Id, user.Id)
+//			b.store.GetLikesRegistry().DeleteItem(item.Id, user.Id)
+//		}
+//	}
+//}
