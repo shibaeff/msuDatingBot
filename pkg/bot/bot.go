@@ -102,7 +102,12 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 	}
 	text := message.Text
 	if !user.IsReg() {
-		reply = user.RegisterStepMessage(text)
+		reply, err = user.RegisterStepMessage(text)
+		if err == nil {
+			b.store.DeleteUser(user.Id)
+			b.store.PutUser(*user)
+		}
+		return reply, nil
 	}
 	if text[0] == '/' {
 		split := strings.Split(text, " ")

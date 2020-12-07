@@ -64,7 +64,7 @@ func (u *User) ReplyWithText(text string) (ret *tgbotapi.MessageConfig) {
 	return
 }
 
-func (u *User) RegisterStepMessage(text string) (reply *tgbotapi.MessageConfig) {
+func (u *User) RegisterStepMessage(text string) (reply *tgbotapi.MessageConfig, err error) {
 	reply = &tgbotapi.MessageConfig{}
 	reply.ChatID = u.Id
 	switch u.RegiStep {
