@@ -3,7 +3,6 @@ package bot
 import (
 	"fmt"
 	"log"
-	"math/rand"
 	"os"
 	"strconv"
 	"strings"
@@ -218,20 +217,7 @@ func (b *bot) Reply(message *tgbotapi.Message) (reply interface{}, err error) {
 			reply = replyWithText(strings.Join(ret, " "))
 			return
 		case nextEmoji:
-			if user.RegiStep < regOver {
-				reply = replyWithText(notRegistered)
-				return
-			}
-			unseen, e := b.store.GetUnseen(user.Id)
-			b.store.GetUnseenRegistry().DeleteItem(user.Id, unseen[0].Whome)
-			unseen, e = b.store.GetUnseen(user.Id)
-			if len(unseen) == 0 || e != nil {
-				reply = replyWithText("Вы просмотрели всех пользователей на данный момент")
-				return reply, nil
-			}
-			unseen_user, _ := b.store.GetUser(unseen[rand.Int()%len(unseen)].Whome)
-			b.actionsLog.Printf("%d VIEWED %d\n", user.Id, unseen_user.Id)
-			reply = replyWithCard(unseen_user, user.Id)
+			reply = b.dislike(user)
 			return
 		case nextCommand:
 			reply = b.next(user)
