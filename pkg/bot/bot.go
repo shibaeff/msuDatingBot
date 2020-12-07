@@ -81,6 +81,11 @@ func (b *bot) HandleCallbackQuery(context context.Context, query *tgbotapi.Callb
 }
 
 func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (reply interface{}, err error) {
+	// fast track
+	switch message.Text {
+	case deleteCommand:
+		return b.deleteUser(message.Chat.ID), nil
+	}
 	// check if user is registered
 	// unregistered users are allowed only to do /start, /help, /register
 	user, err := b.store.GetUser(message.Chat.ID)
@@ -118,8 +123,9 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 				return user.ReplyWithText(greetMsg), nil
 			case registerCommand:
 				user.RegiStep = regBegin
-				b.store.UpdUserField(user.Id, "registep", user.RegiStep)
-				return user.ReplyWithText("Начинаем регистарцию"), nil
+				// b.store.UpdUserField(user.Id, "registep", user.RegiStep)
+				reply, _ = user.RegisterStepMessage(text)
+				return
 			case helpCommand:
 				return user.ReplyWithText(helpMsg), nil
 			}

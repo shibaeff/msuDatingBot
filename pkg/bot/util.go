@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson"
 	"os"
 	"strings"
 
@@ -18,6 +19,17 @@ const (
 	inlineMention = "[%s](tg://user?id=%d)"
 )
 
+func (b *bot) deleteUser(id int64) *tgbotapi.MessageConfig {
+	b.store.DeleteUser(id)
+	b.store.GetActions().DeleteEvents(store.Options{bson.E{"who", id}})
+	b.store.GetActions().DeleteEvents(store.Options{bson.E{"whome", id}})
+	reply := &tgbotapi.MessageConfig{}
+	reply.Text = "Успешное удаление"
+	reply.ChatID = id
+	return reply
+}
+
+// //
 //func (b *bot) notifyUsers(message string) (list []*tgbotapi.MessageConfig, err error) {
 //	users, err := b.store.GetAllUsers()
 //	if err != nil {

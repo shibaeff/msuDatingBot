@@ -28,7 +28,7 @@ const (
 	regOver       = 7
 
 	askName       = "Пожалуйста, введите свое имя"
-	askGender     = "Пожалуйста, введите Ваш пол м/ж"
+	askGender     = "Пожалуйста, введите Ваш пол"
 	askWantGender = "Кого ищем: м/ж/любой?"
 	askFaculty    = "С какого Вы факультета?"
 	askAbout      = "Напишите немного о себе"
@@ -68,9 +68,15 @@ func (u *User) RegisterStepMessage(text string) (reply *tgbotapi.MessageConfig, 
 	reply = &tgbotapi.MessageConfig{}
 	reply.ChatID = u.Id
 	switch u.RegiStep {
-	case regWaiting:
-		u.RegiStep = regBegin
+	case regBegin:
+		u.RegiStep = regName
 		reply.Text = askName
+		return
+	case regName:
+		u.RegiStep = regGender
+		u.Name = text
+		reply.Text = askGender
+		reply.ReplyMarkup = genderKeyboard
 		return
 	}
 	return
