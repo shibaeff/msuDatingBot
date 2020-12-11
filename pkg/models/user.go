@@ -86,7 +86,7 @@ func (u *User) RegisterStepMessage(text string) (reply *tgbotapi.MessageConfig, 
 		reply.ReplyMarkup = genderKeyboard
 		return
 	}
-	return
+	return u.ReplyWithText("Пожалуйста, следуйте подсказкам бота!"), nil
 }
 
 func (u *User) IsReg() bool {
@@ -105,8 +105,17 @@ func (u *User) RegisterStepInline(q *tgbotapi.CallbackQuery) (reply *tgbotapi.Me
 		reply = u.ReplyWithText(askWantGender)
 		reply.ReplyMarkup = wantGenderKeyboard
 		return
+	case regWantGender:
+		warning, err := genderController.Verify(q.Data)
+		if err != nil {
+			return u.ReplyWithText(warning)
+		}
+		u.RegiStep = regFaculty
+		u.WantGender = q.Data
+		reply = u.ReplyWithText(askFaculty)
+		return
 	}
-	return
+	return u.ReplyWithText("Пожалуйста, следуйте подсказкам бота!")
 }
 
 func (u *User) String() string {
