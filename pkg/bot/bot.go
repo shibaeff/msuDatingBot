@@ -82,10 +82,11 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 	case deleteCommand:
 		return b.deleteUser(message.Chat.ID), nil
 	}
-	var user *models.User
+	user := &models.User{}
 	text := message.Text
 	reply = handleSimpleCommands(user, text)
 	if reply != nil {
+		reply.(*tgbotapi.MessageConfig).ChatID = message.Chat.ID
 		return reply, nil
 	}
 	// check if user is registered
