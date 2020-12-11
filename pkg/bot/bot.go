@@ -82,9 +82,15 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 	case deleteCommand:
 		return b.deleteUser(message.Chat.ID), nil
 	}
+	var user *models.User
+	text := message.Text
+	reply = handleSimpleCommands(user, text)
+	if reply != nil {
+		return reply, nil
+	}
 	// check if user is registered
 	// unregistered users are allowed only to do /start, /help, /register
-	user, err := b.store.GetUser(message.Chat.ID)
+	user, err = b.store.GetUser(message.Chat.ID)
 	// Putting user in the db
 	if err != nil {
 		u := models.User{
@@ -101,7 +107,6 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 		b.store.PutUser(u)
 		user = &u
 	}
-	text := message.Text
 	if !user.IsReg() {
 		reply, err = user.RegisterStepMessage(text)
 		if err == nil {
@@ -115,15 +120,11 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 		// in case of paired commands
 		if len(split) == 1 {
 			switch text {
-			case startCommand:
-				return user.ReplyWithText(greetMsg), nil
 			case registerCommand:
 				user.RegiStep = regBegin
 				// b.store.UpdUserField(user.Id, "registep", user.RegiStep)
 				reply, _ = user.RegisterStepMessage(text)
 				return
-			case helpCommand:
-				return user.ReplyWithText(helpMsg), nil
 			}
 		}
 		if len(split) == 2 {
@@ -135,6 +136,15 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 	return user.ReplyWithText(notUnderstood), nil
 }
 
+func handleSimpleCommands(user *models.User, text string) (reply *tgbotapi.MessageConfig) {
+	switch text {
+	case helpCommand:
+		return user.ReplyWithText(helpMsg)
+	case startCommand:
+		return user.ReplyWithText(greetMsg)
+	}
+	return nil
+}
 func (b *bot) setTimeLoggers() {
 	b.timeloggers = make(map[string]timelogger.TimeLogger)
 	b.timeloggers[startCommand] = timelogger.NewTimeLogger(startCommand, timeLoggingFileName)
