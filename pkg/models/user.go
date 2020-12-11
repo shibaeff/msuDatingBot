@@ -102,7 +102,7 @@ func (u *User) RegisterStepInline(q *tgbotapi.CallbackQuery) (reply *tgbotapi.Me
 		}
 		u.RegiStep = regWantGender
 		u.Gender = q.Data
-		reply.Text = askWantGender
+		reply = u.ReplyWithText(askWantGender)
 		reply.ReplyMarkup = wantGenderKeyboard
 		return
 	}

@@ -43,6 +43,15 @@ func init() {
 	}
 }
 
+func switchReply(api *tgbotapi.BotAPI, reply interface{}) {
+	switch v := reply.(type) {
+	case *tgbotapi.MessageConfig:
+		if _, err := api.Send(v); err != nil {
+			log.Println(err)
+		}
+	}
+}
+
 func main() {
 	go func() {
 		err := http.ListenAndServe(":3000", nil)
@@ -109,17 +118,16 @@ func main() {
 				if err != nil {
 					log.Fatal(err)
 				}
-				switch v := reply.(type) {
-				case *tgbotapi.MessageConfig:
-					if _, err := api.Send(v); err != nil {
-						log.Println(err)
-					}
-				}
+				switchReply(api, reply)
 			}()
 		} else {
 			ctx, _ := context.WithTimeout(context.Background(), time.Second)
 			go func() {
-				Bot.HandleCallbackQuery(ctx, update.CallbackQuery)
+				reply, _ = Bot.HandleCallbackQuery(ctx, update.CallbackQuery)
+				switchReply(api, reply)
+				if err != nil {
+					log.Fatal(err)
+				}
 			}()
 		}
 	}
