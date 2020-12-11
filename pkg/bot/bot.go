@@ -99,7 +99,7 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 	text := message.Text
 	r := handleSimpleCommands(user, text)
 	if r != nil {
-		reply.(*tgbotapi.MessageConfig).ChatID = message.Chat.ID
+		r.ChatID = message.Chat.ID
 		return r, nil
 	}
 	// check if user is registered
