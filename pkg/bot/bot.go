@@ -8,7 +8,6 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
-	"echoBot/pkg/bot/controllers"
 	"echoBot/pkg/models"
 	"echoBot/pkg/store"
 	"echoBot/pkg/timelogger"
@@ -60,15 +59,12 @@ type Bot interface {
 }
 
 type bot struct {
-	store            store.Store
-	api              *tgbotapi.BotAPI
-	genderController controllers.Controller
-	photoController  controllers.Controller
-	aboutController  controllers.Controller
-	logFile          *os.File
-	timeloggers      map[string]timelogger.TimeLogger
-	adminsList       []string
-	actionsLog       *log.Logger
+	store       store.Store
+	api         *tgbotapi.BotAPI
+	logFile     *os.File
+	timeloggers map[string]timelogger.TimeLogger
+	adminsList  []string
+	actionsLog  *log.Logger
 }
 
 func (b *bot) GetStore() store.Store {
@@ -154,13 +150,10 @@ func (b *bot) setActionLoggers() {
 
 func NewBot(store store.Store, api *tgbotapi.BotAPI, logFile *os.File, admins []string) (b Bot) {
 	b = &bot{
-		store:            store,
-		api:              api,
-		genderController: &controllers.GenderController{},
-		photoController:  &controllers.PhotoController{},
-		aboutController:  &controllers.AboutController{},
-		logFile:          logFile,
-		adminsList:       admins,
+		store:      store,
+		api:        api,
+		logFile:    logFile,
+		adminsList: admins,
 	}
 	b.(*bot).setTimeLoggers()
 	b.(*bot).setActionLoggers()

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"echoBot/pkg/bot/controllers"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -34,6 +35,12 @@ const (
 	askAbout      = "Напишите немного о себе"
 )
 
+// controllers
+var (
+	genderController controllers.Controller = &controllers.GenderController{}
+	photoController  controllers.Controller = &controllers.PhotoController{}
+	aboutController  controllers.Controller = &controllers.AboutController{}
+)
 var (
 	profileButton = tgbotapi.KeyboardButton{Text: profileCommand}
 	helpButton    = tgbotapi.KeyboardButton{Text: helpCommand}
@@ -86,9 +93,22 @@ func (u *User) IsReg() bool {
 	return u.RegiStep >= regOver
 }
 
-func RegisterStepInline(q *tgbotapi.CallbackQuery) (reply *tgbotapi.MessageConfig) {
+func (u *User) RegisterStepInline(q *tgbotapi.CallbackQuery) (reply *tgbotapi.MessageConfig) {
+	switch u.RegiStep {
+	case regGender:
+		warning, err := genderController.Verify(q.Data)
+		if err != nil {
+			return u.ReplyWithText(warning)
+		}
+		u.RegiStep = regWantGender
+		u.Gender = q.Data
+		reply.Text = askWantGender
+		reply.ReplyMarkup = wantGenderKeyboard
+		return
+	}
 	return
 }
+
 func (u *User) String() string {
 	return fmt.Sprintf(stringify, u.Name, u.Faculty, u.Gender, u.WantGender, u.About)
 }
