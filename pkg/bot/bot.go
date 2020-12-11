@@ -72,7 +72,20 @@ func (b *bot) GetStore() store.Store {
 }
 
 func (b *bot) HandleCallbackQuery(context context.Context, query *tgbotapi.CallbackQuery) (reply interface{}, err error) {
-	_, err = b.store.GetUser(int64(query.From.ID))
+	user, err := b.store.GetUser(int64(query.From.ID))
+	b.api.AnswerCallbackQuery(tgbotapi.CallbackConfig{
+		CallbackQueryID: query.ID,
+		Text:            "",
+		ShowAlert:       false,
+		URL:             "",
+		CacheTime:       0,
+	})
+	if !user.IsReg() {
+		reply = user.RegisterStepInline(query)
+		b.store.DeleteUser(user.Id)
+		b.store.PutUser(*user)
+		return
+	}
 	return nil, nil
 }
 
@@ -84,10 +97,10 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 	}
 	user := &models.User{}
 	text := message.Text
-	reply = handleSimpleCommands(user, text)
-	if reply != nil {
+	r := handleSimpleCommands(user, text)
+	if r != nil {
 		reply.(*tgbotapi.MessageConfig).ChatID = message.Chat.ID
-		return reply, nil
+		return r, nil
 	}
 	// check if user is registered
 	// unregistered users are allowed only to do /start, /help, /register

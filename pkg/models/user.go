@@ -75,7 +75,7 @@ func (u *User) RegisterStepMessage(text string) (reply *tgbotapi.MessageConfig, 
 	reply = &tgbotapi.MessageConfig{}
 	reply.ChatID = u.Id
 	switch u.RegiStep {
-	case regBegin:
+	case regBegin, regWaiting:
 		u.RegiStep = regName
 		reply.Text = askName
 		return
