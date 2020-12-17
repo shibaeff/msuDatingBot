@@ -71,8 +71,10 @@ func (u *User) ReplyWithText(text string) (ret *tgbotapi.MessageConfig) {
 	return
 }
 
-func (u *User) RegisterStepMessage(text string) (reply *tgbotapi.MessageConfig, err error) {
+func (u *User) RegisterStepMessage(message *tgbotapi.Message) (reply *tgbotapi.MessageConfig, err error) {
+	text := message.Text
 	reply = &tgbotapi.MessageConfig{}
+	reply.ParseMode = "html"
 	reply.ChatID = u.Id
 	switch u.RegiStep {
 	case regBegin, regWaiting:
@@ -91,14 +93,25 @@ func (u *User) RegisterStepMessage(text string) (reply *tgbotapi.MessageConfig, 
 		reply.Text = askAbout
 		return
 	case regAbout:
-		errorMsg, err := aboutController.Verify(text)
-		if err != nil {
+		errorMsg, e := aboutController.Verify(text)
+		if e != nil {
 			reply.Text = errorMsg
 			return
 		}
-		u.RegiStep = regOver
-		reply.Text = u.String()
+		u.RegiStep = regPhoto
+		reply.Text = "Загрузите свое фото"
 		return
+	case regPhoto:
+		errorMsg, e := photoController.Verify(text)
+		if e != nil {
+			reply.Text = errorMsg
+			return
+		}
+		photos := *message.Photo
+		photo := photos[0]
+		u.PhotoLink = photo.FileID
+		u.RegiStep = regOver
+		reply.Text = "Регистрация окончена\n" + u.String()
 	}
 	return u.ReplyWithText("Пожалуйста, следуйте подсказкам бота!"), nil
 }

@@ -122,7 +122,7 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 		user = &u
 	}
 	if !user.IsReg() {
-		reply, err = user.RegisterStepMessage(text)
+		reply, err = user.RegisterStepMessage(message)
 		if err == nil {
 			b.store.DeleteUser(user.Id)
 			b.store.PutUser(*user)
@@ -137,7 +137,7 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 			case registerCommand:
 				user.RegiStep = regBegin
 				// b.store.UpdUserField(user.Id, "registep", user.RegiStep)
-				reply, _ = user.RegisterStepMessage(text)
+				reply, _ = user.RegisterStepMessage(message)
 				return
 			}
 		}
