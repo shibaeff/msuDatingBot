@@ -4,6 +4,7 @@ import (
 	"echoBot/pkg/bot/controllers"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"strings"
 )
 
 const (
@@ -37,9 +38,10 @@ const (
 
 // controllers
 var (
-	genderController controllers.Controller = &controllers.GenderController{}
-	photoController  controllers.Controller = &controllers.PhotoController{}
-	aboutController  controllers.Controller = &controllers.AboutController{}
+	genderController  controllers.Controller = &controllers.GenderController{}
+	photoController   controllers.Controller = &controllers.PhotoController{}
+	aboutController   controllers.Controller = &controllers.AboutController{}
+	facultyController controllers.Controller = controllers.NewFacultyController()
 )
 var (
 	profileButton = tgbotapi.KeyboardButton{Text: profileCommand}
@@ -88,8 +90,13 @@ func (u *User) RegisterStepMessage(message *tgbotapi.Message) (reply *tgbotapi.M
 		reply.ReplyMarkup = genderKeyboard
 		return
 	case regFaculty:
+		errorMsg, e := facultyController.Verify(strings.ToLower(text))
+		if e != nil {
+			reply.Text = errorMsg
+			return
+		}
 		u.RegiStep = regAbout
-		u.Faculty = text // TODO add controller
+		u.Faculty = text
 		reply.Text = askAbout
 		return
 	case regAbout:
