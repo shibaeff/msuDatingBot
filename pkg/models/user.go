@@ -102,16 +102,21 @@ func (u *User) RegisterStepMessage(message *tgbotapi.Message) (reply *tgbotapi.M
 		reply.Text = "Загрузите свое фото"
 		return
 	case regPhoto:
-		errorMsg, e := photoController.Verify(text)
+		errorMsg, e := photoController.Verify(message.Photo == nil &&
+			message.Document == nil)
 		if e != nil {
 			reply.Text = errorMsg
 			return
 		}
-		photos := *message.Photo
-		photo := photos[0]
-		u.PhotoLink = photo.FileID
-		u.RegiStep = regOver
-		reply.Text = "Регистрация окончена\n" + u.String()
+		if message.Photo != nil {
+			photos := *message.Photo
+			photo := photos[0]
+			u.PhotoLink = photo.FileID
+			u.RegiStep = regOver
+			return nil, nil
+		} else {
+
+		}
 	}
 	return u.ReplyWithText("Пожалуйста, следуйте подсказкам бота!"), nil
 }
@@ -144,6 +149,20 @@ func (u *User) RegisterStepInline(q *tgbotapi.CallbackQuery) (reply *tgbotapi.Me
 		return
 	}
 	return u.ReplyWithText("Пожалуйста, следуйте подсказкам бота!")
+}
+
+func (u *User) ReplyWithPhoto() (ret *tgbotapi.PhotoConfig) {
+	ret = &tgbotapi.PhotoConfig{
+		BaseFile: tgbotapi.BaseFile{
+			BaseChat: tgbotapi.BaseChat{
+				ChatID: u.Id,
+			},
+			UseExisting: true,
+			FileID:      u.PhotoLink,
+		},
+		Caption: u.String(),
+	}
+	return
 }
 
 func (u *User) String() string {

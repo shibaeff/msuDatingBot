@@ -16,6 +16,7 @@ import (
 const (
 	waiting  = -1
 	regBegin = 0
+	regOver  = 7
 
 	defaultBunchSize = 5
 	noPhoto          = "none"
@@ -121,11 +122,14 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 		b.store.PutUser(u)
 		user = &u
 	}
-	if !user.IsReg() {
+	if !user.IsReg() || user.RegiStep < regOver {
 		reply, err = user.RegisterStepMessage(message)
 		if err == nil {
 			b.store.DeleteUser(user.Id)
 			b.store.PutUser(*user)
+		}
+		if reply == nil {
+			return user.ReplyWithPhoto(), nil
 		}
 		return reply, nil
 	}
@@ -136,7 +140,6 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 			switch text {
 			case registerCommand:
 				user.RegiStep = regBegin
-				// b.store.UpdUserField(user.Id, "registep", user.RegiStep)
 				reply, _ = user.RegisterStepMessage(message)
 				return
 			}

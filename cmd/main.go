@@ -49,6 +49,8 @@ func switchReply(api *tgbotapi.BotAPI, reply interface{}) {
 		if _, err := api.Send(v); err != nil {
 			log.Println(err)
 		}
+	case *tgbotapi.PhotoConfig:
+		api.Send(v)
 	}
 }
 
