@@ -4,7 +4,7 @@ import tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
 var (
 	genderMale = "М"
-	genderFem  = ":"
+	genderFem  = "Ж"
 	any        = "любой"
 )
 var (

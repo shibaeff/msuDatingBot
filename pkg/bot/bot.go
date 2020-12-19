@@ -128,7 +128,7 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 			b.store.DeleteUser(user.Id)
 			b.store.PutUser(*user)
 		}
-		if reply == nil {
+		if reply.(*tgbotapi.MessageConfig) == nil {
 			return user.ReplyWithPhoto(), nil
 		}
 		return reply, nil

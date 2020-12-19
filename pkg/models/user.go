@@ -98,6 +98,7 @@ func (u *User) RegisterStepMessage(message *tgbotapi.Message) (reply *tgbotapi.M
 			reply.Text = errorMsg
 			return
 		}
+		u.About = text
 		u.RegiStep = regPhoto
 		reply.Text = "Загрузите свое фото"
 		return
@@ -160,7 +161,8 @@ func (u *User) ReplyWithPhoto() (ret *tgbotapi.PhotoConfig) {
 			UseExisting: true,
 			FileID:      u.PhotoLink,
 		},
-		Caption: u.String(),
+		Caption:   u.String(),
+		ParseMode: "html",
 	}
 	return
 }
