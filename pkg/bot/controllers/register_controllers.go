@@ -36,7 +36,7 @@ type AboutController struct {
 }
 
 func (a *AboutController) Verify(data interface{}) (string, error) {
-	if len(data.(string)) < 120 {
+	if len(data.(string)) < 0 {
 		return AboutErrorResp, AboutError
 	}
 	return "", nil
