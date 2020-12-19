@@ -2,8 +2,6 @@ package store
 
 import (
 	"context"
-	"log"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 
@@ -20,7 +18,9 @@ type Store interface {
 	GetUser(id int64) (*models.User, error)
 	DeleteUser(id int64) error
 	GetActions() Registry
-	UpdUserField(id int64, field string, value interface{}) (err error)
+	Populate(id int64)
+	GetAllUsers() (ret []*models.User, err error)
+	// UpdUserField(id int64, field string, value interface{}) (err error)
 	// CheckExists() bool
 	//PutLike(who int64, whome int64) error
 	//GetLikes(whose int64) ([]Entry, error)
@@ -31,7 +31,6 @@ type Store interface {
 	//GetBunch(n int) (ret []*models.User, err error)
 	//GetMatchesRegistry() Registry
 	//DeleteFromRegistires(id int64) error
-	//GetAllUsers() (ret []*models.User, err error)
 	//GetUnseenRegistry() Registry
 	//GetSeenRegistry() Registry
 	//GetAdmin(username string) (user *models.User, err error)
@@ -65,17 +64,34 @@ func (s *store) GetAdmin(username string) (user *models.User, err error) {
 	return
 }
 
-func (s *store) UpdUserField(id int64, field string, value interface{}) (err error) {
-	filter := bson.D{{"id", id}}
-	pipeline := bson.D{
-		{"$set", bson.D{{field, value}}},
+func (s *store) Populate(id int64) {
+	users, _ := s.GetAllUsers()
+	for _, user := range users {
+		s.registry.AddEvent(Entry{
+			Who:   id,
+			Whome: user.Id,
+			Event: EventUseen,
+		})
+		s.registry.AddEvent(Entry{
+			Who:   user.Id,
+			Whome: id,
+			Event: EventUseen,
+		})
 	}
-	res, err := s.usersCollection.UpdateOne(context.TODO(), filter, pipeline)
-	if err == nil {
-		log.Printf("modified %d documents\n", res.ModifiedCount)
-	}
-	return
 }
+
+//
+//func (s *store) UpdUserField(id int64, field string, value interface{}) (err error) {
+//	filter := bson.D{{"id", id}}
+//	pipeline := bson.D{
+//		{"$set", bson.D{{field, value}}},
+//	}
+//	res, err := s.usersCollection.UpdateOne(context.TODO(), filter, pipeline)
+//	if err == nil {
+//		log.Printf("modified %d documents\n", res.ModifiedCount)
+//	}
+//	return
+//}
 
 func (s *store) DeleteUser(id int64) (err error) {
 	filter := bson.D{{"id", id}}
@@ -126,21 +142,21 @@ func (s *store) DeleteUser(id int64) (err error) {
 //	return nil, errors.New("no users")
 //}
 //
-//func (s *store) GetAllUsers() (ret []*models.User, err error) {
-//	empty := bson.D{}
-//	cur, err := s.usersCollection.Find(context.TODO(), empty)
-//	if err != nil {
-//		return
-//	}
-//	for cur.Next(context.TODO()) {
-//		user := new(models.User)
-//		if err = cur.Decode(user); err != nil {
-//			return nil, err
-//		}
-//		ret = append(ret, user)
-//	}
-//	return
-//}
+func (s *store) GetAllUsers() (ret []*models.User, err error) {
+	empty := bson.D{}
+	cur, err := s.usersCollection.Find(context.TODO(), empty)
+	if err != nil {
+		return
+	}
+	for cur.Next(context.TODO()) {
+		user := new(models.User)
+		if err = cur.Decode(user); err != nil {
+			return nil, err
+		}
+		ret = append(ret, user)
+	}
+	return
+}
 
 //func (s *store) GetBunch(n int) (ret []*models.User, err error) {
 //	many = []bson.D{bson.D{{"$sample", bson.D{{"size", n}}}}}

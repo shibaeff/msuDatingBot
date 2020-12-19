@@ -12,6 +12,7 @@ const (
 	EventMatch   = "match"
 	EventView    = "view"
 	EventDislike = "dislike"
+	EventUseen   = "unseen"
 )
 
 type Options []bson.E

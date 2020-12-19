@@ -122,6 +122,7 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 		b.store.PutUser(u)
 		user = &u
 	}
+	// if registration is over
 	if !user.IsReg() || user.RegiStep < regOver {
 		reply, err = user.RegisterStepMessage(message)
 		if err == nil {
@@ -129,6 +130,10 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 			b.store.PutUser(*user)
 		}
 		if reply.(*tgbotapi.MessageConfig) == nil {
+			// populate db for user after registration is over
+			go func() {
+				b.store.Populate(user.Id)
+			}()
 			return user.ReplyWithPhoto(), nil
 		}
 		return reply, nil
@@ -139,9 +144,14 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 		if len(split) == 1 {
 			switch text {
 			case registerCommand:
-				user.RegiStep = regBegin
-				reply, _ = user.RegisterStepMessage(message)
-				return
+				if !user.IsReg() {
+					user.RegiStep = regBegin
+					reply, _ = user.RegisterStepMessage(message)
+					return
+				} else {
+					reply = user.ReplyWithText("Вы уже зарегистрированы!")
+					return
+				}
 			}
 		}
 		if len(split) == 2 {
