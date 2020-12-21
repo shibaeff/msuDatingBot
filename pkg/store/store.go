@@ -21,6 +21,7 @@ type Store interface {
 	GetActions() Registry
 	Populate(id int64)
 	GetAllUsers() (ret []*models.User, err error)
+	FindUser(options Options) *models.User
 	UpdUserField(id int64, field string, value interface{}) (err error)
 	// CheckExists() bool
 	//PutLike(who int64, whome int64) error
@@ -93,6 +94,12 @@ func (s *store) UpdUserField(id int64, field string, value interface{}) (err err
 	return
 }
 
+func (s *store) FindUser(opt Options) *models.User {
+	usr, _ := s.usersCollection.Find(context.TODO(), opt)
+	var user models.User
+	usr.Decode(&user)
+	return &user
+}
 func (s *store) DeleteUser(id int64) (err error) {
 	filter := bson.D{{"id", id}}
 	_, err = s.usersCollection.DeleteOne(context.TODO(), filter)

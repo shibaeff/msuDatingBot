@@ -181,6 +181,10 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 				reply = user.ChangeAbout(split[1])
 				b.store.UpdUserField(user.Id, "about", user.About)
 				return
+			case feedbackCommand:
+				b.feedback(split[1])
+				reply = user.ReplyWithText("Отзыв успешно доставлен")
+				return
 			}
 		}
 		reply = user.ReplyWithText("Неизвестная команда")
