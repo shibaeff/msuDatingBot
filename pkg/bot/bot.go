@@ -41,7 +41,7 @@ const (
 	aboutCommand      = "/about"
 	logCommand        = "/log"
 	dumpCommand       = "/dump"
-	notifyAll         = "/notify"
+	notifyCommand     = "/notify"
 	reregisterCommand = "/reregister"
 	feedbackCommand   = "/feedback"
 	numbers           = "/numbers"
@@ -156,6 +156,12 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 					return
 				}
 			case dumpCommand:
+				if !b.ensureAdmin(user.UserName) {
+					return user.ReplyWithText(notAdmin), nil
+				}
+				if !b.ensureAdmin(user.UserName) {
+					return user.ReplyWithText(notAdmin), nil
+				}
 				b.dumpEntire()
 				fileUpload := tgbotapi.NewDocumentUpload(user.Id, "dump.json")
 				fileUpload.ChatID = user.Id
@@ -179,6 +185,9 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 		if len(split) == 2 {
 			switch split[0] {
 			case usersCommand:
+				if !b.ensureAdmin(user.UserName) {
+					return user.ReplyWithText(notAdmin), nil
+				}
 				n, err := strconv.Atoi(split[1])
 				if err != nil {
 					return user.ReplyWithText("Ошибка парсинга"), nil
