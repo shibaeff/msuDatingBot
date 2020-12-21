@@ -157,7 +157,9 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 			case dumpCommand:
 				b.dumpEntire()
 				fileUpload := tgbotapi.NewDocumentUpload(user.Id, "dump.json")
-				return fileUpload, nil
+				fileUpload.ChatID = user.Id
+				fileUpload.Caption = "Ваш дамп!"
+				return &fileUpload, nil
 			case profileCommand:
 				reply = user.ReplyWithPhoto()
 				return
