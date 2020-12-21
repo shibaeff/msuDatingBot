@@ -99,9 +99,9 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 	case deleteCommand:
 		return b.deleteUser(message.Chat.ID), nil
 	}
-	user := &models.User{}
+	user, err := b.store.GetUser(message.Chat.ID)
 	text := message.Text
-	r := handleSimpleCommands(user, text)
+	r := b.handleSimpleCommands(user, text)
 	if r != nil {
 		r.ChatID = message.Chat.ID
 		return r, nil
@@ -202,9 +202,16 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 	return user.ReplyWithText(notUnderstood), nil
 }
 
-func handleSimpleCommands(user *models.User, text string) (reply *tgbotapi.MessageConfig) {
+func (b *bot) handleSimpleCommands(user *models.User, text string) (reply *tgbotapi.MessageConfig) {
 	switch text {
 	case helpCommand:
+		if user != nil {
+			for _, item := range b.adminsList {
+				if item == user.UserName {
+					return user.ReplyWithText(helpMsg + adminHelp)
+				}
+			}
+		}
 		return user.ReplyWithText(helpMsg)
 	case startCommand:
 		return user.ReplyWithText(greetMsg)
