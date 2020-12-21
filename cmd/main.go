@@ -51,6 +51,8 @@ func switchReply(api *tgbotapi.BotAPI, reply interface{}) {
 		}
 	case *tgbotapi.PhotoConfig:
 		api.Send(v)
+	case *tgbotapi.DocumentConfig:
+		api.Send(v)
 	}
 }
 

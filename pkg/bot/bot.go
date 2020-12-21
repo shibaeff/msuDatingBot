@@ -154,6 +154,10 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 					reply = user.ReplyWithText("Вы уже зарегистрированы!")
 					return
 				}
+			case dumpCommand:
+				b.dumpEntire()
+				fileUpload := tgbotapi.NewDocumentUpload(user.Id, "dump.json")
+				return fileUpload, nil
 			case profileCommand:
 				reply = user.ReplyWithPhoto()
 				return
