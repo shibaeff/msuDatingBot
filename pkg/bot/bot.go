@@ -5,6 +5,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -177,6 +178,14 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 		}
 		if len(split) == 2 {
 			switch split[0] {
+			case usersCommand:
+				n, err := strconv.Atoi(split[1])
+				if err != nil {
+					return user.ReplyWithText("Ошибка парсинга"), nil
+				}
+				r := b.users(n)
+				r.ChatID = user.Id
+				return r, nil
 			case aboutCommand:
 				reply = user.ChangeAbout(split[1])
 				b.store.UpdUserField(user.Id, "about", user.About)
