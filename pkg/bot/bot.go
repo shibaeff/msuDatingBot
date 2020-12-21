@@ -2,6 +2,7 @@ package bot
 
 import (
 	"context"
+	"go.mongodb.org/mongo-driver/bson"
 	"log"
 	"os"
 	"strings"
@@ -24,6 +25,7 @@ const (
 	timeLoggingFileName = "time.csv"
 
 	registerCommand   = "/register"
+	unseenCommand     = "/unseen"
 	nextCommand       = "/next"
 	usersCommand      = "/users"
 	helpCommand       = "/help"
@@ -152,10 +154,28 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 					reply = user.ReplyWithText("Вы уже зарегистрированы!")
 					return
 				}
+			case profileCommand:
+				reply = user.ReplyWithPhoto()
+				return
+			case unseenCommand:
+				unseen, _ := b.store.GetActions().GetEvents(store.Options{
+					bson.E{
+						"who", user.Id,
+					},
+					bson.E{
+						"event", store.EventUseen,
+					},
+				})
+				return user.ReplyWithText(string(len(unseen))), nil
 			}
 		}
 		if len(split) == 2 {
-
+			switch split[0] {
+			case aboutCommand:
+				reply = user.ChangeAbout(split[1])
+				b.store.UpdUserField(user.Id, "about", user.About)
+				return
+			}
 		}
 		reply = user.ReplyWithText("Неизвестная команда")
 		return

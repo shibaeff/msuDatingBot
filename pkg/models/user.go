@@ -174,6 +174,15 @@ func (u *User) ReplyWithPhoto() (ret *tgbotapi.PhotoConfig) {
 	return
 }
 
+func (u *User) ChangeAbout(text string) (ret *tgbotapi.MessageConfig) {
+	errorMsg, err := aboutController.Verify(text)
+	if err != nil {
+		return u.ReplyWithText(errorMsg)
+	}
+	u.About = text
+	return u.ReplyWithText("Успешное изменение")
+}
+
 func (u *User) String() string {
 	return fmt.Sprintf(stringify, u.Name, u.Faculty, u.Gender, u.WantGender, u.About)
 }

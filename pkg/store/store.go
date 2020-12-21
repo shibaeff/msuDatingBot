@@ -4,6 +4,7 @@ import (
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"log"
 
 	"echoBot/pkg/models"
 )
@@ -20,7 +21,7 @@ type Store interface {
 	GetActions() Registry
 	Populate(id int64)
 	GetAllUsers() (ret []*models.User, err error)
-	// UpdUserField(id int64, field string, value interface{}) (err error)
+	UpdUserField(id int64, field string, value interface{}) (err error)
 	// CheckExists() bool
 	//PutLike(who int64, whome int64) error
 	//GetLikes(whose int64) ([]Entry, error)
@@ -80,18 +81,17 @@ func (s *store) Populate(id int64) {
 	}
 }
 
-//
-//func (s *store) UpdUserField(id int64, field string, value interface{}) (err error) {
-//	filter := bson.D{{"id", id}}
-//	pipeline := bson.D{
-//		{"$set", bson.D{{field, value}}},
-//	}
-//	res, err := s.usersCollection.UpdateOne(context.TODO(), filter, pipeline)
-//	if err == nil {
-//		log.Printf("modified %d documents\n", res.ModifiedCount)
-//	}
-//	return
-//}
+func (s *store) UpdUserField(id int64, field string, value interface{}) (err error) {
+	filter := bson.D{{"id", id}}
+	pipeline := bson.D{
+		{"$set", bson.D{{field, value}}},
+	}
+	res, err := s.usersCollection.UpdateOne(context.TODO(), filter, pipeline)
+	if err == nil {
+		log.Printf("modified %d documents\n", res.ModifiedCount)
+	}
+	return
+}
 
 func (s *store) DeleteUser(id int64) (err error) {
 	filter := bson.D{{"id", id}}
