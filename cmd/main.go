@@ -22,9 +22,6 @@ const (
 	dbName                = "main"
 	usersCollectionName   = "users"
 	actionsCollectionName = "actions"
-
-	nextEmoji = "➡"
-	likeEmoji = "👍🏻"
 )
 
 var (
