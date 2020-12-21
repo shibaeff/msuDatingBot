@@ -1,23 +1,27 @@
 package bot
 
 import (
-	"echoBot/pkg/store"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"go.mongodb.org/mongo-driver/bson"
+	"log"
 )
 
 func (b *bot) feedback(text string) {
 	for _, admin := range b.adminsList {
-		adm := b.store.FindUser(store.Options{
-			bson.E{
-				"username", admin,
+		adm := b.store.FindUser(
+			bson.D{
+				{"username", admin},
 			},
-		})
-		b.api.Send(&tgbotapi.MessageConfig{
+		)
+		// adm, err := b.store.GetAdmin(admin)
+		_, err := b.api.Send(&tgbotapi.MessageConfig{
 			Text: text,
 			BaseChat: tgbotapi.BaseChat{
 				ChatID: adm.Id,
 			},
 		})
+		if err != nil {
+			log.Println(err)
+		}
 	}
 }

@@ -21,7 +21,7 @@ type Store interface {
 	GetActions() Registry
 	Populate(id int64)
 	GetAllUsers() (ret []*models.User, err error)
-	FindUser(options Options) *models.User
+	FindUser(filter bson.D) *models.User
 	UpdUserField(id int64, field string, value interface{}) (err error)
 	// CheckExists() bool
 	//PutLike(who int64, whome int64) error
@@ -35,7 +35,6 @@ type Store interface {
 	//DeleteFromRegistires(id int64) error
 	//GetUnseenRegistry() Registry
 	//GetSeenRegistry() Registry
-	//GetAdmin(username string) (user *models.User, err error)
 	//GetLikesRegistry() Registry
 }
 
@@ -54,13 +53,6 @@ func (s *store) PutUser(model models.User) error {
 
 func (s *store) GetUser(id int64) (user *models.User, err error) {
 	filter := bson.D{{"id", id}}
-	user = new(models.User)
-	err = s.usersCollection.FindOne(context.TODO(), filter).Decode(user)
-	return
-}
-
-func (s *store) GetAdmin(username string) (user *models.User, err error) {
-	filter := bson.D{{"username", username}}
 	user = new(models.User)
 	err = s.usersCollection.FindOne(context.TODO(), filter).Decode(user)
 	return
@@ -94,11 +86,11 @@ func (s *store) UpdUserField(id int64, field string, value interface{}) (err err
 	return
 }
 
-func (s *store) FindUser(opt Options) *models.User {
-	usr, _ := s.usersCollection.Find(context.TODO(), opt)
-	var user models.User
-	usr.Decode(&user)
-	return &user
+func (s *store) FindUser(opt bson.D) *models.User {
+	usr := s.usersCollection.FindOne(context.TODO(), opt)
+	user := new(models.User)
+	usr.Decode(user)
+	return user
 }
 func (s *store) DeleteUser(id int64) (err error) {
 	filter := bson.D{{"id", id}}
