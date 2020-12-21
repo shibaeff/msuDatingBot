@@ -36,7 +36,6 @@ const (
 	profileCommand    = "/profile"
 	photoCommand      = "/photo"
 	startCommand      = "/start"
-	cancelCommand     = "/cancel"
 	facultyCommand    = "/faculty"
 	aboutCommand      = "/about"
 	logCommand        = "/log"
@@ -44,7 +43,6 @@ const (
 	notifyCommand     = "/notify"
 	reregisterCommand = "/reregister"
 	feedbackCommand   = "/feedback"
-	numbers           = "/numbers"
 	deleteCommand     = "/delete"
 	pauseCommand      = "/pause"
 
@@ -144,6 +142,7 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 	if text[0] == '/' {
 		split := strings.Split(text, " ")
 		// in case of paired commands
+	Reregister:
 		if len(split) == 1 {
 			switch text {
 			case registerCommand:
@@ -152,9 +151,13 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 					reply, _ = user.RegisterStepMessage(message)
 					return
 				} else {
-					reply = user.ReplyWithText("Вы уже зарегистрированы!")
+					reply = user.ReplyWithText(alreadyRegistered)
 					return
 				}
+			case reregisterCommand:
+				b.store.DeleteUser(user.Id)
+				text = registerCommand
+				goto Reregister
 			case dumpCommand:
 				if !b.ensureAdmin(user.UserName) {
 					return user.ReplyWithText(notAdmin), nil
