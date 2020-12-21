@@ -203,6 +203,11 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 				b.feedback(split[1])
 				reply = user.ReplyWithText("Отзыв успешно доставлен")
 				return
+			case notifyCommand:
+				if !b.ensureAdmin(user.UserName) {
+					return user.ReplyWithText(notAdmin), nil
+				}
+				b.notifyUsers(split[1])
 			}
 		}
 		reply = user.ReplyWithText("Неизвестная команда")

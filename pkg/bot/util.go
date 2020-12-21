@@ -29,19 +29,18 @@ func (b *bot) deleteUser(id int64) *tgbotapi.MessageConfig {
 	return reply
 }
 
-// //
-//func (b *bot) notifyUsers(message string) (list []*tgbotapi.MessageConfig, err error) {
-//	users, err := b.store.GetAllUsers()
-//	if err != nil {
-//		return
-//	}
-//	for _, user := range users {
-//		res := replyWithText(message)
-//		res.ChatID = user.Id
-//		list = append(list, res)
-//	}
-//	return
-//}
+//
+func (b *bot) notifyUsers(message string) (list []*tgbotapi.MessageConfig, err error) {
+	users, err := b.store.GetAllUsers()
+	if err != nil {
+		return
+	}
+	for _, user := range users {
+		res := user.ReplyWithText(message)
+		b.api.Send(res)
+	}
+	return
+}
 
 func (b *bot) ensureGender(u1, u2 *models.User) bool {
 	return u1.Id != u2.Id &&
