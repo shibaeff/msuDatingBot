@@ -183,6 +183,15 @@ func (u *User) ChangeAbout(text string) (ret *tgbotapi.MessageConfig) {
 	return u.ReplyWithText("Успешное изменение")
 }
 
+func (u *User) ChangeFaculty(text string) (ret *tgbotapi.MessageConfig) {
+	errorMsg, err := facultyController.Verify(text)
+	if err != nil {
+		return u.ReplyWithText(errorMsg)
+	}
+	u.Faculty = text
+	return u.ReplyWithText("Успешное изменение")
+}
+
 func (u *User) String() string {
 	return fmt.Sprintf(stringify, u.Name, u.Faculty, u.Gender, u.WantGender, u.About)
 }
