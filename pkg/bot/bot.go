@@ -156,6 +156,7 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 				}
 			case reregisterCommand:
 				b.store.DeleteUser(user.Id)
+				user.RegiStep = waiting
 				text = registerCommand
 				goto Reregister
 			case dumpCommand:
@@ -211,6 +212,29 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 					return user.ReplyWithText(notAdmin), nil
 				}
 				b.notifyUsers(split[1])
+			case logCommand:
+				if !b.ensureAdmin(user.UserName) {
+					reply = user.ReplyWithText(notAdmin)
+					return
+				}
+				if len(split) < 2 {
+					reply = user.ReplyWithText("Неправильный оффсет")
+					return reply, nil
+				}
+				var offset, err = strconv.Atoi(split[1])
+				if err != nil {
+					err = nil
+					reply = user.ReplyWithText("Неправильный оффсет")
+					return reply, nil
+				}
+				logs, err := b.grabLogs(offset)
+				if err != nil {
+					err = nil
+					reply = user.ReplyWithText("Неправильный оффсет")
+					return reply, nil
+				}
+				reply = user.ReplyWithText(logs)
+				return reply, nil
 			}
 		}
 		reply = user.ReplyWithText("Неизвестная команда")
