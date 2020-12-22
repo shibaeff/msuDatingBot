@@ -7,11 +7,10 @@ import (
 )
 
 const (
-	EventLike    = "like"
-	EventMatch   = "match"
-	EventView    = "view"
-	EventDislike = "dislike"
-	EventUseen   = "unseen"
+	EventLike  = "like"
+	EventMatch = "match"
+	EventView  = "view"
+	EventUseen = "unseen"
 )
 
 type Options []bson.E

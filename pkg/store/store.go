@@ -22,19 +22,6 @@ type Store interface {
 	GetAllUsers() (ret []*models.User, err error)
 	FindUser(filter bson.D) *models.User
 	UpdUserField(id int64, field string, value interface{}) (err error)
-	// CheckExists() bool
-	//PutLike(who int64, whome int64) error
-	//GetLikes(whose int64) ([]Entry, error)
-	//PutUnseen(who int64, whome int64) error
-	//GetUnseen(whose int64) ([]Entry, error)
-	//GetSeen(whose int64) ([]Entry, error)
-	//GetAny(for_id int64) (*models.User, error)
-	//GetBunch(n int) (ret []*models.User, err error)
-	//GetMatchesRegistry() Registry
-	//DeleteFromRegistires(id int64) error
-	//GetUnseenRegistry() Registry
-	//GetSeenRegistry() Registry
-	//GetLikesRegistry() Registry
 }
 
 type store struct {
@@ -81,49 +68,6 @@ func (s *store) DeleteUser(id int64) (err error) {
 	return err
 }
 
-//
-//func (s *store) PutLike(who, whome int64) (err error) {
-//	err = s.likesRegistry.AddEvent(who, whome)
-//	return
-//}
-//
-//func (s *store) GetLikes(whose int64) (likes []Entry, err error) {
-//	likes, err = s.likesRegistry.GetEvents(whose)
-//	return
-//}
-//
-//func (s *store) PutUnseen(who, whome int64) (err error) {
-//	err = s.unseenRegistry.AddEvent(who, whome)
-//	return
-//}
-//
-//func (s *store) GetUnseen(whose int64) (seen []Entry, err error) {
-//	seen, err = s.unseenRegistry.GetEvents(whose)
-//	return
-//}
-//
-//func (s *store) GetSeen(whose int64) (seen []Entry, err error) {
-//	seen, err = s.seenRegistry.GetEvents(whose)
-//	return
-//}
-//
-//func (s *store) GetAny(for_id int64) (user *models.User, err error) {
-//	users, err := s.GetBunch(5)
-//	for i, user := range users {
-//		if user.Id == for_id {
-//			users = remove(users, i)
-//		}
-//	}
-//	if err != nil {
-//		return
-//	}
-//	if len(users) > 0 {
-//		user = users[0]
-//		return
-//	}
-//	return nil, errors.New("no users")
-//}
-//
 func (s *store) GetAllUsers() (ret []*models.User, err error) {
 	empty := bson.D{}
 	cur, err := s.usersCollection.Find(context.TODO(), empty)
@@ -139,54 +83,6 @@ func (s *store) GetAllUsers() (ret []*models.User, err error) {
 	}
 	return
 }
-
-//func (s *store) GetBunch(n int) (ret []*models.User, err error) {
-//	many = []bson.D{bson.D{{"$sample", bson.D{{"size", n}}}}}
-//	cur, err := s.usersCollection.Aggregate(context.TODO(), many)
-//	if err != nil {
-//		return
-//	}
-//	for cur.Next(context.TODO()) {
-//		user := new(models.User)
-//		if err = cur.Decode(user); err != nil {
-//			return nil, err
-//		}
-//		ret = append(ret, user)
-//	}
-//	return
-//}
-//
-//func (s *store) GetMatchesRegistry() Registry {
-//	return s.matchesRegistry
-//}
-//
-//func (s *store) DeleteFromRegistires(id int64) (err error) {
-//	s.matchesRegistry.DeleteEvents(id)
-//	s.likesRegistry.DeleteEvents(id)
-//	//s.unseenRegistry.DeleteEvents(id)
-//	users, _ := s.GetAllUsers()
-//	for _, user := range users {
-//		if user.Id != id {
-//			s.unseenRegistry.AddEvent(id, user.Id)
-//		}
-//	}
-//	s.seenRegistry.DeleteEvents(id)
-//	return nil
-//}
-//
-//func (s *store) GetUnseenRegistry() Registry {
-//	return s.unseenRegistry
-//}
-//
-//func (s *store) GetSeenRegistry() Registry {
-//	return s.seenRegistry
-//}
-//
-//func remove(s []*models.User, i int) []*models.User {
-//	s[i] = s[len(s)-1]
-//	// We do not need to put s[i] at the end, as it will be discarded anyway
-//	return s[:len(s)-1]
-//}
 
 func NewStore(users *mongo.Collection, registry *mongo.Collection) Store {
 	return &store{
