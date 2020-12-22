@@ -107,25 +107,32 @@ func getUserLink(user *models.User) (raw string) {
 	return
 }
 
-//func (b *bot) prepareMatches(userId int64) (resp string, err error) {
-//	entry, err := b.store.GetMatchesRegistry().GetEvents(userId)
-//	if err != nil {
-//		return "Матчей нет", nil
-//	}
-//	if len(entry) == 0 {
-//		return "Матчей нет", nil
-//	}
-//	raw := []string{}
-//	for _, match := range entry {
-//		user, err := b.store.GetUser(match.Whome)
-//		if err != nil {
-//			continue
-//		}
-//		raw = append(raw, getUserLink(user))
-//	}
-//	resp = matchesList + strings.Join(raw, "\n")
-//	return
-//}
+func (b *bot) prepareMatches(userId int64) (resp string, err error) {
+	entry, err := b.store.GetActions().GetEvents(store.Options{
+		bson.E{
+			"who", userId,
+		},
+		bson.E{
+			"event", store.EventMatch,
+		},
+	})
+	if err != nil {
+		return "Мэтчей нет", nil
+	}
+	if len(entry) == 0 {
+		return "Мэтчей нет", nil
+	}
+	raw := []string{}
+	for _, match := range entry {
+		user, err := b.store.GetUser(match.Whome)
+		if err != nil {
+			continue
+		}
+		raw = append(raw, getUserLink(user))
+	}
+	resp = matchesList + strings.Join(raw, "\n")
+	return
+}
 
 func replyWithPhoto(u *models.User, to int64) (ret *tgbotapi.PhotoConfig) {
 	ret = &tgbotapi.PhotoConfig{

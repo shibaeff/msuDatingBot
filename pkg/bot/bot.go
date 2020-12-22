@@ -188,6 +188,9 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 					reply = user.ReplyWithText(alreadyRegistered)
 					return
 				}
+			case matchesCommand:
+				resp, _ := b.prepareMatches(user.Id)
+				return user.ReplyWithText(resp), nil
 			case resetCommand:
 				b.reset(user)
 				reply = user.ReplyWithText("Записи о лайках и просмотрах сброшены")
