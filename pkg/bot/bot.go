@@ -179,6 +179,9 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 					bson.E{
 						"event", store.EventUseen,
 					},
+					bson.E{
+						"who", user.Id,
+					},
 				})
 				candidate_id := candidates[0].Whome
 				candidate, _ := b.store.GetUser(candidate_id)
