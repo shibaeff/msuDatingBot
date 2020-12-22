@@ -97,9 +97,28 @@ func (b *bot) HandleCallbackQuery(context context.Context, query *tgbotapi.Callb
 		// dislike
 		// mark user as seen
 		reply = b.dislike(user)
+		edit := tgbotapi.NewEditMessageCaption(user.Id, query.Message.MessageID, nextEmoji)
+		b.api.Send(edit)
+		return reply, nil
+	case likeEmoji:
+		// dislike
+		// mark user as seen
+		reply = b.like(user)
+		edit := tgbotapi.NewEditMessageCaption(user.Id, query.Message.MessageID, nextEmoji)
+		b.api.Send(edit)
 		return reply, nil
 	}
 	return nil, nil
+}
+
+func (b *bot) switchReply(reply interface{}) (tgbotapi.Message, error) {
+	switch v := reply.(type) {
+	case *tgbotapi.MessageConfig:
+		return b.api.Send(v)
+	case *tgbotapi.PhotoConfig:
+		return b.api.Send(v)
+	}
+	return tgbotapi.Message{}, nil
 }
 
 func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (reply interface{}, err error) {
