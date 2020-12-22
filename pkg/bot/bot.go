@@ -51,6 +51,7 @@ const (
 	alreadyRegistered = "Вы уже зарегистрированы!"
 	notRegistered     = "Вы не зарегистрированы!"
 	notAdmin          = "Вы не админ"
+	allSeen           = "Вы просмотрели всех пользователей на данный момент"
 	pleaseSendAgain   = "Пожалуйста, сделайте запрос еще раз"
 )
 
@@ -87,6 +88,27 @@ func (b *bot) HandleCallbackQuery(context context.Context, query *tgbotapi.Callb
 		b.store.DeleteUser(user.Id)
 		b.store.PutUser(*user)
 		return
+	}
+	text := query.Data
+	switch text {
+	case nextEmoji:
+		last, err := b.getLastUnseen(user)
+		b.store.GetActions().DeleteEvents(store.Options{
+			bson.E{"who", user.Id},
+			bson.E{"whome", last},
+		})
+		b.store.GetActions().AddEvent(store.Entry{
+			Who:   user.Id,
+			Whome: last,
+			Event: store.EventView,
+		})
+		last, err = b.getLastUnseen(user)
+		if err != nil {
+			reply = user.ReplyWithText(allSeen)
+			return reply, nil
+		}
+		cand, _ := b.store.GetUser(last)
+		return b.replyWithCard(cand, user.Id), nil
 	}
 	return nil, nil
 }
@@ -154,6 +176,10 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 					reply = user.ReplyWithText(alreadyRegistered)
 					return
 				}
+			case resetCommand:
+				b.reset(user)
+				reply = user.ReplyWithText("Записи о лайках и просмотрах сброшены")
+				return
 			case reregisterCommand:
 				b.store.DeleteUser(user.Id)
 				user.RegiStep = waiting
@@ -175,15 +201,10 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 				reply = user.ReplyWithPhoto()
 				return
 			case nextCommand:
-				candidates, _ := b.store.GetActions().GetEvents(store.Options{
-					bson.E{
-						"event", store.EventUseen,
-					},
-					bson.E{
-						"who", user.Id,
-					},
-				})
-				candidate_id := candidates[0].Whome
+				candidate_id, err := b.getLastUnseen(user)
+				if err != nil {
+					return user.ReplyWithText(allSeen), nil
+				}
 				candidate, _ := b.store.GetUser(candidate_id)
 				return b.replyWithCard(candidate, user.Id), nil
 			case unseenCommand:
@@ -257,6 +278,19 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 		return
 	}
 	return user.ReplyWithText(notUnderstood), nil
+}
+
+func (b *bot) getLastUnseen(user *models.User) (int64, error) {
+	candidates, err := b.store.GetActions().GetEvents(store.Options{
+		bson.E{
+			"event", store.EventUseen,
+		},
+		bson.E{
+			"who", user.Id,
+		},
+	})
+	candidate_id := candidates[0].Whome
+	return candidate_id, err
 }
 
 func (b *bot) handleSimpleCommands(user *models.User, text string) (reply *tgbotapi.MessageConfig) {
