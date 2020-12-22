@@ -174,6 +174,15 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 			case profileCommand:
 				reply = user.ReplyWithPhoto()
 				return
+			case nextCommand:
+				candidates, _ := b.store.GetActions().GetEvents(store.Options{
+					bson.E{
+						"event", store.EventUseen,
+					},
+				})
+				candidate_id := candidates[0].Whome
+				candidate, _ := b.store.GetUser(candidate_id)
+				return b.replyWithCard(candidate, user.Id), nil
 			case unseenCommand:
 				unseen, _ := b.store.GetActions().GetEvents(store.Options{
 					bson.E{

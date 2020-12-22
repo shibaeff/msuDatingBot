@@ -19,8 +19,9 @@ var (
 	nextKeyBoard    = tgbotapi.NewInlineKeyboardMarkup([]tgbotapi.InlineKeyboardButton{nextEmojiButton, likeEmojiButton})
 )
 
-func replyWithCard(u *models.User, to int64) (ret *tgbotapi.PhotoConfig) {
-	ret = replyWithPhoto(u, to)
+func (b *bot) replyWithCard(candidate *models.User, whome int64) (ret *tgbotapi.PhotoConfig) {
+	ret = candidate.ReplyWithPhoto()
+	ret.ChatID = whome
 	ret.ReplyMarkup = nextKeyBoard
 	return
 }
