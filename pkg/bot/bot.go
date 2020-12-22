@@ -22,9 +22,6 @@ const (
 	regPhoto = 6
 	regOver  = 7
 
-	defaultBunchSize = 5
-	noPhoto          = "none"
-
 	timeLoggingFileName = "time.csv"
 
 	registerCommand   = "/register"
@@ -32,7 +29,6 @@ const (
 	nextCommand       = "/next"
 	usersCommand      = "/users"
 	helpCommand       = "/help"
-	likeCommand       = "/like"
 	matchesCommand    = "/matches"
 	resetCommand      = "/reset"
 	profileCommand    = "/profile"
@@ -46,7 +42,6 @@ const (
 	reregisterCommand = "/reregister"
 	feedbackCommand   = "/feedback"
 	deleteCommand     = "/delete"
-	pauseCommand      = "/pause"
 
 	greetMsg          = "Привет! ✨\nЭто бот знакомств МГУ. Работает аналогично Тиндеру 😉\n\nДля регистрации вызывай: /register, для отмены: /cancel. Бот запросит имя, фоточку и пару слов о себе.\n\nПредложения и баги пишите в /feedback."
 	notUnderstood     = "Пожалуйста, выберите действие из меню"

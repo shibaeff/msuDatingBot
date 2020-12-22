@@ -143,15 +143,3 @@ func find(slice []store.Entry, val int64) (int, bool) {
 	}
 	return -1, false
 }
-
-//func (b *bot) hide(user *models.User) {
-//	users, _ := b.store.GetAllUsers()
-//	for _, item := range users {
-//		if item.Id != user.Id {
-//			b.store.GetUnseenRegistry().DeleteItem(item.Id, user.Id)
-//			b.store.GetSeenRegistry().DeleteItem(item.Id, user.Id)
-//			b.store.GetMatchesRegistry().DeleteItem(item.Id, user.Id)
-//			b.store.GetLikesRegistry().DeleteItem(item.Id, user.Id)
-//		}
-//	}
-//}

@@ -13,7 +13,6 @@ func (b *bot) feedback(text string) {
 				{"username", admin},
 			},
 		)
-		// adm, err := b.store.GetAdmin(admin)
 		_, err := b.api.Send(&tgbotapi.MessageConfig{
 			Text: text,
 			BaseChat: tgbotapi.BaseChat{
