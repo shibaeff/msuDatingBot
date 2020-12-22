@@ -22,9 +22,6 @@ const (
 	dbName                = "main"
 	usersCollectionName   = "users"
 	actionsCollectionName = "actions"
-
-	nextEmoji = "➡"
-	likeEmoji = "👍🏻"
 )
 
 var (
@@ -50,6 +47,8 @@ func switchReply(api *tgbotapi.BotAPI, reply interface{}) {
 			log.Println(err)
 		}
 	case *tgbotapi.PhotoConfig:
+		api.Send(v)
+	case *tgbotapi.DocumentConfig:
 		api.Send(v)
 	}
 }

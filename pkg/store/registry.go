@@ -2,16 +2,15 @@ package store
 
 import (
 	"context"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const (
-	EventLike    = "like"
-	EventMatch   = "match"
-	EventView    = "view"
-	EventDislike = "dislike"
+	EventLike  = "like"
+	EventMatch = "match"
+	EventView  = "view"
+	EventUseen = "unseen"
 )
 
 type Options []bson.E

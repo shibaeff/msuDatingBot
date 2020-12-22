@@ -2,8 +2,11 @@ package bot
 
 import (
 	"context"
+	"errors"
+	"go.mongodb.org/mongo-driver/bson"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -16,40 +19,36 @@ import (
 const (
 	waiting  = -1
 	regBegin = 0
+	regPhoto = 6
 	regOver  = 7
-
-	defaultBunchSize = 5
-	noPhoto          = "none"
 
 	timeLoggingFileName = "time.csv"
 
 	registerCommand   = "/register"
+	unseenCommand     = "/unseen"
 	nextCommand       = "/next"
 	usersCommand      = "/users"
 	helpCommand       = "/help"
-	likeCommand       = "/like"
 	matchesCommand    = "/matches"
 	resetCommand      = "/reset"
 	profileCommand    = "/profile"
 	photoCommand      = "/photo"
 	startCommand      = "/start"
-	cancelCommand     = "/cancel"
 	facultyCommand    = "/faculty"
 	aboutCommand      = "/about"
 	logCommand        = "/log"
 	dumpCommand       = "/dump"
-	notifyAll         = "/notify"
+	notifyCommand     = "/notify"
 	reregisterCommand = "/reregister"
 	feedbackCommand   = "/feedback"
-	numbers           = "/numbers"
 	deleteCommand     = "/delete"
-	pauseCommand      = "/pause"
 
 	greetMsg          = "Привет! ✨\nЭто бот знакомств МГУ. Работает аналогично Тиндеру 😉\n\nДля регистрации вызывай: /register, для отмены: /cancel. Бот запросит имя, фоточку и пару слов о себе.\n\nПредложения и баги пишите в /feedback."
 	notUnderstood     = "Пожалуйста, выберите действие из меню"
 	alreadyRegistered = "Вы уже зарегистрированы!"
 	notRegistered     = "Вы не зарегистрированы!"
 	notAdmin          = "Вы не админ"
+	allSeen           = "Вы просмотрели всех пользователей на данный момент"
 	pleaseSendAgain   = "Пожалуйста, сделайте запрос еще раз"
 )
 
@@ -87,7 +86,34 @@ func (b *bot) HandleCallbackQuery(context context.Context, query *tgbotapi.Callb
 		b.store.PutUser(*user)
 		return
 	}
+	text := query.Data
+	switch text {
+	case nextEmoji:
+		// dislike
+		// mark user as seen
+		reply = b.dislike(user)
+		edit := tgbotapi.NewEditMessageCaption(user.Id, query.Message.MessageID, nextEmoji)
+		b.api.Send(edit)
+		return reply, nil
+	case likeEmoji:
+		// dislike
+		// mark user as seen
+		reply = b.like(user)
+		edit := tgbotapi.NewEditMessageCaption(user.Id, query.Message.MessageID, likeEmoji)
+		b.api.Send(edit)
+		return reply, nil
+	}
 	return nil, nil
+}
+
+func (b *bot) switchReply(reply interface{}) (tgbotapi.Message, error) {
+	switch v := reply.(type) {
+	case *tgbotapi.MessageConfig:
+		return b.api.Send(v)
+	case *tgbotapi.PhotoConfig:
+		return b.api.Send(v)
+	}
+	return tgbotapi.Message{}, nil
 }
 
 func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (reply interface{}, err error) {
@@ -96,9 +122,9 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 	case deleteCommand:
 		return b.deleteUser(message.Chat.ID), nil
 	}
-	user := &models.User{}
+	user, err := b.store.GetUser(message.Chat.ID)
 	text := message.Text
-	r := handleSimpleCommands(user, text)
+	r := b.handleSimpleCommands(user, text)
 	if r != nil {
 		r.ChatID = message.Chat.ID
 		return r, nil
@@ -122,6 +148,7 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 		b.store.PutUser(u)
 		user = &u
 	}
+	// if registration is over
 	if !user.IsReg() || user.RegiStep < regOver {
 		reply, err = user.RegisterStepMessage(message)
 		if err == nil {
@@ -129,6 +156,17 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 			b.store.PutUser(*user)
 		}
 		if reply.(*tgbotapi.MessageConfig) == nil {
+			records, _ := b.store.GetActions().GetEvents(store.Options{
+				bson.E{
+					"who", user.Id,
+				},
+			})
+			// populate db for user after registration is over
+			if len(records) == 0 {
+				go func() {
+					b.populateNotify(user)
+				}()
+			}
 			return user.ReplyWithPhoto(), nil
 		}
 		return reply, nil
@@ -136,16 +174,122 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 	if text[0] == '/' {
 		split := strings.Split(text, " ")
 		// in case of paired commands
+	Reregister:
 		if len(split) == 1 {
 			switch text {
 			case registerCommand:
-				user.RegiStep = regBegin
-				reply, _ = user.RegisterStepMessage(message)
+				if !user.IsReg() {
+					user.RegiStep = regBegin
+					reply, _ = user.RegisterStepMessage(message)
+					return
+				} else {
+					reply = user.ReplyWithText(alreadyRegistered)
+					return
+				}
+			case matchesCommand:
+				resp, _ := b.prepareMatches(user.Id)
+				return user.ReplyWithText(resp), nil
+			case resetCommand:
+				b.reset(user)
+				reply = user.ReplyWithText("Записи о лайках и просмотрах сброшены")
 				return
+			case reregisterCommand:
+				b.store.DeleteUser(user.Id)
+				user.RegiStep = waiting
+				text = registerCommand
+				goto Reregister
+			case dumpCommand:
+				if !b.ensureAdmin(user.UserName) {
+					return user.ReplyWithText(notAdmin), nil
+				}
+				if !b.ensureAdmin(user.UserName) {
+					return user.ReplyWithText(notAdmin), nil
+				}
+				b.dumpEntire()
+				fileUpload := tgbotapi.NewDocumentUpload(user.Id, "dump.json")
+				fileUpload.ChatID = user.Id
+				fileUpload.Caption = "Ваш дамп!"
+				return &fileUpload, nil
+			case profileCommand:
+				reply = user.ReplyWithPhoto()
+				return
+			case photoCommand:
+				user.RegiStep = regPhoto
+				b.store.UpdUserField(user.Id, "registep", regPhoto)
+				return user.ReplyWithText("Пришлите новое фото"), nil
+			case nextCommand:
+				candidate_id, err := b.getLastUnseen(user)
+				if err != nil {
+					return user.ReplyWithText(allSeen), nil
+				}
+				candidate, _ := b.store.GetUser(candidate_id)
+				return b.replyWithCard(candidate, user.Id), nil
+			case unseenCommand:
+				unseen, _ := b.store.GetActions().GetEvents(store.Options{
+					bson.E{
+						"who", user.Id,
+					},
+					bson.E{
+						"event", store.EventUseen,
+					},
+				})
+				return user.ReplyWithText(string(len(unseen))), nil
 			}
 		}
 		if len(split) == 2 {
-
+			switch split[0] {
+			case usersCommand:
+				if !b.ensureAdmin(user.UserName) {
+					return user.ReplyWithText(notAdmin), nil
+				}
+				n, err := strconv.Atoi(split[1])
+				if err != nil {
+					return user.ReplyWithText("Ошибка парсинга"), nil
+				}
+				r := b.users(n)
+				r.ChatID = user.Id
+				return r, nil
+			case aboutCommand:
+				reply = user.ChangeAbout(split[1])
+				b.store.UpdUserField(user.Id, "about", user.About)
+				return
+			case facultyCommand:
+				reply = user.ChangeFaculty(split[1])
+				b.store.UpdUserField(user.Id, "faculty", user.Faculty)
+				return
+			case feedbackCommand:
+				b.feedback(split[1])
+				reply = user.ReplyWithText("Отзыв успешно доставлен")
+				return
+			case notifyCommand:
+				if !b.ensureAdmin(user.UserName) {
+					return user.ReplyWithText(notAdmin), nil
+				}
+				b.notifyUsers(split[1])
+			case logCommand:
+				if !b.ensureAdmin(user.UserName) {
+					reply = user.ReplyWithText(notAdmin)
+					return
+				}
+				if len(split) < 2 {
+					reply = user.ReplyWithText("Неправильный оффсет")
+					return reply, nil
+				}
+				var offset, err = strconv.Atoi(split[1])
+				if err != nil {
+					err = nil
+					reply = user.ReplyWithText("Неправильный оффсет")
+					return reply, nil
+				}
+				logs, err := b.grabLogs(offset)
+				if err != nil {
+					err = nil
+					reply = user.ReplyWithText("Неправильный оффсет")
+					return reply, nil
+				}
+				reply = user.ReplyWithText(logs)
+				return reply, nil
+			}
 		}
 		reply = user.ReplyWithText("Неизвестная команда")
 		return
@@ -153,9 +297,35 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 	return user.ReplyWithText(notUnderstood), nil
 }
 
-func handleSimpleCommands(user *models.User, text string) (reply *tgbotapi.MessageConfig) {
+func (b *bot) getLastUnseen(user *models.User) (int64, error) {
+	candidates, err := b.store.GetActions().GetEvents(store.Options{
+		bson.E{
+			"event", store.EventUseen,
+		},
+		bson.E{
+			"who", user.Id,
+		},
+	})
+	if len(candidates) == 0 {
+		return 0, errors.New("No users found")
+	}
+	if err != nil {
+		return 0, err
+	}
+	candidate_id := candidates[0].Whome
+	return candidate_id, err
+}
+
+func (b *bot) handleSimpleCommands(user *models.User, text string) (reply *tgbotapi.MessageConfig) {
 	switch text {
 	case helpCommand:
+		if user != nil {
+			for _, item := range b.adminsList {
+				if item == user.UserName {
+					return user.ReplyWithText(helpMsg + adminHelp)
+				}
+			}
+		}
 		return user.ReplyWithText(helpMsg)
 	case startCommand:
 		return user.ReplyWithText(greetMsg)
