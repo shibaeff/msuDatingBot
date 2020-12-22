@@ -13,6 +13,7 @@ const (
 		"<strong>Пол:</strong> %s\n" +
 		"<strong>Пол собеседника:</strong> %s\n" +
 		"<strong>О себе:</strong> %s\n"
+	inlineMention = "[%s](tg://user?id=%d)"
 
 	nextCommand    = "/next"
 	helpCommand    = "/help"
@@ -192,6 +193,14 @@ func (u *User) ChangeFaculty(text string) (ret *tgbotapi.MessageConfig) {
 	return u.ReplyWithText("Успешное изменение")
 }
 
+func (user *User) GetLink() (raw string) {
+	if user.UserName != "" {
+		raw = fmt.Sprintf("@%s\n", user.UserName)
+	} else {
+		raw = fmt.Sprintf(inlineMention, user.Name, user.Id)
+	}
+	return
+}
 func (u *User) String() string {
 	return fmt.Sprintf(stringify, u.Name, u.Faculty, u.Gender, u.WantGender, u.About)
 }

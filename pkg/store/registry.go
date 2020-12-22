@@ -2,8 +2,6 @@ package store
 
 import (
 	"context"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -28,10 +26,9 @@ type registry struct {
 }
 
 type Entry struct {
-	Who     int64
-	Whome   int64
-	Event   string
-	Message tgbotapi.Message
+	Who   int64
+	Whome int64
+	Event string
 }
 
 func (r *registry) AddEvent(e Entry) (err error) {

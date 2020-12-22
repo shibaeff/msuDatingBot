@@ -15,10 +15,6 @@ import (
 	"echoBot/pkg/store"
 )
 
-const (
-	inlineMention = "[%s](tg://user?id=%d)"
-)
-
 func (b *bot) deleteUser(id int64) *tgbotapi.MessageConfig {
 	b.store.DeleteUser(id)
 	b.store.GetActions().DeleteEvents(store.Options{bson.E{"who", id}})
@@ -98,15 +94,6 @@ func (b *bot) parseLikee(message *tgbotapi.Message) (id int64, err error) {
 	return
 }
 
-func getUserLink(user *models.User) (raw string) {
-	if user.UserName != "" {
-		raw = fmt.Sprintf("@%s\n", user.UserName)
-	} else {
-		raw = fmt.Sprintf(inlineMention, user.Name, user.Id)
-	}
-	return
-}
-
 func (b *bot) prepareMatches(userId int64) (resp string, err error) {
 	entry, err := b.store.GetActions().GetEvents(store.Options{
 		bson.E{
@@ -128,7 +115,7 @@ func (b *bot) prepareMatches(userId int64) (resp string, err error) {
 		if err != nil {
 			continue
 		}
-		raw = append(raw, getUserLink(user))
+		raw = append(raw, user.GetLink())
 	}
 	resp = matchesList + strings.Join(raw, "\n")
 	return

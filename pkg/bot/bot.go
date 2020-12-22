@@ -104,7 +104,7 @@ func (b *bot) HandleCallbackQuery(context context.Context, query *tgbotapi.Callb
 		// dislike
 		// mark user as seen
 		reply = b.like(user)
-		edit := tgbotapi.NewEditMessageCaption(user.Id, query.Message.MessageID, nextEmoji)
+		edit := tgbotapi.NewEditMessageCaption(user.Id, query.Message.MessageID, likeEmoji)
 		b.api.Send(edit)
 		return reply, nil
 	}
