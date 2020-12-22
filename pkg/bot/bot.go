@@ -19,6 +19,7 @@ import (
 const (
 	waiting  = -1
 	regBegin = 0
+	regPhoto = 6
 	regOver  = 7
 
 	defaultBunchSize = 5
@@ -157,10 +158,17 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 			b.store.PutUser(*user)
 		}
 		if reply.(*tgbotapi.MessageConfig) == nil {
+			records, _ := b.store.GetActions().GetEvents(store.Options{
+				bson.E{
+					"who", user.Id,
+				},
+			})
 			// populate db for user after registration is over
-			go func() {
-				b.populateNotify(user)
-			}()
+			if len(records) == 0 {
+				go func() {
+					b.populateNotify(user)
+				}()
+			}
 			return user.ReplyWithPhoto(), nil
 		}
 		return reply, nil
@@ -204,6 +212,10 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 			case profileCommand:
 				reply = user.ReplyWithPhoto()
 				return
+			case photoCommand:
+				user.RegiStep = regPhoto
+				b.store.UpdUserField(user.Id, "registep", regPhoto)
+				return user.ReplyWithText("Пришлите новое фото"), nil
 			case nextCommand:
 				candidate_id, err := b.getLastUnseen(user)
 				if err != nil {
