@@ -96,24 +96,8 @@ func (b *bot) HandleCallbackQuery(context context.Context, query *tgbotapi.Callb
 	case nextEmoji:
 		// dislike
 		// mark user as seen
-		last, err := b.getLastUnseen(user)
-		b.store.GetActions().DeleteEvents(store.Options{
-			bson.E{"who", user.Id},
-			bson.E{"whome", last},
-		})
-		b.store.GetActions().AddEvent(store.Entry{
-			Who:   user.Id,
-			Whome: last,
-			Event: store.EventView,
-		})
-		// attempt to get new unseen user
-		last, err = b.getLastUnseen(user)
-		if err != nil {
-			reply = user.ReplyWithText(allSeen)
-			return reply, nil
-		}
-		cand, _ := b.store.GetUser(last)
-		return b.replyWithCard(cand, user.Id), nil
+		reply = b.dislike(user)
+		return reply, nil
 	}
 	return nil, nil
 }
