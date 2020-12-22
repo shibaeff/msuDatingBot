@@ -19,7 +19,6 @@ type Store interface {
 	GetUser(id int64) (*models.User, error)
 	DeleteUser(id int64) error
 	GetActions() Registry
-	Populate(id int64)
 	GetAllUsers() (ret []*models.User, err error)
 	FindUser(filter bson.D) *models.User
 	UpdUserField(id int64, field string, value interface{}) (err error)
@@ -56,22 +55,6 @@ func (s *store) GetUser(id int64) (user *models.User, err error) {
 	user = new(models.User)
 	err = s.usersCollection.FindOne(context.TODO(), filter).Decode(user)
 	return
-}
-
-func (s *store) Populate(id int64) {
-	users, _ := s.GetAllUsers()
-	for _, user := range users {
-		s.registry.AddEvent(Entry{
-			Who:   id,
-			Whome: user.Id,
-			Event: EventUseen,
-		})
-		s.registry.AddEvent(Entry{
-			Who:   user.Id,
-			Whome: id,
-			Event: EventUseen,
-		})
-	}
 }
 
 func (s *store) UpdUserField(id int64, field string, value interface{}) (err error) {
