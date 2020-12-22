@@ -2,6 +2,7 @@ package bot
 
 import (
 	"context"
+	"errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"log"
 	"os"
@@ -92,6 +93,8 @@ func (b *bot) HandleCallbackQuery(context context.Context, query *tgbotapi.Callb
 	text := query.Data
 	switch text {
 	case nextEmoji:
+		// dislike
+		// mark user as seen
 		last, err := b.getLastUnseen(user)
 		b.store.GetActions().DeleteEvents(store.Options{
 			bson.E{"who", user.Id},
@@ -102,6 +105,7 @@ func (b *bot) HandleCallbackQuery(context context.Context, query *tgbotapi.Callb
 			Whome: last,
 			Event: store.EventView,
 		})
+		// attempt to get new unseen user
 		last, err = b.getLastUnseen(user)
 		if err != nil {
 			reply = user.ReplyWithText(allSeen)
@@ -289,6 +293,12 @@ func (b *bot) getLastUnseen(user *models.User) (int64, error) {
 			"who", user.Id,
 		},
 	})
+	if len(candidates) == 0 {
+		return 0, errors.New("No users found")
+	}
+	if err != nil {
+		return 0, err
+	}
 	candidate_id := candidates[0].Whome
 	return candidate_id, err
 }
