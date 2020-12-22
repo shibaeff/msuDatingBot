@@ -133,7 +133,7 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 		if reply.(*tgbotapi.MessageConfig) == nil {
 			// populate db for user after registration is over
 			go func() {
-				// b.store.Populate(user.Id)
+				b.populateNotify(user)
 			}()
 			return user.ReplyWithPhoto(), nil
 		}
