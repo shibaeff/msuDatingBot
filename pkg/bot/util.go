@@ -25,7 +25,6 @@ func (b *bot) deleteUser(id int64) *tgbotapi.MessageConfig {
 	return reply
 }
 
-//
 func (b *bot) notifyUsers(message string) (list []*tgbotapi.MessageConfig, err error) {
 	users, err := b.store.GetAllUsers()
 	if err != nil {
