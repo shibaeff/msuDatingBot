@@ -16,7 +16,7 @@ func (b *bot) reset(user *models.User) {
 	// repopulate user's preferences
 	users, _ := b.store.GetAllUsers()
 	for _, another := range users {
-		if !b.ensureGender(user, another) {
+		if !EnsureGender(user, another) {
 			continue
 		}
 		b.store.GetActions().AddEvent(store.Entry{

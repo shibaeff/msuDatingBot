@@ -15,7 +15,7 @@ var (
 func (b *bot) populateNotify(newuser *models.User) {
 	users, _ := b.store.GetAllUsers()
 	for _, user := range users {
-		if !b.ensureGender(newuser, user) {
+		if !EnsureGender(newuser, user) {
 			continue
 		}
 		b.store.GetActions().AddEvent(store.Entry{
