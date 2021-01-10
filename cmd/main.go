@@ -4,7 +4,6 @@ import (
 	"context"
 	"io"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -54,12 +53,12 @@ func switchReply(api *tgbotapi.BotAPI, reply interface{}) {
 }
 
 func main() {
-	go func() {
-		err := http.ListenAndServe(":3000", nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
+	//go func() {
+	//	err := http.ListenAndServe(":3000", nil)
+	//	if err != nil {
+	//		log.Fatal(err)
+	//	}
+	//}()
 	log.Println("hello")
 	err := client.Connect(context.TODO())
 	if err != nil {
