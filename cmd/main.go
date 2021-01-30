@@ -97,7 +97,7 @@ func main() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
-	updates, err := api.GetUpdatesChan(u)
+	// updates, err := api.GetUpdatesChan(u)
 	admins, ok := os.LookupEnv("ADMINS")
 	if !ok {
 		log.Fatal("cannot load admins")
@@ -106,6 +106,7 @@ func main() {
 	Bot := bot.NewBot(store, api, readFile, admins_list)
 	api.SetWebhook(tgbotapi.NewWebhook(os.Getenv("WEBHOOK")))
 	defer logFile.Close()
+	updates := api.ListenForWebhook("/" + api.Token)
 	for update := range updates {
 		if update.Message == nil && update.CallbackQuery == nil { // ignore any non-Message Updates
 			continue
