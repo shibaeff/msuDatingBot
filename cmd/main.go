@@ -104,9 +104,9 @@ func main() {
 	}
 	admins_list := strings.Split(admins, " ")
 	Bot := bot.NewBot(store, api, readFile, admins_list)
-	api.SetWebhook(tgbotapi.NewWebhook(os.Getenv("WEBHOOK")))
+	//api.SetWebhook(tgbotapi.NewWebhookWithCert(os.Getenv("WEBHOOK", )))
 	defer logFile.Close()
-	updates := api.ListenForWebhook("/" + api.Token)
+	updates := api.ListenForWebhook("/")
 	for update := range updates {
 		if update.Message == nil && update.CallbackQuery == nil { // ignore any non-Message Updates
 			continue
