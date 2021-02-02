@@ -107,7 +107,7 @@ func main() {
 	Bot := bot.NewBot(store, api, readFile, admins_list)
 	//api.SetWebhook(tgbotapi.NewWebhookWithCert(os.Getenv("WEBHOOK", )))
 	defer logFile.Close()
-	updates := api.ListenForWebhook("/" + api.Token)
+	updates := api.ListenForWebhook("umsu.me")
 	go http.ListenAndServeTLS("0.0.0.0:443", " /etc/letsencrypt/live/umsu.me/fullchain.pem", " /etc/letsencrypt/live/umsu.me/privkey.pem", nil)
 	for update := range updates {
 		if update.Message == nil && update.CallbackQuery == nil { // ignore any non-Message Updates
