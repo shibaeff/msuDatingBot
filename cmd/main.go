@@ -25,7 +25,7 @@ const (
 )
 
 var (
-	client, _ = mongo.NewClient(options.Client().ApplyURI("mongodb://127.0.0.1:27017"))
+	client, _ = mongo.NewClient(options.Client().ApplyURI("mongodb+srv://user:123@userscluster.whxir.mongodb.net/users?retryWrites=true&w=majority"))
 )
 
 func PrepareCollection(client *mongo.Client, name string) (conn *mongo.Collection) {
