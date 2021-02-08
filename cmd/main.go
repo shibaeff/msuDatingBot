@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
@@ -33,12 +32,12 @@ func PrepareCollection(client *mongo.Client, name string) (conn *mongo.Collectio
 	return
 }
 
-func init() {
-	// loads values from .env into the system
-	if err := godotenv.Load(); err != nil {
-		log.Print("No .env file found")
-	}
-}
+//func init() {
+//	// loads values from .env into the system
+//	if err := godotenv.Load(); err != nil {
+//		log.Print("No .env file found")
+//	}
+//}
 
 func switchReply(api *tgbotapi.BotAPI, reply interface{}) {
 	switch v := reply.(type) {
@@ -51,6 +50,10 @@ func switchReply(api *tgbotapi.BotAPI, reply interface{}) {
 	case *tgbotapi.DocumentConfig:
 		api.Send(v)
 	}
+}
+
+func MainHandler(resp http.ResponseWriter, _ *http.Request) {
+	resp.Write([]byte(""))
 }
 
 func main() {
@@ -107,8 +110,10 @@ func main() {
 	Bot := bot.NewBot(store, api, readFile, admins_list)
 	//api.SetWebhook(tgbotapi.NewWebhookWithCert(os.Getenv("WEBHOOK", )))
 	defer logFile.Close()
-	updates := api.ListenForWebhook("umsu.me")
-	go http.ListenAndServeTLS("0.0.0.0:443", " /etc/letsencrypt/live/umsu.me/fullchain.pem", " /etc/letsencrypt/live/umsu.me/privkey.pem", nil)
+
+	http.HandleFunc("/", MainHandler)
+	go http.ListenAndServe(":"+os.Getenv("PORT"), nil)
+	updates := api.ListenForWebhook("/" + api.Token)
 	for update := range updates {
 		if update.Message == nil && update.CallbackQuery == nil { // ignore any non-Message Updates
 			continue
