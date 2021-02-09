@@ -64,9 +64,6 @@ type User struct {
 // It is normally a user's username, but falls back to a first/last
 // name as available.
 func (u *User) String() string {
-	if u == nil {
-		return ""
-	}
 	if u.UserName != "" {
 		return u.UserName
 	}
@@ -103,7 +100,6 @@ type Chat struct {
 	Photo               *ChatPhoto `json:"photo"`
 	Description         string     `json:"description,omitempty"` // optional
 	InviteLink          string     `json:"invite_link,omitempty"` // optional
-	PinnedMessage       *Message   `json:"pinned_message"`        // optional
 }
 
 // IsPrivate returns if the Chat is a private conversation.
@@ -134,160 +130,45 @@ func (c Chat) ChatConfig() ChatConfig {
 // Message is returned by almost every request, and contains data about
 // almost anything.
 type Message struct {
-	// MessageID is a unique message identifier inside this chat
-	MessageID int `json:"message_id"`
-	// From is a sender, empty for messages sent to channels;
-	// optional
-	From *User `json:"from"`
-	// Date of the message was sent in Unix time
-	Date int `json:"date"`
-	// Chat is the conversation the message belongs to
-	Chat *Chat `json:"chat"`
-	// ForwardFrom for forwarded messages, sender of the original message;
-	// optional
-	ForwardFrom *User `json:"forward_from"`
-	// ForwardFromChat for messages forwarded from channels,
-	// information about the original channel;
-	// optional
-	ForwardFromChat *Chat `json:"forward_from_chat"`
-	// ForwardFromMessageID for messages forwarded from channels,
-	// identifier of the original message in the channel;
-	// optional
-	ForwardFromMessageID int `json:"forward_from_message_id"`
-	// ForwardDate for forwarded messages, date the original message was sent in Unix time;
-	// optional
-	ForwardDate int `json:"forward_date"`
-	// ReplyToMessage for replies, the original message.
-	// Note that the Message object in this field will not contain further ReplyToMessage fields
-	// even if it itself is a reply;
-	// optional
-	ReplyToMessage *Message `json:"reply_to_message"`
-	// ViaBot through which the message was sent;
-	// optional
-	ViaBot *User `json:"via_bot"`
-	// EditDate of the message was last edited in Unix time;
-	// optional
-	EditDate int `json:"edit_date"`
-	// MediaGroupID is the unique identifier of a media message group this message belongs to;
-	// optional
-	MediaGroupID string `json:"media_group_id"`
-	// AuthorSignature is the signature of the post author for messages in channels;
-	// optional
-	AuthorSignature string `json:"author_signature"`
-	// Text is for text messages, the actual UTF-8 text of the message, 0-4096 characters;
-	// optional
-	Text string `json:"text"`
-	// Entities is for text messages, special entities like usernames,
-	// URLs, bot commands, etc. that appear in the text;
-	// optional
-	Entities *[]MessageEntity `json:"entities"`
-	// CaptionEntities;
-	// optional
-	CaptionEntities *[]MessageEntity `json:"caption_entities"`
-	// Audio message is an audio file, information about the file;
-	// optional
-	Audio *Audio `json:"audio"`
-	// Document message is a general file, information about the file;
-	// optional
-	Document *Document `json:"document"`
-	// Animation message is an animation, information about the animation.
-	// For backward compatibility, when this field is set, the document field will also be set;
-	// optional
-	Animation *ChatAnimation `json:"animation"`
-	// Game message is a game, information about the game;
-	// optional
-	Game *Game `json:"game"`
-	// Photo message is a photo, available sizes of the photo;
-	// optional
-	Photo *[]PhotoSize `json:"photo"`
-	// Sticker message is a sticker, information about the sticker;
-	// optional
-	Sticker *Sticker `json:"sticker"`
-	// Video message is a video, information about the video;
-	// optional
-	Video *Video `json:"video"`
-	// VideoNote message is a video note, information about the video message;
-	// optional
-	VideoNote *VideoNote `json:"video_note"`
-	// Voice message is a voice message, information about the file;
-	// optional
-	Voice *Voice `json:"voice"`
-	// Caption for the animation, audio, document, photo, video or voice, 0-1024 characters;
-	// optional
-	Caption string `json:"caption"`
-	// Contact message is a shared contact, information about the contact;
-	// optional
-	Contact *Contact `json:"contact"`
-	// Location message is a shared location, information about the location;
-	// optional
-	Location *Location `json:"location"`
-	// Venue message is a venue, information about the venue.
-	// For backward compatibility, when this field is set, the location field will also be set;
-	// optional
-	Venue *Venue `json:"venue"`
-	// NewChatMembers that were added to the group or supergroup
-	// and information about them (the bot itself may be one of these members);
-	// optional
-	NewChatMembers *[]User `json:"new_chat_members"`
-	// LeftChatMember is a member was removed from the group,
-	// information about them (this member may be the bot itself);
-	// optional
-	LeftChatMember *User `json:"left_chat_member"`
-	// NewChatTitle is a chat title was changed to this value;
-	// optional
-	NewChatTitle string `json:"new_chat_title"`
-	// NewChatPhoto is a chat photo was change to this value;
-	// optional
-	NewChatPhoto *[]PhotoSize `json:"new_chat_photo"`
-	// DeleteChatPhoto is a service message: the chat photo was deleted;
-	// optional
-	DeleteChatPhoto bool `json:"delete_chat_photo"`
-	// GroupChatCreated is a service message: the group has been created;
-	// optional
-	GroupChatCreated bool `json:"group_chat_created"`
-	// SuperGroupChatCreated is a service message: the supergroup has been created.
-	// This field can't be received in a message coming through updates,
-	// because bot can't be a member of a supergroup when it is created.
-	// It can only be found in ReplyToMessage if someone replies to a very first message
-	// in a directly created supergroup;
-	// optional
-	SuperGroupChatCreated bool `json:"supergroup_chat_created"`
-	// ChannelChatCreated is a service message: the channel has been created.
-	// This field can't be received in a message coming through updates,
-	// because bot can't be a member of a channel when it is created.
-	// It can only be found in ReplyToMessage
-	// if someone replies to a very first message in a channel;
-	// optional
-	ChannelChatCreated bool `json:"channel_chat_created"`
-	// MigrateToChatID is the group has been migrated to a supergroup with the specified identifier.
-	// This number may be greater than 32 bits and some programming languages
-	// may have difficulty/silent defects in interpreting it.
-	// But it is smaller than 52 bits, so a signed 64 bit integer
-	// or double-precision float type are safe for storing this identifier;
-	// optional
-	MigrateToChatID int64 `json:"migrate_to_chat_id"`
-	// MigrateFromChatID is the supergroup has been migrated from a group with the specified identifier.
-	// This number may be greater than 32 bits and some programming languages
-	// may have difficulty/silent defects in interpreting it.
-	// But it is smaller than 52 bits, so a signed 64 bit integer
-	// or double-precision float type are safe for storing this identifier;
-	// optional
-	MigrateFromChatID int64 `json:"migrate_from_chat_id"`
-	// PinnedMessage is a specified message was pinned.
-	// Note that the Message object in this field will not contain further ReplyToMessage
-	// fields even if it is itself a reply;
-	// optional
-	PinnedMessage *Message `json:"pinned_message"`
-	// Invoice message is an invoice for a payment;
-	// optional
-	Invoice *Invoice `json:"invoice"`
-	// SuccessfulPayment message is a service message about a successful payment,
-	// information about the payment;
-	// optional
-	SuccessfulPayment *SuccessfulPayment `json:"successful_payment"`
-	// PassportData is a Telegram Passport data;
-	// optional
-	PassportData *PassportData `json:"passport_data,omitempty"`
+	MessageID             int                `json:"message_id"`
+	From                  *User              `json:"from"` // optional
+	Date                  int                `json:"date"`
+	Chat                  *Chat              `json:"chat"`
+	ForwardFrom           *User              `json:"forward_from"`            // optional
+	ForwardFromChat       *Chat              `json:"forward_from_chat"`       // optional
+	ForwardFromMessageID  int                `json:"forward_from_message_id"` // optional
+	ForwardDate           int                `json:"forward_date"`            // optional
+	ReplyToMessage        *Message           `json:"reply_to_message"`        // optional
+	EditDate              int                `json:"edit_date"`               // optional
+	Text                  string             `json:"text"`                    // optional
+	Entities              *[]MessageEntity   `json:"entities"`                // optional
+	Audio                 *Audio             `json:"audio"`                   // optional
+	Document              *Document          `json:"document"`                // optional
+	Animation             *ChatAnimation     `json:"animation"`               // optional
+	Game                  *Game              `json:"game"`                    // optional
+	Photo                 *[]PhotoSize       `json:"photo"`                   // optional
+	Sticker               *Sticker           `json:"sticker"`                 // optional
+	Video                 *Video             `json:"video"`                   // optional
+	VideoNote             *VideoNote         `json:"video_note"`              // optional
+	Voice                 *Voice             `json:"voice"`                   // optional
+	Caption               string             `json:"caption"`                 // optional
+	Contact               *Contact           `json:"contact"`                 // optional
+	Location              *Location          `json:"location"`                // optional
+	Venue                 *Venue             `json:"venue"`                   // optional
+	NewChatMembers        *[]User            `json:"new_chat_members"`        // optional
+	LeftChatMember        *User              `json:"left_chat_member"`        // optional
+	NewChatTitle          string             `json:"new_chat_title"`          // optional
+	NewChatPhoto          *[]PhotoSize       `json:"new_chat_photo"`          // optional
+	DeleteChatPhoto       bool               `json:"delete_chat_photo"`       // optional
+	GroupChatCreated      bool               `json:"group_chat_created"`      // optional
+	SuperGroupChatCreated bool               `json:"supergroup_chat_created"` // optional
+	ChannelChatCreated    bool               `json:"channel_chat_created"`    // optional
+	MigrateToChatID       int64              `json:"migrate_to_chat_id"`      // optional
+	MigrateFromChatID     int64              `json:"migrate_from_chat_id"`    // optional
+	PinnedMessage         *Message           `json:"pinned_message"`          // optional
+	Invoice               *Invoice           `json:"invoice"`                 // optional
+	SuccessfulPayment     *SuccessfulPayment `json:"successful_payment"`      // optional
+	PassportData          *PassportData      `json:"passport_data,omitempty"` // optional
 }
 
 // Time converts the message timestamp into a Time.
@@ -302,7 +183,7 @@ func (m *Message) IsCommand() bool {
 	}
 
 	entity := (*m.Entities)[0]
-	return entity.Offset == 0 && entity.IsCommand()
+	return entity.Offset == 0 && entity.Type == "bot_command"
 }
 
 // Command checks if the message was a command and if it was, returns the
@@ -368,62 +249,12 @@ type MessageEntity struct {
 }
 
 // ParseURL attempts to parse a URL contained within a MessageEntity.
-func (e MessageEntity) ParseURL() (*url.URL, error) {
-	if e.URL == "" {
+func (entity MessageEntity) ParseURL() (*url.URL, error) {
+	if entity.URL == "" {
 		return nil, errors.New(ErrBadURL)
 	}
 
-	return url.Parse(e.URL)
-}
-
-// IsMention returns true if the type of the message entity is "mention" (@username).
-func (e MessageEntity) IsMention() bool {
-	return e.Type == "mention"
-}
-
-// IsHashtag returns true if the type of the message entity is "hashtag".
-func (e MessageEntity) IsHashtag() bool {
-	return e.Type == "hashtag"
-}
-
-// IsCommand returns true if the type of the message entity is "bot_command".
-func (e MessageEntity) IsCommand() bool {
-	return e.Type == "bot_command"
-}
-
-// IsUrl returns true if the type of the message entity is "url".
-func (e MessageEntity) IsUrl() bool {
-	return e.Type == "url"
-}
-
-// IsEmail returns true if the type of the message entity is "email".
-func (e MessageEntity) IsEmail() bool {
-	return e.Type == "email"
-}
-
-// IsBold returns true if the type of the message entity is "bold" (bold text).
-func (e MessageEntity) IsBold() bool {
-	return e.Type == "bold"
-}
-
-// IsItalic returns true if the type of the message entity is "italic" (italic text).
-func (e MessageEntity) IsItalic() bool {
-	return e.Type == "italic"
-}
-
-// IsCode returns true if the type of the message entity is "code" (monowidth string).
-func (e MessageEntity) IsCode() bool {
-	return e.Type == "code"
-}
-
-// IsPre returns true if the type of the message entity is "pre" (monowidth block).
-func (e MessageEntity) IsPre() bool {
-	return e.Type == "pre"
-}
-
-// IsTextLink returns true if the type of the message entity is "text_link" (clickable text URL).
-func (e MessageEntity) IsTextLink() bool {
-	return e.Type == "text_link"
+	return url.Parse(entity.URL)
 }
 
 // PhotoSize contains information about photos.
@@ -455,24 +286,13 @@ type Document struct {
 
 // Sticker contains information about a sticker.
 type Sticker struct {
-	FileUniqueID string     `json:"file_unique_id"`
-	FileID       string     `json:"file_id"`
-	Width        int        `json:"width"`
-	Height       int        `json:"height"`
-	Thumbnail    *PhotoSize `json:"thumb"`       // optional
-	Emoji        string     `json:"emoji"`       // optional
-	FileSize     int        `json:"file_size"`   // optional
-	SetName      string     `json:"set_name"`    // optional
-	IsAnimated   bool       `json:"is_animated"` // optional
-}
-
-// StickerSet contains information about an sticker set.
-type StickerSet struct {
-	Name          string    `json:"name"`
-	Title         string    `json:"title"`
-	IsAnimated    bool      `json:"is_animated"`
-	ContainsMasks bool      `json:"contains_masks"`
-	Stickers      []Sticker `json:"stickers"`
+	FileID    string     `json:"file_id"`
+	Width     int        `json:"width"`
+	Height    int        `json:"height"`
+	Thumbnail *PhotoSize `json:"thumb"`     // optional
+	Emoji     string     `json:"emoji"`     // optional
+	FileSize  int        `json:"file_size"` // optional
+	SetName   string     `json:"set_name"`  // optional
 }
 
 // ChatAnimation contains information about an animation.
@@ -631,7 +451,6 @@ type ForceReply struct {
 type ChatMember struct {
 	User                  *User  `json:"user"`
 	Status                string `json:"status"`
-	CustomTitle           string `json:"custom_title,omitempty"`              // optional
 	UntilDate             int64  `json:"until_date,omitempty"`                // optional
 	CanBeEdited           bool   `json:"can_be_edited,omitempty"`             // optional
 	CanChangeInfo         bool   `json:"can_change_info,omitempty"`           // optional
@@ -699,7 +518,6 @@ type WebhookInfo struct {
 	PendingUpdateCount   int    `json:"pending_update_count"`
 	LastErrorDate        int    `json:"last_error_date"`    // optional
 	LastErrorMessage     string `json:"last_error_message"` // optional
-	MaxConnections       int    `json:"max_connections"`    // optional
 }
 
 // IsSet returns true if a webhook is currently set.
@@ -764,47 +582,21 @@ type InlineQueryResultPhoto struct {
 	Title               string                `json:"title"`
 	Description         string                `json:"description"`
 	Caption             string                `json:"caption"`
-	ParseMode           string                `json:"parse_mode"`
-	ReplyMarkup         *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
-	InputMessageContent interface{}           `json:"input_message_content,omitempty"`
-}
-
-// InlineQueryResultCachedPhoto is an inline query response with cached photo.
-type InlineQueryResultCachedPhoto struct {
-	Type                string                `json:"type"`          // required
-	ID                  string                `json:"id"`            // required
-	PhotoID             string                `json:"photo_file_id"` // required
-	Title               string                `json:"title"`
-	Description         string                `json:"description"`
-	Caption             string                `json:"caption"`
-	ParseMode           string                `json:"parse_mode"`
 	ReplyMarkup         *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	InputMessageContent interface{}           `json:"input_message_content,omitempty"`
 }
 
 // InlineQueryResultGIF is an inline query response GIF.
 type InlineQueryResultGIF struct {
-	Type                string                `json:"type"`      // required
-	ID                  string                `json:"id"`        // required
-	URL                 string                `json:"gif_url"`   // required
-	ThumbURL            string                `json:"thumb_url"` // required
-	Width               int                   `json:"gif_width,omitempty"`
-	Height              int                   `json:"gif_height,omitempty"`
-	Duration            int                   `json:"gif_duration,omitempty"`
-	Title               string                `json:"title,omitempty"`
-	Caption             string                `json:"caption,omitempty"`
-	ReplyMarkup         *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
-	InputMessageContent interface{}           `json:"input_message_content,omitempty"`
-}
-
-// InlineQueryResultCachedGIF is an inline query response with cached gif.
-type InlineQueryResultCachedGIF struct {
-	Type                string                `json:"type"`        // required
-	ID                  string                `json:"id"`          // required
-	GifID               string                `json:"gif_file_id"` // required
+	Type                string                `json:"type"`    // required
+	ID                  string                `json:"id"`      // required
+	URL                 string                `json:"gif_url"` // required
+	Width               int                   `json:"gif_width"`
+	Height              int                   `json:"gif_height"`
+	Duration            int                   `json:"gif_duration"`
+	ThumbURL            string                `json:"thumb_url"`
 	Title               string                `json:"title"`
 	Caption             string                `json:"caption"`
-	ParseMode           string                `json:"parse_mode"`
 	ReplyMarkup         *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	InputMessageContent interface{}           `json:"input_message_content,omitempty"`
 }
@@ -820,19 +612,6 @@ type InlineQueryResultMPEG4GIF struct {
 	ThumbURL            string                `json:"thumb_url"`
 	Title               string                `json:"title"`
 	Caption             string                `json:"caption"`
-	ReplyMarkup         *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
-	InputMessageContent interface{}           `json:"input_message_content,omitempty"`
-}
-
-// InlineQueryResultCachedMpeg4Gif is an inline query response with cached
-// H.264/MPEG-4 AVC video without sound gif.
-type InlineQueryResultCachedMpeg4Gif struct {
-	Type                string                `json:"type"`          // required
-	ID                  string                `json:"id"`            // required
-	MGifID              string                `json:"mpeg4_file_id"` // required
-	Title               string                `json:"title"`
-	Caption             string                `json:"caption"`
-	ParseMode           string                `json:"parse_mode"`
 	ReplyMarkup         *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	InputMessageContent interface{}           `json:"input_message_content,omitempty"`
 }
@@ -854,30 +633,6 @@ type InlineQueryResultVideo struct {
 	InputMessageContent interface{}           `json:"input_message_content,omitempty"`
 }
 
-// InlineQueryResultCachedVideo is an inline query response with cached video.
-type InlineQueryResultCachedVideo struct {
-	Type                string                `json:"type"`          // required
-	ID                  string                `json:"id"`            // required
-	VideoID             string                `json:"video_file_id"` // required
-	Title               string                `json:"title"`         // required
-	Description         string                `json:"description"`
-	Caption             string                `json:"caption"`
-	ParseMode           string                `json:"parse_mode"`
-	ReplyMarkup         *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
-	InputMessageContent interface{}           `json:"input_message_content,omitempty"`
-}
-
-// InlineQueryResultCachedSticker is an inline query response with cached sticker.
-type InlineQueryResultCachedSticker struct {
-	Type                string                `json:"type"`            // required
-	ID                  string                `json:"id"`              // required
-	StickerID           string                `json:"sticker_file_id"` // required
-	Title               string                `json:"title"`           // required
-	ParseMode           string                `json:"parse_mode"`
-	ReplyMarkup         *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
-	InputMessageContent interface{}           `json:"input_message_content,omitempty"`
-}
-
 // InlineQueryResultAudio is an inline query response audio.
 type InlineQueryResultAudio struct {
 	Type                string                `json:"type"`      // required
@@ -891,17 +646,6 @@ type InlineQueryResultAudio struct {
 	InputMessageContent interface{}           `json:"input_message_content,omitempty"`
 }
 
-// InlineQueryResultCachedAudio is an inline query response with cached audio.
-type InlineQueryResultCachedAudio struct {
-	Type                string                `json:"type"`          // required
-	ID                  string                `json:"id"`            // required
-	AudioID             string                `json:"audio_file_id"` // required
-	Caption             string                `json:"caption"`
-	ParseMode           string                `json:"parse_mode"`
-	ReplyMarkup         *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
-	InputMessageContent interface{}           `json:"input_message_content,omitempty"`
-}
-
 // InlineQueryResultVoice is an inline query response voice.
 type InlineQueryResultVoice struct {
 	Type                string                `json:"type"`      // required
@@ -910,18 +654,6 @@ type InlineQueryResultVoice struct {
 	Title               string                `json:"title"`     // required
 	Caption             string                `json:"caption"`
 	Duration            int                   `json:"voice_duration"`
-	ReplyMarkup         *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
-	InputMessageContent interface{}           `json:"input_message_content,omitempty"`
-}
-
-// InlineQueryResultCachedVoice is an inline query response with cached voice.
-type InlineQueryResultCachedVoice struct {
-	Type                string                `json:"type"`          // required
-	ID                  string                `json:"id"`            // required
-	VoiceID             string                `json:"voice_file_id"` // required
-	Title               string                `json:"title"`         // required
-	Caption             string                `json:"caption"`
-	ParseMode           string                `json:"parse_mode"`
 	ReplyMarkup         *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	InputMessageContent interface{}           `json:"input_message_content,omitempty"`
 }
@@ -942,19 +674,6 @@ type InlineQueryResultDocument struct {
 	ThumbHeight         int                   `json:"thumb_height"`
 }
 
-// InlineQueryResultCachedDocument is an inline query response with cached document.
-type InlineQueryResultCachedDocument struct {
-	Type                string                `json:"type"`             // required
-	ID                  string                `json:"id"`               // required
-	DocumentID          string                `json:"document_file_id"` // required
-	Title               string                `json:"title"`            // required
-	Caption             string                `json:"caption"`
-	Description         string                `json:"description"`
-	ParseMode           string                `json:"parse_mode"`
-	ReplyMarkup         *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
-	InputMessageContent interface{}           `json:"input_message_content,omitempty"`
-}
-
 // InlineQueryResultLocation is an inline query response location.
 type InlineQueryResultLocation struct {
 	Type                string                `json:"type"`      // required
@@ -962,23 +681,6 @@ type InlineQueryResultLocation struct {
 	Latitude            float64               `json:"latitude"`  // required
 	Longitude           float64               `json:"longitude"` // required
 	Title               string                `json:"title"`     // required
-	ReplyMarkup         *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
-	InputMessageContent interface{}           `json:"input_message_content,omitempty"`
-	ThumbURL            string                `json:"thumb_url"`
-	ThumbWidth          int                   `json:"thumb_width"`
-	ThumbHeight         int                   `json:"thumb_height"`
-}
-
-// InlineQueryResultVenue is an inline query response venue.
-type InlineQueryResultVenue struct {
-	Type                string                `json:"type"`      // required
-	ID                  string                `json:"id"`        // required
-	Latitude            float64               `json:"latitude"`  // required
-	Longitude           float64               `json:"longitude"` // required
-	Title               string                `json:"title"`     // required
-	Address             string                `json:"address"`   // required
-	FoursquareID        string                `json:"foursquare_id"`
-	FoursquareType      string                `json:"foursquare_type"`
 	ReplyMarkup         *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	InputMessageContent interface{}           `json:"input_message_content,omitempty"`
 	ThumbURL            string                `json:"thumb_url"`
@@ -1108,17 +810,10 @@ type PreCheckoutQuery struct {
 
 // Error is an error containing extra information returned by the Telegram API.
 type Error struct {
-	Code    int
 	Message string
 	ResponseParameters
 }
 
 func (e Error) Error() string {
 	return e.Message
-}
-
-// BotCommand represents a bot command.
-type BotCommand struct {
-	Command     string `json:"command"`
-	Description string `json:"description"`
 }
