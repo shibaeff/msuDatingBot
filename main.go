@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
@@ -32,12 +33,12 @@ func PrepareCollection(client *mongo.Client, name string) (conn *mongo.Collectio
 	return
 }
 
-//func init() {
-//	// loads values from .env into the system
-//	if err := godotenv.Load(); err != nil {
-//		log.Print("No .env file found")
-//	}
-//}
+func init() {
+	// loads values from .env into the system
+	if err := godotenv.Load(); err != nil {
+		log.Print("No .env file found")
+	}
+}
 
 func switchReply(api *tgbotapi.BotAPI, reply interface{}) {
 	switch v := reply.(type) {
@@ -108,17 +109,12 @@ func main() {
 	}
 	admins_list := strings.Split(admins, " ")
 	Bot := bot.NewBot(store, api, readFile, admins_list)
-	//api.SetWebhook(tgbotapi.NewWebhookWithCert(os.Getenv("WEBHOOK", )))
 	defer logFile.Close()
-
-	http.HandleFunc("/", MainHandler)
-	go http.ListenAndServe(":"+os.Getenv("PORT"), nil)
-	updates := api.ListenForWebhook("/" + api.Token)
+	updates, _ := api.GetUpdatesChan(u)
 	for update := range updates {
 		if update.Message == nil && update.CallbackQuery == nil { // ignore any non-Message Updates
 			continue
 		}
-
 		var reply interface{}
 		if update.Message != nil {
 			ctx, _ := context.WithTimeout(context.Background(), time.Second)
