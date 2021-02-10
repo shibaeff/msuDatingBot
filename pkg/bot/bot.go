@@ -43,7 +43,6 @@ const (
 	feedbackCommand   = "/feedback"
 	deleteCommand     = "/delete"
 
-	greetMsg          = "Привет! ✨\nЭто бот знакомств МГУ. Работает аналогично Тиндеру 😉\n\nДля регистрации вызывай: /register, для отмены: /cancel. Бот запросит имя, фоточку и пару слов о себе.\n\nПредложения и баги пишите в /feedback."
 	notUnderstood     = "Пожалуйста, выберите действие из меню"
 	alreadyRegistered = "Вы уже зарегистрированы!"
 	notRegistered     = "Вы не зарегистрированы!"
@@ -117,13 +116,22 @@ func (b *bot) switchReply(reply interface{}) (tgbotapi.Message, error) {
 }
 
 func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (reply interface{}, err error) {
-	// fast track
+	user, err := b.store.GetUser(message.Chat.ID)
 	switch message.Text {
 	case deleteCommand:
 		return b.deleteUser(message.Chat.ID), nil
+	case registerCommand:
+		if !user.IsReg() {
+			user.RegiStep = regBegin
+			reply, _ = user.RegisterStepMessage(message)
+			return
+		} else {
+			reply = user.ReplyWithText(alreadyRegistered)
+			return
+		}
 	}
-	user, err := b.store.GetUser(message.Chat.ID)
 	text := message.Text
+	user.Id = message.Chat.ID
 	r := b.handleSimpleCommands(user, text)
 	if r != nil {
 		r.ChatID = message.Chat.ID
@@ -328,7 +336,8 @@ func (b *bot) handleSimpleCommands(user *models.User, text string) (reply *tgbot
 		}
 		return user.ReplyWithText(helpMsg)
 	case startCommand:
-		return user.ReplyWithText(greetMsg)
+		ret := prepareHello(user.Id)
+		return &ret
 	}
 	return nil
 }

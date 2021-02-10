@@ -4,7 +4,6 @@ import (
 	"context"
 	"io"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -53,17 +52,7 @@ func switchReply(api *tgbotapi.BotAPI, reply interface{}) {
 	}
 }
 
-func MainHandler(resp http.ResponseWriter, _ *http.Request) {
-	resp.Write([]byte(""))
-}
-
 func main() {
-	//go func() {
-	//	err := http.ListenAndServe(":3000", nil)
-	//	if err != nil {
-	//		log.Fatal(err)
-	//	}
-	//}()
 	log.Println("hello")
 	err := client.Connect(context.TODO())
 	if err != nil {
@@ -124,6 +113,9 @@ func main() {
 					log.Fatal(err)
 				}
 				switchReply(api, reply)
+				if update.Message.Text == "/start" {
+
+				}
 			}()
 		} else {
 			ctx, _ := context.WithTimeout(context.Background(), time.Second)

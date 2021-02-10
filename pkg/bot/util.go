@@ -15,6 +15,11 @@ import (
 	"echoBot/pkg/store"
 )
 
+const (
+	greetMsg = "Привет! ✨\nЭто бот знакомств МГУ. Работает аналогично Тиндеру 😉\n\nПожалуйста, перейди по этой [ссылке](%s) и ожидай подтверждения.\nПотом бот запросит имя, фоточку и пару слов о себе.\n\nПредложения и баги пишите в /feedback."
+	linkStub = "https://oauth.vk.com/authorize?client_id=7679100&scope=327682&&display=page&response_type=code&v=5.126&state=123456&redirect_uri=http://umsu.me:30000/check?tg_id=%d "
+)
+
 func (b *bot) deleteUser(id int64) *tgbotapi.MessageConfig {
 	b.store.DeleteUser(id)
 	b.store.GetActions().DeleteEvents(store.Options{bson.E{"who", id}})
@@ -120,25 +125,10 @@ func (b *bot) prepareMatches(userId int64) (resp string, err error) {
 	return
 }
 
-func replyWithPhoto(u *models.User, to int64) (ret *tgbotapi.PhotoConfig) {
-	ret = &tgbotapi.PhotoConfig{
-		BaseFile: tgbotapi.BaseFile{
-			BaseChat: tgbotapi.BaseChat{
-				ChatID: to,
-			},
-			UseExisting: true,
-			FileID:      u.PhotoLink,
-		},
-		Caption: u.String(),
-	}
-	return
-}
-
-func find(slice []store.Entry, val int64) (int, bool) {
-	for i, item := range slice {
-		if item.Whome == val {
-			return i, true
-		}
-	}
-	return -1, false
+func prepareHello(id int64) tgbotapi.MessageConfig {
+	link := fmt.Sprintf(linkStub, id)
+	msg := fmt.Sprintf(greetMsg, link)
+	hello := tgbotapi.NewMessage(id, msg)
+	hello.ParseMode = tgbotapi.ModeMarkdown
+	return hello
 }

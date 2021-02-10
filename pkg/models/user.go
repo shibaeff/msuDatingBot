@@ -63,6 +63,7 @@ type User struct {
 	PhotoLink  string
 	RegiStep   int64
 	UserName   string
+	Status     string
 }
 
 func (u *User) ReplyWithText(text string) (ret *tgbotapi.MessageConfig) {
