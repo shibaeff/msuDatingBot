@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -21,6 +24,8 @@ const (
 	dbName                = "main"
 	usersCollectionName   = "users"
 	actionsCollectionName = "actions"
+
+	checkUrl = "http://umsu.me/answer?tg_id=%d"
 )
 
 var (
@@ -50,6 +55,17 @@ func switchReply(api *tgbotapi.BotAPI, reply interface{}) {
 	case *tgbotapi.DocumentConfig:
 		api.Send(v)
 	}
+}
+
+func checkUserStatus(id int64) bool {
+	url := fmt.Sprintf(checkUrl, id)
+	resp, _ := http.Get(url)
+	bytes, _ := ioutil.ReadAll(resp.Body)
+	status := string(bytes)
+	if status == "3" || status == "0" {
+		return
+	}
+
 }
 
 func main() {
