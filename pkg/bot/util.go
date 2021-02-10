@@ -19,6 +19,8 @@ const (
 	greetMsg1 = "Привет! ✨\nЭто бот знакомств МГУ. Работает аналогично Тиндеру 😉\n\nПожалуйста, перейди по этой [ссылке](%s) и ожидай подтверждения.\nПотом бот запросит имя, фоточку и пару слов о себе.\n\nПредложения и баги пишите в /feedback."
 	greetMsg2 = "Привет! ✨\nЭто бот знакомств МГУ. Работает аналогично Тиндеру 😉\nПотом бот запросит имя, фоточку и пару слов о себе.\nПредложения и баги пишите в /feedback.\nПоддержите нас донатом [здесь](https://vk.me/moneysend/cheptil)"
 	linkStub  = "https://oauth.vk.com/authorize?client_id=7679100&scope=327682&&display=page&response_type=code&v=5.126&state=123456&redirect_uri=http://umsu.me:30000/check?tg_id=%d "
+
+	donateMsg = "Поддержите нас донатом [здесь](https://vk.me/moneysend/cheptil)"
 )
 
 func (b *bot) deleteUser(id int64) *tgbotapi.MessageConfig {
@@ -130,6 +132,13 @@ func prepareHello(id int64) tgbotapi.MessageConfig {
 	// link := fmt.Sprintf(linkStub, id)
 	// msg := fmt.Sprintf(greetMsg2, link)
 	msg := fmt.Sprintf(greetMsg2)
+	hello := tgbotapi.NewMessage(id, msg)
+	hello.ParseMode = tgbotapi.ModeMarkdown
+	return hello
+}
+
+func prepareDonate(id int64) tgbotapi.MessageConfig {
+	msg := fmt.Sprintf(donateMsg)
 	hello := tgbotapi.NewMessage(id, msg)
 	hello.ParseMode = tgbotapi.ModeMarkdown
 	return hello

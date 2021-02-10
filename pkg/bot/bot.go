@@ -42,6 +42,7 @@ const (
 	reregisterCommand = "/reregister"
 	feedbackCommand   = "/feedback"
 	deleteCommand     = "/delete"
+	donateCommand     = "/donate"
 
 	notUnderstood     = "Пожалуйста, выберите действие из меню"
 	alreadyRegistered = "Вы уже зарегистрированы!"
@@ -118,6 +119,8 @@ func (b *bot) switchReply(reply interface{}) (tgbotapi.Message, error) {
 func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (reply interface{}, err error) {
 	user, err := b.store.GetUser(message.Chat.ID)
 	switch message.Text {
+	case donateCommand:
+		return prepareDonate(message.Chat.ID), nil
 	case deleteCommand:
 		return b.deleteUser(message.Chat.ID), nil
 	case registerCommand:
