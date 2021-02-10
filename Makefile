@@ -1,4 +1,4 @@
 build:
-	go  build ./cmd/main.go
+	go  build ./main.go
 run:
 	./main
