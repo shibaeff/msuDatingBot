@@ -25,7 +25,7 @@ const (
 	usersCollectionName   = "users"
 	actionsCollectionName = "actions"
 
-	checkUrl = "http://umsu.me/answer?tg_id=%d"
+	checkUrl = "https://umsu.me/answer?tg_id=%d"
 )
 
 var (
@@ -57,15 +57,42 @@ func switchReply(api *tgbotapi.BotAPI, reply interface{}) {
 	}
 }
 
+var banned, allowed map[int64]bool
+
+func ban(name int64) {
+	if banned == nil {
+		banned = make(map[int64]bool)
+	}
+	banned[name] = true
+}
 func checkUserStatus(id int64) bool {
 	url := fmt.Sprintf(checkUrl, id)
 	resp, _ := http.Get(url)
 	bytes, _ := ioutil.ReadAll(resp.Body)
 	status := string(bytes)
 	if status == "3" || status == "0" {
-		return
+		ban(int64(id))
+		return false
+	} else {
+		if allowed == nil {
+			allowed = make(map[int64]bool)
+		}
+		allowed[int64(id)] = true
 	}
+	return true
+}
 
+var (
+	api *tgbotapi.BotAPI
+)
+
+func bannedReply(update tgbotapi.Update) {
+	api.Send(tgbotapi.MessageConfig{
+		BaseChat: tgbotapi.BaseChat{
+			ChatID: update.Message.Chat.ID,
+		},
+		Text: "К сожалению, верификация не пройдена ",
+	})
 }
 
 func main() {
@@ -86,7 +113,7 @@ func main() {
 	if !exists {
 		log.Panic("Not telegram key specified!")
 	}
-	api, err := tgbotapi.NewBotAPI(token)
+	api, err = tgbotapi.NewBotAPI(token)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -124,13 +151,42 @@ func main() {
 		if update.Message != nil {
 			ctx, _ := context.WithTimeout(context.Background(), time.Second)
 			go func() {
-				reply, err = Bot.ReplyMessage(ctx, update.Message)
-				if err != nil {
-					log.Fatal(err)
-				}
-				switchReply(api, reply)
+				// register or ban
 				if update.Message.Text == "/start" {
-
+					reply, err = Bot.ReplyMessage(ctx, update.Message)
+					if err != nil {
+						log.Fatal(err)
+					}
+					switchReply(api, reply)
+					if checkUserStatus(update.Message.Chat.ID) {
+						api.Send(tgbotapi.MessageConfig{
+							BaseChat: tgbotapi.BaseChat{
+								ChatID: update.Message.Chat.ID,
+							},
+							Text: "Верификация успешно пройдена.\n\nДля продолжения нажмите /register",
+						})
+					} else {
+						bannedReply(update)
+					}
+				} else {
+					_, allow := allowed[update.Message.Chat.ID]
+					_, block := banned[update.Message.Chat.ID]
+					if allow {
+						reply, err = Bot.ReplyMessage(ctx, update.Message)
+						if err != nil {
+							log.Fatal(err)
+						}
+						switchReply(api, reply)
+					} else if block {
+						bannedReply(update)
+					} else {
+						api.Send(tgbotapi.MessageConfig{
+							BaseChat: tgbotapi.BaseChat{
+								ChatID: update.Message.Chat.ID,
+							},
+							Text: "Пройдите верификацию по ссылке в /start",
+						})
+					}
 				}
 			}()
 		} else {

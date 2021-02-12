@@ -123,15 +123,15 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 		return prepareDonate(message.Chat.ID), nil
 	case deleteCommand:
 		return b.deleteUser(message.Chat.ID), nil
-	case registerCommand:
-		if !user.IsReg() {
-			user.RegiStep = regBegin
-			reply, _ = user.RegisterStepMessage(message)
-			return
-		} else {
-			reply = user.ReplyWithText(alreadyRegistered)
-			return
-		}
+		//case registerCommand:
+		//	if !user.IsReg() {
+		//		user.RegiStep = regBegin
+		//		reply, _ = user.RegisterStepMessage(message)
+		//		return
+		//	} else {
+		//		reply = user.ReplyWithText(alreadyRegistered)
+		//		return
+		//	}
 	}
 	text := message.Text
 	user.Id = message.Chat.ID
