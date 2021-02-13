@@ -148,7 +148,7 @@ func main() {
 		if update.Message == nil && update.CallbackQuery == nil { // ignore any non-Message Updates
 			continue
 		}
-		if strings.HasPrefix(update.Message.Text, "/strike") && Bot.EnsureAdmin(update.Message.Chat.UserName) {
+		if update.Message != nil && strings.HasPrefix(update.Message.Text, "/strike") && Bot.EnsureAdmin(update.Message.Chat.UserName) {
 			split := strings.Split(update.Message.Text, " ")
 			if len(split) == 2 {
 				user := Bot.GetStore().FindUser(bson.D{
