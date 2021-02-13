@@ -56,6 +56,7 @@ type Bot interface {
 	ReplyMessage(ctx context.Context, message *tgbotapi.Message) (interface{}, error)
 	HandleCallbackQuery(ctx context.Context, query *tgbotapi.CallbackQuery) (interface{}, error)
 	GetStore() store.Store
+	EnsureAdmin(name string) bool
 }
 
 type bot struct {
@@ -114,6 +115,15 @@ func (b *bot) switchReply(reply interface{}) (tgbotapi.Message, error) {
 		return b.api.Send(v)
 	}
 	return tgbotapi.Message{}, nil
+}
+
+func (b *bot) EnsureAdmin(userName string) bool {
+	for _, item := range b.adminsList {
+		if item == userName {
+			return true
+		}
+	}
+	return false
 }
 
 func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (reply interface{}, err error) {

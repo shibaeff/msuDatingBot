@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson"
 	"io"
 	"io/ioutil"
 	"log"
@@ -147,8 +148,24 @@ func main() {
 		if update.Message == nil && update.CallbackQuery == nil { // ignore any non-Message Updates
 			continue
 		}
-		if strings.HasPrefix(update.Message.Text, "/strike") {
-
+		if strings.HasPrefix(update.Message.Text, "/strike") && Bot.EnsureAdmin(update.Message.Chat.UserName) {
+			split := strings.Split(update.Message.Text, " ")
+			if len(split) == 2 {
+				user := Bot.GetStore().FindUser(bson.D{
+					{"username", split[1]},
+				})
+				if banned == nil {
+					banned = make(map[int64]bool)
+				}
+				banned[user.Id] = true
+				api.Send(tgbotapi.MessageConfig{
+					BaseChat: tgbotapi.BaseChat{
+						ChatID: update.Message.Chat.ID,
+					},
+					Text: "Пользователь забанен",
+				})
+				continue
+			}
 		}
 		var reply interface{}
 		if update.Message != nil {
@@ -174,14 +191,16 @@ func main() {
 				} else {
 					_, allow := allowed[update.Message.Chat.ID]
 					_, block := banned[update.Message.Chat.ID]
-					if allow {
+					if block {
+						bannedReply(update)
+						return
+					}
+					if allow || !block {
 						reply, err = Bot.ReplyMessage(ctx, update.Message)
 						if err != nil {
 							log.Fatal(err)
 						}
 						switchReply(api, reply)
-					} else if block {
-						bannedReply(update)
 					} else {
 						api.Send(tgbotapi.MessageConfig{
 							BaseChat: tgbotapi.BaseChat{

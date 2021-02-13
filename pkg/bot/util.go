@@ -55,14 +55,6 @@ func EnsureGender(u1, u2 *models.User) bool {
 			u1.WantGender == u2.WantGender && u1.WantGender == "любой")
 }
 
-func (b *bot) EnsureAdmin(userName string) bool {
-	for _, item := range b.adminsList {
-		if item == userName {
-			return true
-		}
-	}
-	return false
-}
 func (b *bot) grabLogs(offset int) (str string, err error) {
 	var (
 		part   []byte
