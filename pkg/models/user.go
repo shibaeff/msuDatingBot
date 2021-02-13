@@ -163,9 +163,6 @@ func (u *User) RegisterStepInline(q *tgbotapi.CallbackQuery) (reply *tgbotapi.Me
 
 func (u *User) ReplyWithPhoto(withLink bool) (ret *tgbotapi.PhotoConfig) {
 	caption := u.String()
-	if withLink {
-		caption += "\n\n<a href=https://t.me/joinchat/ULI8TYHezz6g6PuK>Чат знакомств</a>"
-	}
 	ret = &tgbotapi.PhotoConfig{
 		BaseFile: tgbotapi.BaseFile{
 			BaseChat: tgbotapi.BaseChat{

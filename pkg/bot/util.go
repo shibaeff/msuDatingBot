@@ -55,7 +55,7 @@ func EnsureGender(u1, u2 *models.User) bool {
 			u1.WantGender == u2.WantGender && u1.WantGender == "любой")
 }
 
-func (b *bot) ensureAdmin(userName string) bool {
+func (b *bot) EnsureAdmin(userName string) bool {
 	for _, item := range b.adminsList {
 		if item == userName {
 			return true

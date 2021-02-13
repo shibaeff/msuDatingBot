@@ -20,7 +20,7 @@ var (
 )
 
 func (b *bot) replyWithCard(candidate *models.User, whome int64) (ret *tgbotapi.PhotoConfig) {
-	ret = candidate.ReplyWithPhoto()
+	ret = candidate.ReplyWithPhoto(false)
 	ret.ChatID = whome
 	ret.ReplyMarkup = nextKeyBoard
 	return

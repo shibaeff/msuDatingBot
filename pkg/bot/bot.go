@@ -178,6 +178,13 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 					b.populateNotify(user)
 				}()
 			}
+			b.api.Send(tgbotapi.MessageConfig{
+				BaseChat: tgbotapi.BaseChat{
+					ChatID: user.Id,
+				},
+				ParseMode: tgbotapi.ModeMarkdown,
+				Text:      "[Присоединяйся и в общий чат](https://t.me/joinchat/ULI8TYHezz6g6PuK)",
+			})
 			return user.ReplyWithPhoto(true), nil
 		}
 		return reply, nil
@@ -210,10 +217,10 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 				text = registerCommand
 				goto Reregister
 			case dumpCommand:
-				if !b.ensureAdmin(user.UserName) {
+				if !b.EnsureAdmin(user.UserName) {
 					return user.ReplyWithText(notAdmin), nil
 				}
-				if !b.ensureAdmin(user.UserName) {
+				if !b.EnsureAdmin(user.UserName) {
 					return user.ReplyWithText(notAdmin), nil
 				}
 				b.dumpEntire()
@@ -222,7 +229,7 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 				fileUpload.Caption = "Ваш дамп!"
 				return &fileUpload, nil
 			case profileCommand:
-				reply = user.ReplyWithPhoto()
+				reply = user.ReplyWithPhoto(false)
 				return
 			case photoCommand:
 				user.RegiStep = regPhoto
@@ -250,7 +257,7 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 		if len(split) == 2 {
 			switch split[0] {
 			case usersCommand:
-				if !b.ensureAdmin(user.UserName) {
+				if !b.EnsureAdmin(user.UserName) {
 					return user.ReplyWithText(notAdmin), nil
 				}
 				n, err := strconv.Atoi(split[1])
@@ -273,12 +280,12 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 				reply = user.ReplyWithText("Отзыв успешно доставлен")
 				return
 			case notifyCommand:
-				if !b.ensureAdmin(user.UserName) {
+				if !b.EnsureAdmin(user.UserName) {
 					return user.ReplyWithText(notAdmin), nil
 				}
 				b.notifyUsers(split[1])
 			case logCommand:
-				if !b.ensureAdmin(user.UserName) {
+				if !b.EnsureAdmin(user.UserName) {
 					reply = user.ReplyWithText(notAdmin)
 					return
 				}

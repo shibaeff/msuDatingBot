@@ -147,6 +147,9 @@ func main() {
 		if update.Message == nil && update.CallbackQuery == nil { // ignore any non-Message Updates
 			continue
 		}
+		if strings.HasPrefix(update.Message.Text, "/strike") {
+
+		}
 		var reply interface{}
 		if update.Message != nil {
 			ctx, _ := context.WithTimeout(context.Background(), time.Second)
