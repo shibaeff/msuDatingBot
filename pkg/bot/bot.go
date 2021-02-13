@@ -128,6 +128,7 @@ func (b *bot) EnsureAdmin(userName string) bool {
 
 func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (reply interface{}, err error) {
 	user, err := b.store.GetUser(message.Chat.ID)
+	user.UserName = message.Chat.UserName
 	switch message.Text {
 	case donateCommand:
 		return prepareDonate(message.Chat.ID), nil
