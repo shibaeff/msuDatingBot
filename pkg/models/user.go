@@ -161,7 +161,11 @@ func (u *User) RegisterStepInline(q *tgbotapi.CallbackQuery) (reply *tgbotapi.Me
 	return u.ReplyWithText("Пожалуйста, следуйте подсказкам бота!")
 }
 
-func (u *User) ReplyWithPhoto() (ret *tgbotapi.PhotoConfig) {
+func (u *User) ReplyWithPhoto(withLink bool) (ret *tgbotapi.PhotoConfig) {
+	caption := u.String()
+	if withLink {
+		caption += "\n\n<a href=https://t.me/joinchat/ULI8TYHezz6g6PuK>Чат знакомств</a>"
+	}
 	ret = &tgbotapi.PhotoConfig{
 		BaseFile: tgbotapi.BaseFile{
 			BaseChat: tgbotapi.BaseChat{
@@ -170,7 +174,7 @@ func (u *User) ReplyWithPhoto() (ret *tgbotapi.PhotoConfig) {
 			UseExisting: true,
 			FileID:      u.PhotoLink,
 		},
-		Caption:   u.String(),
+		Caption:   caption,
 		ParseMode: "html",
 	}
 	return

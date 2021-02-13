@@ -178,7 +178,7 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 					b.populateNotify(user)
 				}()
 			}
-			return user.ReplyWithPhoto(), nil
+			return user.ReplyWithPhoto(true), nil
 		}
 		return reply, nil
 	}
