@@ -284,6 +284,12 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 			return user.ReplyWithText("Изменение выполнено"), nil
 		}
 
+		if strings.HasPrefix(text, feedbackCommand) {
+			b.feedback(strings.Join(split[1:], " "))
+			reply = user.ReplyWithText("Отзыв успешно доставлен")
+			return
+		}
+
 		if len(split) == 2 {
 			switch split[0] {
 			case usersCommand:
@@ -300,10 +306,6 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 			case facultyCommand:
 				reply = user.ChangeFaculty(split[1])
 				b.store.UpdUserField(user.Id, "faculty", user.Faculty)
-				return
-			case feedbackCommand:
-				b.feedback(strings.Join(split[1:], " "))
-				reply = user.ReplyWithText("Отзыв успешно доставлен")
 				return
 			case logCommand:
 				if !b.EnsureAdmin(user.UserName) {
