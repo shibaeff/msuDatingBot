@@ -274,7 +274,11 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 			if !b.EnsureAdmin(user.UserName) {
 				return user.ReplyWithText(notAdmin), nil
 			}
-			b.notifyUsers(split[1:])
+			if message.Photo == nil {
+				b.notifyUsers(split[1:])
+			} else {
+
+			}
 			return user.ReplyWithText("Оповещение выполнено"), nil
 		}
 

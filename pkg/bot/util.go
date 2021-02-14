@@ -45,6 +45,20 @@ func (b *bot) notifyUsers(message []string) (list []*tgbotapi.MessageConfig, err
 	return
 }
 
+func (b *bot) notifyUsersWithPhoto(message *tgbotapi.Message) (list []*tgbotapi.MessageConfig, err error) {
+	users, err := b.store.GetAllUsers()
+	if err != nil {
+		return
+	}
+	for _, user := range users {
+		res := tgbotapi.PhotoConfig{}
+		res.ChatID = user.Id
+		res.FileID = (*message.Photo)[0].FileID
+		b.api.Send(res)
+	}
+	return
+}
+
 func EnsureGender(u1, u2 *models.User) bool {
 	return u1.Id != u2.Id &&
 		(u1.Gender == u2.WantGender && // strict pair
