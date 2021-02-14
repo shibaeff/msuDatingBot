@@ -278,6 +278,11 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 			return user.ReplyWithText("Оповещение выполнено"), nil
 		}
 
+		if strings.HasPrefix(text, aboutCommand) {
+			reply = user.ChangeAbout(strings.Join(split[1:], " "))
+			b.store.UpdUserField(user.Id, "about", user.About)
+		}
+
 		if len(split) == 2 {
 			switch split[0] {
 			case usersCommand:
@@ -291,10 +296,6 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 				r := b.users(n)
 				r.ChatID = user.Id
 				return r, nil
-			case aboutCommand:
-				reply = user.ChangeAbout(split[1])
-				b.store.UpdUserField(user.Id, "about", user.About)
-				return
 			case facultyCommand:
 				reply = user.ChangeFaculty(split[1])
 				b.store.UpdUserField(user.Id, "faculty", user.Faculty)
