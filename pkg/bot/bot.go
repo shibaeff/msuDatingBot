@@ -200,7 +200,20 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 		}
 		return reply, nil
 	}
-	if text[0] == '/' {
+	if strings.HasPrefix(text, notifyCommand) || strings.HasPrefix(message.Caption, "notify") {
+		split := strings.Split(text, " ")
+		if !b.EnsureAdmin(user.UserName) {
+			return user.ReplyWithText(notAdmin), nil
+		}
+		if message.Photo == nil {
+			b.notifyUsers(split[1:])
+		} else {
+			b.notifyUsersWithPhoto(message)
+		}
+		return user.ReplyWithText("Оповещение выполнено"), nil
+	}
+
+	if len(text) > 0 && text[0] == '/' {
 		split := strings.Split(text, " ")
 		// in case of paired commands
 	Reregister:
@@ -268,18 +281,6 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 				})
 				return user.ReplyWithText(string(len(unseen))), nil
 			}
-		}
-
-		if strings.HasPrefix(text, notifyCommand) {
-			if !b.EnsureAdmin(user.UserName) {
-				return user.ReplyWithText(notAdmin), nil
-			}
-			if message.Photo == nil {
-				b.notifyUsers(split[1:])
-			} else {
-
-			}
-			return user.ReplyWithText("Оповещение выполнено"), nil
 		}
 
 		if strings.HasPrefix(text, aboutCommand) {

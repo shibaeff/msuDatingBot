@@ -51,10 +51,20 @@ func (b *bot) notifyUsersWithPhoto(message *tgbotapi.Message) (list []*tgbotapi.
 		return
 	}
 	for _, user := range users {
-		res := tgbotapi.PhotoConfig{}
-		res.ChatID = user.Id
-		res.FileID = (*message.Photo)[0].FileID
-		b.api.Send(res)
+		ret := &tgbotapi.PhotoConfig{
+			BaseFile: tgbotapi.BaseFile{
+				BaseChat: tgbotapi.BaseChat{
+					ChatID: user.Id,
+				},
+				UseExisting: true,
+				FileID:      (*message.Photo)[0].FileID,
+			},
+			ParseMode: "html",
+		}
+		_, err := b.api.Send(ret)
+		if err != nil {
+			panic(err)
+		}
 	}
 	return
 }
