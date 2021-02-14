@@ -281,6 +281,7 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 		if strings.HasPrefix(text, aboutCommand) {
 			reply = user.ChangeAbout(strings.Join(split[1:], " "))
 			b.store.UpdUserField(user.Id, "about", user.About)
+			return user.ReplyWithText("Изменение выполнено"), nil
 		}
 
 		if len(split) == 2 {
