@@ -302,7 +302,7 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 				b.store.UpdUserField(user.Id, "faculty", user.Faculty)
 				return
 			case feedbackCommand:
-				b.feedback(split[1])
+				b.feedback(strings.Join(split[1:], " "))
 				reply = user.ReplyWithText("Отзыв успешно доставлен")
 				return
 			case logCommand:

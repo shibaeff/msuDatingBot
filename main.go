@@ -96,7 +96,21 @@ func bannedReply(update tgbotapi.Update) {
 	})
 }
 
+func prepareDonate(id int64) tgbotapi.MessageConfig {
+	donateMsg := "Поддержите нас донатом [здесь](https://vk.me/moneysend/cheptil)"
+	msg := fmt.Sprintf(donateMsg)
+	hello := tgbotapi.NewMessage(id, msg)
+	hello.ParseMode = tgbotapi.ModeMarkdown
+	return hello
+}
+
 func main() {
+	if allowed == nil {
+		allowed = make(map[int64]bool)
+	}
+	if banned == nil {
+		banned = make(map[int64]bool)
+	}
 	log.Println("hello")
 	err := client.Connect(context.TODO())
 	if err != nil {
@@ -172,6 +186,10 @@ func main() {
 			ctx, _ := context.WithTimeout(context.Background(), time.Second)
 			go func() {
 				// register or ban
+				if update.Message.Text == "/donate" {
+					api.Send(prepareDonate(update.Message.Chat.ID))
+					return
+				}
 				if update.Message.Text == "/start" {
 					reply, err = Bot.ReplyMessage(ctx, update.Message)
 					if err != nil {

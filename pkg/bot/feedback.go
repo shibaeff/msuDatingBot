@@ -13,6 +13,9 @@ func (b *bot) feedback(text string) {
 				{"username", admin},
 			},
 		)
+		if adm == nil {
+			continue
+		}
 		_, err := b.api.Send(&tgbotapi.MessageConfig{
 			Text: text,
 			BaseChat: tgbotapi.BaseChat{
@@ -21,6 +24,7 @@ func (b *bot) feedback(text string) {
 		})
 		if err != nil {
 			log.Println(err)
+			continue
 		}
 	}
 }
