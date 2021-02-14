@@ -265,6 +265,15 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 				return user.ReplyWithText(string(len(unseen))), nil
 			}
 		}
+
+		if strings.HasPrefix(text, notifyCommand) {
+			if !b.EnsureAdmin(user.UserName) {
+				return user.ReplyWithText(notAdmin), nil
+			}
+			b.notifyUsers(split[1])
+			return user.ReplyWithText("Оповещение выполнено"), nil
+		}
+
 		if len(split) == 2 {
 			switch split[0] {
 			case usersCommand:
@@ -290,11 +299,6 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 				b.feedback(split[1])
 				reply = user.ReplyWithText("Отзыв успешно доставлен")
 				return
-			case notifyCommand:
-				if !b.EnsureAdmin(user.UserName) {
-					return user.ReplyWithText(notAdmin), nil
-				}
-				b.notifyUsers(split[1])
 			case logCommand:
 				if !b.EnsureAdmin(user.UserName) {
 					reply = user.ReplyWithText(notAdmin)
