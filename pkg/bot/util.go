@@ -33,13 +33,13 @@ func (b *bot) deleteUser(id int64) *tgbotapi.MessageConfig {
 	return reply
 }
 
-func (b *bot) notifyUsers(message string) (list []*tgbotapi.MessageConfig, err error) {
+func (b *bot) notifyUsers(message []string) (list []*tgbotapi.MessageConfig, err error) {
 	users, err := b.store.GetAllUsers()
 	if err != nil {
 		return
 	}
 	for _, user := range users {
-		res := user.ReplyWithText(message)
+		res := user.ReplyWithText(strings.Join(message, " "))
 		b.api.Send(res)
 	}
 	return

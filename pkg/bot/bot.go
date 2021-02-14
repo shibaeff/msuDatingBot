@@ -270,7 +270,7 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 			if !b.EnsureAdmin(user.UserName) {
 				return user.ReplyWithText(notAdmin), nil
 			}
-			b.notifyUsers(split[1])
+			b.notifyUsers(split[1:])
 			return user.ReplyWithText("Оповещение выполнено"), nil
 		}
 
