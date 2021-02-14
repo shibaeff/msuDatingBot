@@ -209,7 +209,11 @@ func (b *bot) ReplyMessage(context context.Context, message *tgbotapi.Message) (
 			case registerCommand:
 				if !user.IsReg() {
 					user.RegiStep = regBegin
-					reply, _ = user.RegisterStepMessage(message)
+					reply, err = user.RegisterStepMessage(message)
+					if err == nil {
+						b.store.DeleteUser(user.Id)
+						b.store.PutUser(*user)
+					}
 					return
 				} else {
 					reply = user.ReplyWithText(alreadyRegistered)
